@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="סידור אולם">
+<meta name="theme-color" content="#3d2b45">
+<title>סידור אולם</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#f8f4f9; --warm:#fce8f3; --pink:#e891bb; --pink-dark:#d45e9b;
+  --teal:#5bbcb8; --teal-dark:#48a8a4; --charcoal:#3d2b45; --mid:#7a6580;
+  --border:#f0c8e4; --shadow:rgba(180,100,160,0.10);
+  --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal);min-height:100dvh;font-size:14.5px;overscroll-behavior:none}
+/* ══ ONBOARDING ══ */
+#onboarding{min-height:100dvh;background:linear-gradient(160deg,#3d2b45 0%,#5bbcb8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px calc(32px + var(--safe-bottom));text-align:center}
+.ob-logo{font-size:72px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ob-title{font-family:'Playfair Display',serif;font-size:32px;color:#fce8f3;margin-bottom:8px}
+.ob-sub{font-size:13px;color:#a8e6e4;letter-spacing:2px;text-transform:uppercase;margin-bottom:40px}
+.ob-steps{width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.ob-step{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:16px;text-align:right}
+.ob-step.done{background:rgba(91,188,184,0.25);border-color:rgba(91,188,184,0.5)}
+.ob-step-num{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.ob-step.done .ob-step-num{background:#5bbcb8}
+.ob-step-text{flex:1}
+.ob-step-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
+.ob-step-desc{font-size:12px;color:rgba(255,255,255,0.7)}
+.ob-btn{padding:16px 40px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-family:'Heebo',sans-serif;font-size:16px;font-weight:700;cursor:pointer;width:100%;max-width:380px;transition:all 0.2s}
+.ob-btn:active{background:var(--pink-dark);transform:scale(0.98)}
+.ob-skip{margin-top:14px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;text-decoration:underline}
+/* ══ HOME SCREEN ══ */
+#home-screen{min-height:100dvh;background:linear-gradient(160deg,#3d2b45 0%,#5bbcb8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px calc(40px + var(--safe-bottom));display:none}
+.home-logo{font-size:64px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+.home-title{font-family:'Playfair Display',serif;font-size:34px;color:#fce8f3;text-align:center;margin-bottom:6px}
+.home-sub{font-size:13px;color:#a8e6e4;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:40px}
+.home-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px}
+.home-card{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:18px;padding:22px 20px;cursor:pointer;transition:all 0.25s;backdrop-filter:blur(10px);display:flex;align-items:center;gap:16px}
+.home-card:active{background:rgba(255,255,255,0.22);transform:scale(1.02)}
+.hc-icon{font-size:38px;flex-shrink:0}
+.hc-title{font-family:'Playfair Display',serif;font-size:18px;color:#fff;margin-bottom:3px}
+.hc-desc{font-size:12px;color:rgba(255,255,255,0.7);line-height:1.4}
+.hc-arrow{font-size:20px;color:rgba(255,255,255,0.4)}
+/* ══ SIDE MENU ══ */
+#side-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300}
+#side-menu-overlay.open{display:block}
+#side-menu{position:fixed;top:0;right:-280px;width:280px;height:100dvh;background:#fff;z-index:301;transition:right 0.3s ease;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:var(--safe-bottom)}
+#side-menu.open{right:0}
+.sm-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(20px + var(--safe-top)) 20px 20px;display:flex;align-items:center;justify-content:space-between}
+.sm-title{font-family:'Playfair Display',serif;font-size:20px;color:#fce8f3}
+.sm-close{background:none;border:none;color:rgba(255,255,255,0.8);font-size:24px;cursor:pointer}
+.sm-section{padding:16px 20px 8px;font-size:11px;font-weight:700;color:var(--mid);letter-spacing:1px;text-transform:uppercase}
+.sm-item{display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.sm-item:active{background:var(--warm)}
+.sm-item-icon{font-size:22px;width:28px;text-align:center}
+.sm-item-text{flex:1}
+.sm-item-title{font-size:14px;font-weight:600;color:var(--charcoal)}
+.sm-item-desc{font-size:11px;color:var(--mid);margin-top:1px}
+.sm-item-badge{background:var(--pink);color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:2px 7px}
+.sm-lang-toggle{display:flex;gap:8px;padding:16px 20px}
+.sm-lang-btn{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;background:#fff;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--mid)}
+.sm-lang-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
+/* ══ APP HEADER ══ */
+#app-shell{display:none;flex-direction:column;min-height:100dvh}
+.app-header{background:linear-gradient(135deg,#3d2b45 0%,#5bbcb8 100%);padding:calc(14px + var(--safe-top)) 16px 0;border-bottom:3px solid var(--pink);position:sticky;top:0;z-index:100}
+.app-header-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:0}
+.ah-menu{background:none;border:none;color:#fce8f3;font-size:24px;cursor:pointer;padding:4px 8px;border-radius:8px;line-height:1}
+.ah-logo{font-family:'Playfair Display',serif;font-size:18px;color:#fce8f3;flex:1;text-align:center}
+.ah-actions{display:flex;gap:6px}
+.ah-btn{padding:6px 11px;background:rgba(252,232,243,0.15);color:#fce8f3;border:1.5px solid rgba(252,232,243,0.4);border-radius:8px;font-family:'Heebo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.ah-btn:active{background:rgba(252,232,243,0.28)}
+.ah-btn.pdf{background:var(--pink);border-color:var(--pink)}
+.mode-tabs{display:flex;margin-top:12px}
+.mode-tab{flex:1;padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;font-family:'Heebo',sans-serif}
+.mode-tab.active{color:#fff;border-bottom-color:var(--pink)}
+/* ══ LAYOUT ══ */
+.app-body{display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden}
+.sidebar{background:#fef6fb;border-left:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:18px;overflow-y:auto;height:calc(100dvh - 108px)}
+.main-panel{padding:18px 20px;overflow-y:auto;height:calc(100dvh - 108px)}
+.section-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--charcoal);margin-bottom:10px;padding-bottom:7px;border-bottom:2px solid var(--pink);display:flex;align-items:center;gap:7px}
+/* ══ INVENTORY ══ */
+#inv-list,#cost-inv-list{display:flex;flex-direction:column;gap:7px}
+.inv-row{display:flex;align-items:center;gap:7px;background:var(--warm);border-radius:10px;padding:8px 10px;border:1px solid var(--border)}
+.inv-row .inv-icon{font-size:18px;cursor:pointer;user-select:none}
+.inv-row input.inv-name{flex:1;border:none;background:transparent;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;color:var(--charcoal);outline:none}
+.inv-row input.inv-qty,.inv-row input.inv-price{width:56px;padding:4px 5px;border:1.5px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;text-align:center;background:#fff}
+.inv-row input:focus{outline:none;border-color:var(--teal)}
+.del-inv{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;line-height:1}
+.del-inv:active{color:var(--pink-dark)}
+/* PRESET PICKER */
+.preset-bar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.preset-chip{padding:5px 10px;background:#fff;border:1.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.preset-chip:active,.preset-chip.sel{background:var(--teal);border-color:var(--teal);color:#fff}
+.preset-custom{display:none;flex-direction:column;gap:6px;margin-top:6px}
+.preset-custom.show{display:flex}
+/* EMOJI PICKER */
+.emoji-picker{display:none;flex-wrap:wrap;gap:4px;padding:8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-top:5px}
+.emoji-picker.open{display:flex}
+.emoji-picker span{font-size:20px;cursor:pointer;padding:4px;border-radius:6px}
+.emoji-picker span:active{background:var(--warm)}
+.add-row{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.emoji-pick{font-size:20px;cursor:pointer;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--warm);user-select:none;line-height:1}
+.add-row input{padding:7px 9px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:13px;background:var(--warm)}
+.add-row input:focus{outline:none;border-color:var(--teal);background:#fff}
+.btn-teal{padding:7px 12px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn-teal:active{background:var(--teal-dark)}
+/* TABLE FORM */
+.add-table-box{background:var(--warm);border-radius:11px;padding:13px;border:1px solid var(--border);display:flex;flex-direction:column;gap:9px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:11px;color:var(--mid);font-weight:600;letter-spacing:0.5px}
+.fg input,.fg textarea{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px;background:#fff;width:100%}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
+.fg textarea{resize:vertical;min-height:60px;font-size:13px}
+.btn-pink{padding:10px;background:var(--pink);color:#fff;border:none;border-radius:9px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%}
+.btn-pink:active{background:var(--pink-dark)}
+/* ══ STOCK BAR ══ */
+.stock-bar{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.stock-card{display:flex;align-items:center;gap:9px;background:#fff;border-radius:10px;padding:7px 13px;border:1.5px solid var(--border);box-shadow:0 1px 5px var(--shadow);position:relative;overflow:hidden}
+.stock-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--ic)}
+.sc-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sc-name{font-size:13px;font-weight:700;flex:1}
+.sc-rem{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center}
+.sc-sub{font-size:11px;color:var(--mid);flex:1;text-align:center}
+.sc-bar-bg{width:60px;height:4px;background:var(--warm);border-radius:10px;overflow:hidden;flex-shrink:0}
+.sc-bar-fill{height:100%;border-radius:10px;background:var(--ic);transition:width 0.4s}
+.sc-warn{font-size:10px;color:#e05050;font-weight:700;min-width:55px;text-align:left}
+/* ALERT */
+.alert-bar{border-radius:11px;padding:12px 16px;font-size:14px;font-weight:700;margin-bottom:14px;display:none;text-align:center}
+.alert-bar.show{display:block;background:#ff2d55;color:#fff;box-shadow:0 0 0 4px rgba(255,45,85,.25),0 0 20px rgba(255,45,85,.4);animation:pulse-glow 1.5s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 4px rgba(255,45,85,.25),0 0 20px rgba(255,45,85,.4)}50%{box-shadow:0 0 0 8px rgba(255,45,85,.12),0 0 36px rgba(255,45,85,.6)}}
+/* ══ TABLES ══ */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-header h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px}
+.table-card{background:#fff;border-radius:11px;border:1.5px solid var(--border);box-shadow:0 2px 9px var(--shadow);overflow:hidden;transition:transform 0.15s}
+.table-card:hover{transform:translateY(-2px)}
+.tc-header{background:linear-gradient(135deg,#e891bb22,#5bbcb822);border-bottom:1.5px solid var(--border);padding:8px 11px;display:flex;align-items:center;justify-content:space-between}
+.tc-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--charcoal)}
+.tc-meta{font-size:10px;color:var(--mid);margin-top:1px}
+.tc-note{font-size:10px;color:var(--teal);margin-top:2px;font-style:italic}
+.tc-del{background:none;border:none;cursor:pointer;color:var(--mid);font-size:15px;padding:2px 4px;border-radius:5px}
+.tc-del:active{color:var(--pink-dark)}
+.tc-body{padding:9px 11px}
+.tc-label{font-size:10px;color:var(--mid);font-weight:600;margin-bottom:7px}
+.tc-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.tc-row .tci{font-size:14px;width:18px;text-align:center}
+.tc-row .tcl{font-size:12px;color:var(--mid);flex:1;font-weight:500}
+.tc-row input{width:48px;padding:4px;border:1.5px solid var(--border);border-radius:6px;font-family:'Heebo',sans-serif;font-size:12px;text-align:center;background:var(--warm)}
+.tc-row input:focus{outline:none;border-color:var(--teal);background:#fff}
+.tc-totals{background:linear-gradient(135deg,#fce8f322,#a8e6e422);border:1px solid var(--border);border-radius:7px;padding:6px 9px;margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.tc-tot{text-align:center;flex:1;min-width:42px}
+.tc-tot strong{display:block;font-family:'Playfair Display',serif;font-size:15px}
+.tc-tot span{font-size:10px;color:var(--mid)}
+/* ══ COST ══ */
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px;margin-top:4px}
+.cost-card{background:#fff;border-radius:11px;border:1.5px solid var(--border);box-shadow:0 2px 9px var(--shadow);padding:14px}
+.cost-card .cc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cost-card .cc-icon{font-size:22px}
+.cost-card .cc-name{font-size:14px;font-weight:700;flex:1}
+.cost-card .cc-price-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.cost-card label{font-size:11px;color:var(--mid);font-weight:600}
+.cost-card input.price-input{flex:1;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;background:var(--warm);text-align:center}
+.cost-card input.price-input:focus{outline:none;border-color:var(--teal);background:#fff}
+.cost-card .cc-result{background:linear-gradient(135deg,#fce8f322,#a8e6e422);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-top:8px;text-align:center}
+.cost-card .cc-result .cr-total{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal)}
+.cost-card .cc-result .cr-sub{font-size:11px;color:var(--mid);margin-top:2px}
+.total-banner{background:linear-gradient(135deg,#3d2b45,#5bbcb8);border-radius:14px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.tb-label{font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:4px}
+.tb-amount{font-family:'Playfair Display',serif;font-size:34px;color:#fff;font-weight:700}
+.tb-currency{font-size:16px;color:rgba(255,255,255,0.8);margin-right:4px}
+.tb-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-top:4px}
+/* BUDGET ALERT */
+.budget-alert{background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;color:#856404;margin-bottom:14px;display:none;text-align:center}
+.budget-alert.show{display:block}
+.budget-alert.over{background:#ffe0e0;border-color:#ff2d55;color:#c0392b;animation:pulse-glow 2s ease-in-out infinite}
+/* ══ MODALS (shared) ══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:400;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:18px;width:100%;max-width:500px;max-height:90dvh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:18px 22px;border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{color:#fff;font-family:'Playfair Display',serif;font-size:18px}
+.modal-close{background:none;border:none;color:rgba(255,255,255,0.8);font-size:22px;cursor:pointer}
+.modal-body{padding:22px}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.modal-actions button{flex:1;padding:12px;border:none;border-radius:10px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.btn-save{background:var(--teal);color:#fff}
+.btn-cancel{background:var(--warm);color:var(--charcoal);border:1.5px solid var(--border)!important}
+/* ══ PDF MODAL ══ */
+#pdf-preview{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;padding:16px}
+#pdf-preview.open{display:flex}
+.pdf-modal{background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:90dvh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.pdf-modal-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:16px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between}
+.pdf-modal-header h3{color:#fff;font-family:'Playfair Display',serif;font-size:17px}
+.pdf-modal-actions{display:flex;gap:8px}
+.pdf-close{background:none;border:none;color:rgba(255,255,255,0.8);font-size:22px;cursor:pointer}
+.pdf-print-btn{padding:7px 16px;background:var(--pink);color:#fff;border:none;border-radius:8px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.pdf-share-btn{padding:7px 12px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.pdf-body{padding:24px 28px}
+.print-doc{font-family:'Heebo',sans-serif;color:#2d2d2d;direction:rtl}
+.print-doc .pd-header{text-align:center;border-bottom:3px solid #e891bb;padding-bottom:14px;margin-bottom:18px}
+.print-doc .pd-title{font-family:'Playfair Display',serif;font-size:24px;color:#3d2b45}
+.print-doc .pd-date{font-size:12px;color:#7a6580;margin-top:4px}
+.print-doc .pd-section{margin-bottom:20px}
+.print-doc .pd-section-title{font-size:14px;font-weight:700;color:#3d2b45;border-bottom:1.5px solid #f0c8e4;padding-bottom:5px;margin-bottom:10px}
+.print-doc table{width:100%;border-collapse:collapse;font-size:12px}
+.print-doc th{background:#fce8f3;color:#3d2b45;font-weight:700;padding:6px 9px;text-align:right;border:1px solid #f0c8e4}
+.print-doc td{padding:5px 9px;border:1px solid #f0c8e4}
+.print-doc tr:nth-child(even) td{background:#fdf6fb}
+.print-doc .pd-grand-total{background:linear-gradient(135deg,#3d2b45,#5bbcb8);color:#fff;border-radius:10px;padding:14px 18px;margin-top:14px;text-align:center}
+.print-doc .pd-grand-total .gt-label{font-size:12px;opacity:0.8}
+.print-doc .pd-grand-total .gt-amount{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+.share-bar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.share-btn{flex:1;min-width:120px;padding:12px;border:none;border-radius:11px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.share-wa{background:#25D366;color:#fff}
+.share-mail{background:#4285F4;color:#fff}
+/* ══ CHECKLIST MODAL ══ */
+.checklist-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:10px}
+.checklist-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--warm);border-radius:9px;border:1px solid var(--border)}
+.checklist-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--teal);flex-shrink:0}
+.checklist-item .ci-text{flex:1;font-size:13px}
+.checklist-item .ci-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px}
+.template-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tmpl-tab{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:var(--mid)}
+.tmpl-tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.add-check-row{display:flex;gap:8px;margin-top:8px}
+.add-check-row input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Heebo',sans-serif;font-size:13px;background:var(--warm)}
+.add-check-row input:focus{outline:none;border-color:var(--teal);background:#fff}
+/* ══ REMINDER MODAL ══ */
+.reminder-card{background:var(--warm);border-radius:11px;padding:14px;border:1px solid var(--border);margin-bottom:10px}
+.reminder-active{background:linear-gradient(135deg,#fce8f322,#a8e6e422);border-color:var(--teal)}
+.reminder-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.reminder-label{font-size:12px;color:var(--mid);font-weight:600;min-width:60px}
+/* ══ BOTTOM NAV ══ */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--border);padding:7px 0 calc(7px + var(--safe-bottom));z-index:200;justify-content:space-around}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:3px;font-family:'Heebo',sans-serif;font-size:10px;color:var(--mid)}
+.nav-btn .nav-icon{font-size:20px}
+.nav-btn.active{color:var(--pink-dark);font-weight:600}
+/* ══ PROFIT ══ */
+.profit-card{background:#fff;border-radius:11px;border:1.5px solid #c8e6c9;box-shadow:0 2px 9px rgba(0,100,0,0.08);padding:14px}
+.profit-card .pc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.profit-card .pc-icon{font-size:22px}
+.profit-card .pc-name{font-size:14px;font-weight:700;flex:1}
+.profit-card .pc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.profit-card .pc-input-group{display:flex;flex-direction:column;gap:3px}
+.profit-card .pc-input-group label{font-size:10px;font-weight:700;color:var(--mid)}
+.profit-card .pc-input-group input{padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;text-align:center;background:var(--warm)}
+.profit-card .pc-input-group input:focus{outline:none;border-color:var(--teal);background:#fff}
+.profit-card .pc-input-group.sell label{color:#1b5e20}
+.profit-card .pc-input-group.sell input{border-color:#a5d6a7;background:#f1f8e9}
+.profit-card .pc-result{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#f1f8e9;border:1px solid #a5d6a7;border-radius:8px;padding:8px}
+.profit-card .pc-stat{text-align:center}
+.profit-card .pc-stat strong{display:block;font-family:'Playfair Display',serif;font-size:16px}
+.profit-card .pc-stat.green strong{color:#2e7d32}
+.profit-card .pc-stat.red strong{color:#c62828}
+.profit-card .pc-stat span{font-size:10px;color:var(--mid)}
+/* ══ SUMMARY SCREEN ══ */
+#summary-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
+.summary-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(16px + var(--safe-top)) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
+.summary-header h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;flex:1}
+.summary-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
+.summary-body{padding:20px}
+.summary-section{background:#fff;border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:16px;box-shadow:0 2px 10px var(--shadow)}
+.summary-section h3{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--pink);display:flex;align-items:center;gap:8px}
+.summary-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.summary-stat{background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:11px;padding:14px;text-align:center;color:#fff}
+.summary-stat .ss-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700}
+.summary-stat .ss-label{font-size:11px;opacity:0.85;margin-top:3px}
+.summary-inv-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.summary-inv-row:last-child{border-bottom:none}
+.summary-inv-bar{flex:1;height:8px;background:var(--warm);border-radius:10px;overflow:hidden}
+.summary-inv-bar-fill{height:100%;border-radius:10px;transition:width 0.6s}
+@media(max-width:700px){.profit-card .pc-inputs{grid-template-columns:1fr}.summary-stat-grid{grid-template-columns:1fr 1fr}}
+.empty-state{text-align:center;padding:36px 20px;color:var(--mid);grid-column:1/-1}
+.empty-state .ei{font-size:44px;margin-bottom:10px}
+@media print{
+  body>*:not(#pdf-preview){display:none!important}
+  #pdf-preview{display:block!important;position:static;padding:0;background:none}
+  .pdf-modal{box-shadow:none;max-height:none;overflow:visible;max-width:none;width:100%;border-radius:0}
+  .pdf-modal-header{display:none}
+  .pdf-body{padding:0}
+}
+/* ══ RESPONSIVE ══ */
+@media(max-width:700px){
+  .app-body{grid-template-columns:1fr}
+  .sidebar{display:none;height:auto}
+  .sidebar.mob-show{display:flex}
+  .main-panel{height:auto;padding:14px;padding-bottom:80px}
+  .main-panel.mob-hide{display:none}
+  .tables-grid{grid-template-columns:1fr}
+  .cost-grid{grid-template-columns:1fr}
+  .bottom-nav{display:flex}
+  .total-banner{flex-direction:column;align-items:flex-start}
+  .pdf-body{padding:16px}
+}
+</style>
+</head>
+<body>
+<!-- ══════ ONBOARDING ══════ -->
+<div id="onboarding">
+  <div class="ob-logo">🌹</div>
+  <div class="ob-title" id="ob-title">ברוך הבא!</div>
+  <div class="ob-sub" id="ob-sub">סידור אולם · פרחים ונרות</div>
+  <div class="ob-steps">
+    <div class="ob-step" id="ob-s1">
+      <div class="ob-step-num">1</div>
+      <div class="ob-step-text">
+        <div class="ob-step-title" id="ob-t1">הוסף פריטי מלאי</div>
+        <div class="ob-step-desc" id="ob-d1">ורדים, נרות, אגרטלים — כל מה שיש לך</div>
+      </div>
+    </div>
+    <div class="ob-step" id="ob-s2">
+      <div class="ob-step-num">2</div>
+      <div class="ob-step-text">
+        <div class="ob-step-title" id="ob-t2">הגדר שולחנות</div>
+        <div class="ob-step-desc" id="ob-d2">כמה שולחנות יש, כמה מקומות לכל אחד</div>
+      </div>
+    </div>
+    <div class="ob-step" id="ob-s3">
+      <div class="ob-step-num">3</div>
+      <div class="ob-step-text">
+        <div class="ob-step-title" id="ob-t3">חלק כמויות</div>
+        <div class="ob-step-desc" id="ob-d3">כמה פריטים לכל שולחן — האפליקציה מחשבת הכל</div>
+      </div>
+    </div>
+  </div>
+  <button class="ob-btn" id="ob-start-btn" onclick="finishOnboarding()">התחל עכשיו 🚀</button>
+  <div class="ob-skip" onclick="finishOnboarding()">דלג</div>
+</div>
+<!-- ══════ HOME SCREEN ══════ -->
+<div id="home-screen">
+  <div class="home-logo">🌹</div>
+  <div class="home-title" id="hs-title">סידור אולם</div>
+  <div class="home-sub" id="hs-sub">פרחים · נרות · קישוטים</div>
+  <div class="home-cards">
+    <div class="home-card" onclick="openMode('planner')">
+      <div class="hc-icon">🪑</div>
+      <div style="flex:1">
+        <div class="hc-title" id="hc-plan-title">סידור אירוע</div>
+        <div class="hc-desc" id="hc-plan-desc">ניהול שולחנות, מלאי וחישוב כמויות בזמן אמת</div>
+      </div>
+      <div class="hc-arrow">←</div>
+    </div>
+    <div class="home-card" onclick="openMode('costs')">
+      <div class="hc-icon">💰</div>
+      <div style="flex:1">
+        <div class="hc-title" id="hc-cost-title">חישוב עלויות</div>
+        <div class="hc-desc" id="hc-cost-desc">הזן מחיר לפריט וקבל עלות כוללת לכל האירוע</div>
+      </div>
+      <div class="hc-arrow">←</div>
+    </div>
+    <div class="home-card" onclick="openSideMenu()">
+      <div class="hc-icon">⚙️</div>
+      <div style="flex:1">
+        <div class="hc-title" id="hc-set-title">הגדרות וכלים</div>
+        <div class="hc-desc" id="hc-set-desc">תזכורות, צ׳קליסט, שפה ועוד</div>
+      </div>
+      <div class="hc-arrow">←</div>
+    </div>
+  </div>
+</div>
+<!-- ══════ SIDE MENU ══════ -->
+<div id="side-menu-overlay" onclick="closeSideMenu()"></div>
+<div id="side-menu">
+  <div class="sm-header">
+    <div class="sm-title">🌹 תפריט</div>
+    <button class="sm-close" onclick="closeSideMenu()">✕</button>
+  </div>
+  <div class="sm-section" id="sm-s-tools">כלים</div>
+  <div class="sm-item" onclick="closeSideMenu();newEvent()">
+    <div class="sm-item-icon">🆕</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-newevent-title">התחלת אירוע חדש</div>
+      <div class="sm-item-desc" id="sm-newevent-desc">שומר קטלוג פריטים ומחירים, מאפס שולחנות ומלאי</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openSummary()">
+    <div class="sm-item-icon">📊</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title">דוח מסכם</div>
+      <div class="sm-item-desc">סיכום צבעוני של כל האירוע</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openChecklist()">
+    <div class="sm-item-icon">✅</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-checklist-title">צ׳קליסט הכנה</div>
+      <div class="sm-item-desc" id="sm-checklist-desc">מה לא לשכוח לכל אירוע</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openReminder()">
+    <div class="sm-item-icon">🔔</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-reminder-title">תזכורת לאירוע</div>
+      <div class="sm-item-desc" id="sm-reminder-desc">הגדר תאריך ושעה, קבל התראה</div>
+    </div>
+    <div class="sm-item-badge" id="reminder-badge" style="display:none">פעיל</div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openPdfPreview()">
+    <div class="sm-item-icon">📄</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-pdf-title">דוח PDF + שיתוף</div>
+      <div class="sm-item-desc" id="sm-pdf-desc">הורד, הדפס, שלח לווטסאפ או מייל</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openBudget()">
+    <div class="sm-item-icon">🎯</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-budget-title">יעד תקציב</div>
+      <div class="sm-item-desc" id="sm-budget-desc">הגדר תקציב מקסימלי לאירוע</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openPinSettings()">
+    <div class="sm-item-icon">🔒</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-pin-title">נעילת טאב רווח</div>
+      <div class="sm-item-desc" id="sm-pin-desc">קוד גישה לטאב הרווח בלבד</div>
+    </div>
+  </div>
+  <div class="sm-section" id="sm-s-backup">גיבוי ושחזור</div>
+  <div class="sm-item" onclick="closeSideMenu();shareBackup()">
+    <div class="sm-item-icon">📤</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-sharebackup-title">שתף קובץ גיבוי</div>
+      <div class="sm-item-desc" id="sm-sharebackup-desc">ווטסאפ / מייל / Drive דרך תפריט השיתוף</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();downloadBackup()">
+    <div class="sm-item-icon">💾</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-downloadbackup-title">הורד קובץ גיבוי</div>
+      <div class="sm-item-desc" id="sm-downloadbackup-desc">שמירה ידנית למחשב/טלפון</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();document.getElementById('import-file-input').click()">
+    <div class="sm-item-icon">📥</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-importbackup-title">ייבוא מקובץ גיבוי</div>
+      <div class="sm-item-desc" id="sm-importbackup-desc">שחזור נתונים מקובץ JSON</div>
+    </div>
+  </div>
+  <div class="sm-section" id="sm-s-app">אפליקציה</div>
+  <div class="sm-item" onclick="closeSideMenu();resetAll()">
+    <div class="sm-item-icon">🔄</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-reset-title">איפוס הכל</div>
+      <div class="sm-item-desc" id="sm-reset-desc">מחק את כל הנתונים</div>
+    </div>
+  </div>
+  <div class="sm-section" id="sm-s-lang">שפה / Language</div>
+  <div class="sm-lang-toggle">
+    <button class="sm-lang-btn active" id="lang-he-btn" onclick="setLang('he')">עברית</button>
+    <button class="sm-lang-btn" id="lang-en-btn" onclick="setLang('en')">English</button>
+  </div>
+</div>
+<!-- ══════ APP SHELL ══════ -->
+<div id="app-shell">
+  <div class="app-header">
+    <div class="app-header-top">
+      <button class="ah-menu" onclick="openSideMenu()">☰</button>
+      <div class="ah-logo" id="ah-logo">🌹 סידור אירוע</div>
+      <div class="ah-actions">
+        <button class="ah-btn" onclick="goHome()" title="בית" aria-label="בית">🏠</button>
+        <button class="ah-btn pdf" onclick="openPdfPreview()">📄</button>
+      </div>
+    </div>
+    <div class="mode-tabs">
+      <div class="mode-tab active" id="tab-planner" onclick="switchTab('planner')">🪑 שולחנות</div>
+      <div class="mode-tab" id="tab-costs" onclick="switchTab('costs')">💰 עלויות</div>
+      <div class="mode-tab" id="tab-profit" onclick="switchTab('profit')">📈 רווח</div>
+    </div>
+    <!-- COUNTDOWN STRIP -->
+    <div id="countdown-strip" style="display:none;background:rgba(0,0,0,0.2);padding:5px 16px;text-align:center;font-size:12px;color:#fce8f3;font-weight:600;letter-spacing:0.5px"></div>
+  </div>
+  <!-- PLANNER -->
+  <div class="app-body" id="planner-body">
+    <aside class="sidebar" id="planner-sidebar">
+      <div>
+        <div class="section-title">📦 <span id="inv-section-title">מלאי לאירוע</span></div>
+        <!-- PRESET CHIPS -->
+        <div class="preset-bar" id="preset-bar"></div>
+        <div id="inv-list"><p style="font-size:12px;color:var(--mid)" id="inv-empty-msg">עוד לא הוספת פריטים</p></div>
+        <div class="emoji-picker" id="emoji-picker">
+          <span>🌹</span><span>🌸</span><span>🌺</span><span>🌻</span><span>🌼</span>
+          <span>💐</span><span>🌷</span><span>🍀</span><span>🌿</span><span>🪷</span>
+          <span>🕯️</span><span>🪔</span><span>✨</span><span>🎀</span><span>🎊</span>
+          <span>🏺</span><span>🫙</span><span>🪣</span><span>🧺</span><span>🪴</span>
+          <span>🌾</span><span>🎗️</span><span>🪄</span><span>💡</span><span>🫧</span>
+        </div>
+        <!-- CUSTOM ADD ROW (shown when "אחר" selected) -->
+        <div class="preset-custom" id="custom-add-row">
+          <div class="add-row">
+            <span class="emoji-pick" id="chosen-emoji">🌹</span>
+            <input type="text" id="new-inv-name" style="flex:2;min-width:60px">
+            <input type="number" id="new-inv-qty" min="0" style="width:62px">
+            <button class="btn-teal" onclick="addInvItem()" id="btn-add-inv">+ הוסף</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">🪑 <span id="add-table-title">הוסף שולחן</span></div>
+        <div class="add-table-box">
+          <div class="fg">
+            <label id="lbl-tname">שם השולחן</label>
+            <input type="text" id="new-name" placeholder='למשל: "שולחן VIP"'>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="fg" style="flex:1"><label id="lbl-tcount">כמות שולחנות</label><input type="number" id="new-count" placeholder="5" min="1"></div>
+            <div class="fg" style="flex:1"><label id="lbl-tsize">מקומות</label><input type="number" id="new-size" placeholder="10" min="1"></div>
+          </div>
+          <div class="fg">
+            <label id="lbl-tnote">הערה (אופציונלי)</label>
+            <input type="text" id="new-note" placeholder='למשל: "ליד הבמה"'>
+          </div>
+          <button class="btn-pink" onclick="addTable()" id="btn-add-table">+ הוסף שולחן</button>
+        </div>
+      </div>
+    </aside>
+    <main class="main-panel" id="planner-main">
+      <div class="stock-bar" id="stock-bar">
+        <p style="font-size:13px;color:var(--mid);padding-bottom:6px;" id="stock-empty-msg">הוסף פריטי מלאי מהתפריט</p>
+      </div>
+      <div class="alert-bar" id="stock-alert">⚠️ <span id="alert-msg"></span></div>
+      <div class="section-header">
+        <h2 id="tables-section-title">שולחנות האולם</h2>
+        <span id="tables-count" style="font-size:11px;color:var(--mid)"></span>
+      </div>
+      <div class="tables-grid" id="tables-grid">
+        <div class="empty-state"><div class="ei">🪑</div><p id="tables-empty-msg">הוסף שולחנות מהתפריט</p></div>
+      </div>
+    </main>
+  </div>
+  <!-- COSTS -->
+  <div class="app-body" id="costs-body" style="display:none">
+    <aside class="sidebar" id="costs-sidebar">
+      <div>
+        <div class="section-title">💰 <span id="price-section-title">מחיר לפריט</span></div>
+        <div id="cost-inv-list"><p style="font-size:12px;color:var(--mid)" id="cost-inv-empty">הוסף פריטי מלאי בלשונית "שולחנות" תחילה</p></div>
+      </div>
+      <div style="background:var(--warm);border-radius:11px;padding:12px;border:1px solid var(--border);font-size:12px;color:var(--mid);line-height:1.6">
+        💡 <span id="cost-tip">הזן מחיר לכל פריט. המחשבון מחשב: כמות × שולחנות × מחיר.</span>
+      </div>
+    </aside>
+    <main class="main-panel" id="costs-main">
+      <div class="budget-alert" id="budget-alert"></div>
+      <div class="total-banner">
+        <div>
+          <div class="tb-label" id="tb-label">עלות כוללת לאירוע</div>
+          <div class="tb-amount"><span class="tb-currency">₪</span><span id="grand-total">0</span></div>
+          <div class="tb-sub" id="grand-sub">הזן מחירים בתפריט הימני</div>
+        </div>
+      </div>
+      <div class="section-header"><h2 id="cost-detail-title">פירוט לפי פריט</h2></div>
+      <div class="cost-grid" id="cost-grid">
+        <div class="empty-state"><div class="ei">💰</div><p id="cost-empty-msg">הוסף פריטי מלאי וזן מחירים</p></div>
+      </div>
+    </main>
+  </div>
+  <!-- PROFIT MODE -->
+  <div class="app-body" id="profit-body" style="display:none">
+    <aside class="sidebar" id="profit-sidebar">
+      <div>
+        <div class="section-title">📈 <span id="profit-subtitle">עלות vs מחיר מכירה</span></div>
+        <div id="profit-inv-list"><p style="font-size:12px;color:var(--mid)" id="profit-inv-empty-static">הוסף פריטי מלאי בלשונית "שולחנות" תחילה</p></div>
+      </div>
+      <div style="background:#e8f5e9;border-radius:11px;padding:12px;border:1px solid #a5d6a7;font-size:12px;color:#2e7d32;line-height:1.6" id="profit-secret-note">
+        🔒 <strong>סודי:</strong> הרווח לא מופיע בדוח ללקוח
+      </div>
+    </aside>
+    <main class="main-panel" id="profit-main">
+      <div id="profit-summary-banner" style="background:linear-gradient(135deg,#1b5e20,#43a047);border-radius:14px;padding:18px 22px;margin-bottom:18px;color:#fff">
+        <div style="font-size:13px;opacity:0.8;margin-bottom:4px" id="profit-total-label">רווח כולל לאירוע</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700">₪<span id="total-profit">0</span></div>
+        <div style="font-size:12px;opacity:0.7;margin-top:4px" id="profit-margin-text"></div>
+      </div>
+      <div class="section-header"><h2 id="profit-detail-h2">פירוט רווח לפי פריט</h2></div>
+      <div class="cost-grid" id="profit-grid">
+        <div class="empty-state"><div class="ei">📈</div><p id="profit-grid-empty-static">הוסף פריטים ומחירים תחילה</p></div>
+      </div>
+    </main>
+  </div>
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-btn active" id="nav-main" onclick="mobileShowMain()">
+      <span class="nav-icon" id="nav-main-icon">🪑</span><span id="nav-main-lbl">שולחנות</span>
+    </button>
+    <button class="nav-btn" id="nav-side" onclick="mobileShowSide()">
+      <span class="nav-icon">📦</span><span id="nav-inv-lbl">מלאי</span>
+    </button>
+    <button class="nav-btn" id="nav-menu-btn" onclick="openSideMenu()">
+      <span class="nav-icon">☰</span><span id="nav-menu-lbl">תפריט</span>
+    </button>
+  </nav>
+</div>
+<!-- ══════ SUMMARY SCREEN ══════ -->
+<div id="summary-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeSummary()">←</button>
+    <h2>📊 דוח מסכם</h2>
+    <button class="ah-btn" onclick="openPdfPreview()" style="font-size:12px">📄 PDF</button>
+  </div>
+  <div class="summary-body" id="summary-body"></div>
+</div>
+<!-- ══════ PDF MODAL ══════ -->
+<div id="pdf-preview">
+  <div class="pdf-modal">
+    <div class="pdf-modal-header">
+      <h3 id="pdf-title">📄 דוח אירוע</h3>
+      <div class="pdf-modal-actions">
+        <button class="pdf-share-btn" onclick="shareWA()">💬 WA</button>
+        <button class="pdf-share-btn" onclick="shareMail()">✉️ מייל</button>
+        <button class="pdf-print-btn" onclick="window.print()" id="pdf-print-btn">💾 הורד / הדפס</button>
+        <button class="pdf-close" onclick="closePdfPreview()">✕</button>
+      </div>
+    </div>
+    <div class="pdf-body" id="pdf-body"></div>
+  </div>
+</div>
+<!-- ══════ CHECKLIST MODAL ══════ -->
+<div class="modal-overlay" id="checklist-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="cl-modal-title">✅ צ׳קליסט הכנה</h3>
+      <button class="modal-close" onclick="closeChecklist()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="template-tabs" id="tmpl-tabs"></div>
+      <div class="checklist-list" id="checklist-list"></div>
+      <div class="add-check-row">
+        <input type="text" id="new-check-item" placeholder="הוסף פריט לרשימה...">
+        <button class="btn-teal" onclick="addCheckItem()" id="btn-add-check">+ הוסף</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="saveNewTemplate()" id="btn-save-tmpl">💾 שמור כתבנית חדשה</button>
+        <button class="btn-cancel" onclick="closeChecklist()" id="btn-cl-close">סגור</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ REMINDER MODAL ══════ -->
+<div class="modal-overlay" id="reminder-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="rm-modal-title">🔔 תזכורת לאירוע</h3>
+      <button class="modal-close" onclick="closeReminder()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="reminder-card" id="reminder-card">
+        <div class="reminder-row">
+          <span class="reminder-label" id="lbl-event-name">שם האירוע</span>
+          <input type="text" id="reminder-name" placeholder="חתונה / בר מצווה..." style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+        </div>
+        <div class="reminder-row">
+          <span class="reminder-label" id="lbl-event-date">תאריך</span>
+          <input type="date" id="reminder-date" style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+        </div>
+        <div class="reminder-row">
+          <span class="reminder-label" id="lbl-event-time">שעה</span>
+          <input type="time" id="reminder-time" style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+        </div>
+      </div>
+      <div id="reminder-status" style="margin-top:12px;font-size:13px;color:var(--mid);text-align:center"></div>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="saveReminder()" id="btn-save-reminder">🔔 שמור תזכורת</button>
+        <button class="btn-cancel" onclick="clearReminder()" id="btn-clear-reminder">מחק</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ BUDGET MODAL ══════ -->
+<div class="modal-overlay" id="budget-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="bg-modal-title">🎯 יעד תקציב</h3>
+      <button class="modal-close" onclick="closeBudget()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="margin-bottom:16px">
+        <label id="lbl-budget">תקציב מקסימלי לאירוע (₪)</label>
+        <input type="text" inputmode="decimal" id="budget-input" placeholder="0.00" style="font-size:22px;text-align:center;font-weight:700">
+      </div>
+      <p style="font-size:12px;color:var(--mid);text-align:center" id="budget-tip">האפליקציה תתריע כשעלות האירוע מתקרבת ועוברת את התקציב</p>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="saveBudget()" id="btn-save-budget">שמור</button>
+        <button class="btn-cancel" onclick="closeBudget()" id="btn-cancel-budget">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ GENERIC CONFIRM MODAL ══════ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="confirm-modal-title">?</h3>
+      <button class="modal-close" onclick="closeConfirmModal(false)">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-modal-text" style="font-size:14px;line-height:1.6"></p>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="closeConfirmModal(true)" id="confirm-modal-ok">אישור</button>
+        <button class="btn-cancel" onclick="closeConfirmModal(false)" id="confirm-modal-cancel">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ GENERIC PROMPT MODAL ══════ -->
+<div class="modal-overlay" id="prompt-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="prompt-modal-title">?</h3>
+      <button class="modal-close" onclick="closePromptModal(false)">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" id="prompt-modal-input" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Heebo',sans-serif;font-size:14px;margin-bottom:14px">
+      <div class="modal-actions">
+        <button class="btn-save" onclick="closePromptModal(true)" id="prompt-modal-ok">שמור</button>
+        <button class="btn-cancel" onclick="closePromptModal(false)" id="prompt-modal-cancel">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ PIN ENTRY MODAL (profit tab lock) ══════ -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="pin-modal-title-h">🔒 קוד גישה</h3>
+      <button class="modal-close" onclick="closePinModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="password" inputmode="numeric" maxlength="8" id="pin-modal-input" placeholder="****" style="width:100%;font-size:22px;text-align:center;letter-spacing:8px;padding:10px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:8px">
+      <div id="pin-modal-error" style="color:#e05050;font-size:12px;text-align:center;min-height:16px"></div>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="submitPin()" id="pin-modal-ok">אישור</button>
+        <button class="btn-cancel" onclick="closePinModal()" id="pin-modal-cancel">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ PIN SETTINGS MODAL ══════ -->
+<div class="modal-overlay" id="pin-settings-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="pin-settings-title">🔒 נעילת טאב רווח</h3>
+      <button class="modal-close" onclick="closePinSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="pin-settings-hint" style="font-size:12px;color:var(--mid);margin-bottom:10px;line-height:1.6"></p>
+      <input type="password" inputmode="numeric" maxlength="8" id="pin-settings-input" placeholder="****" style="width:100%;font-size:22px;text-align:center;letter-spacing:8px;padding:10px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:14px">
+      <div class="modal-actions">
+        <button class="btn-save" onclick="savePinSetting()" id="pin-settings-save">שמור</button>
+        <button class="btn-cancel" onclick="removePinSetting()" id="pin-settings-remove">הסר נעילה</button>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="file" id="import-file-input" accept="application/json,.json" style="display:none" onchange="importBackupFile(this)">
+<script>
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let inventory=[], tables=[], prices={}, sellPrices={}, nextId=1;
+let pickerFor=null, currentTab='planner', lang='he';
+let budgetTarget=0, reminder={}, checklists={}, activeTemplate='general';
+const COLORS=['#e891bb','#5bbcb8','#f4a7c8','#7dd4d1','#d4a0e8','#8ed4b8','#f0b8d8','#6bc8c5'];
+// ══════════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════════
+const T = {
+  he: {
+    appTitle:'סידור אולם', appSub:'פרחים · נרות · קישוטים',
+    obTitle:'ברוך הבא!', obSub:'סידור אולם · פרחים ונרות',
+    obT1:'הוסף פריטי מלאי', obD1:'ורדים, נרות, אגרטלים — כל מה שיש לך',
+    obT2:'הגדר שולחנות', obD2:'כמה שולחנות יש, כמה מקומות לכל אחד',
+    obT3:'חלק כמויות', obD3:'כמה פריטים לכל שולחן — האפליקציה מחשבת הכל',
+    obBtn:'התחל עכשיו 🚀',
+    hcPlanTitle:'סידור אירוע', hcPlanDesc:'ניהול שולחנות, מלאי וחישוב כמויות בזמן אמת',
+    hcCostTitle:'חישוב עלויות', hcCostDesc:'הזן מחיר לפריט וקבל עלות כוללת לכל האירוע',
+    hcSetTitle:'הגדרות וכלים', hcSetDesc:'תזכורות, צ׳קליסט, שפה ועוד',
+    planTitle:'🌹 סידור אירוע', costTitle:'💰 חישוב עלויות',
+    tabPlan:'🪑 שולחנות', tabCost:'💰 עלויות',
+    invSection:'מלאי לאירוע', addTableTitle:'הוסף שולחן',
+    invEmpty:'עוד לא הוספת פריטים', stockEmpty:'הוסף פריטי מלאי מהתפריט',
+    tablesSection:'שולחנות האולם', tablesEmpty:'הוסף שולחנות מהתפריט',
+    lblTname:'שם השולחן', lblTcount:'כמות שולחנות', lblTsize:'מקומות', lblTnote:'הערה (אופציונלי)',
+    btnAddInv:'+ הוסף', btnAddTable:'+ הוסף שולחן',
+    priceSection:'מחיר לפריט', costInvEmpty:'הוסף פריטי מלאי בלשונית "שולחנות" תחילה',
+    costTip:'הזן עלות שלך ומחיר ללקוח לכל פריט. "עלות כוללת לאירוע" מחושבת לפי מחיר ללקוח: כמות × שולחנות × מחיר.',
+    tbLabel:'עלות כוללת לאירוע', grandSubEmpty:'הזן מחירים בתפריט הימני',
+    costDetailTitle:'פירוט לפי פריט', costEmpty:'הוסף פריטי מלאי וזן מחירים',
+    pdfTitle:'📄 דוח אירוע', pdfPrint:'💾 הורד / הדפס',
+    smTools:'כלים', smApp:'אפליקציה', smLang:'שפה / Language',
+    smChecklistTitle:'צ׳קליסט הכנה', smChecklistDesc:'מה לא לשכוח לכל אירוע',
+    smReminderTitle:'תזכורת לאירוע', smReminderDesc:'הגדר תאריך ושעה, קבל התראה',
+    smPdfTitle:'דוח PDF + שיתוף', smPdfDesc:'הורד, הדפס, שלח לווטסאפ או מייל',
+    smBudgetTitle:'יעד תקציב', smBudgetDesc:'הגדר תקציב מקסימלי לאירוע',
+    smResetTitle:'איפוס הכל', smResetDesc:'מחק את כל הנתונים',
+    reminderBadge:'פעיל',
+    navTables:'שולחנות', navInv:'מלאי', navMenu:'תפריט',
+    presets:[
+      {icon:'🌹',name:'ורדים'},{icon:'🌸',name:'פרחים'},{icon:'🕯️',name:'נרות'},
+      {icon:'🏺',name:'אגרטל'},{icon:'🌿',name:'ירק'},{icon:'🎀',name:'סרטים'},
+      {icon:'✨',name:'נצנצים'},{icon:'🪴',name:'עציץ'},{icon:'➕',name:'אחר...'}
+    ],
+    customPlaceholder:'שם פריט',customQtyPlaceholder:'כמות',
+    clModalTitle:'✅ צ׳קליסט הכנה',
+    tmplGeneral:'כללי', tmplWedding:'חתונה', tmplBarMitzvah:'בר מצווה',
+    btnAddCheck:'+ הוסף', btnSaveTmpl:'💾 שמור כתבנית חדשה', btnClClose:'סגור',
+    newTmplPrompt:'שם לתבנית החדשה:',
+    rmModalTitle:'🔔 תזכורת לאירוע',
+    lblEventName:'שם האירוע', lblEventDate:'תאריך', lblEventTime:'שעה',
+    btnSaveReminder:'🔔 שמור תזכורת', btnClearReminder:'מחק',
+    reminderSet:'✅ תזכורת נשמרה!',
+    reminderPermDenied:'⚠️ אין הרשאה לשלוח התראות. אפשר בהגדרות.',
+    bgModalTitle:'🎯 יעד תקציב',
+    lblBudget:'תקציב מקסימלי לאירוע (₪)',
+    budgetTip:'האפליקציה תתריע כשעלות האירוע מתקרבת ועוברת את התקציב',
+    btnSaveBudget:'שמור', btnCancelBudget:'ביטול',
+    budgetWarning:'⚠️ מתקרב לתקציב! עלות: ₪{cost} מתוך ₪{budget}',
+    budgetOver:'🚨 חרגת מהתקציב! עלות: ₪{cost} מתוך ₪{budget}',
+    resetConfirm:'לאפס הכל? המלאי, השולחנות והמחירים יימחקו.',
+    reportTitle:'🌹 דוח סידור אירוע',
+    invSummary:'📦 סיכום מלאי', tableDetail:'🪑 פירוט שולחנות',
+    colItem:'פריט', colStock:'במלאי', colUsed:'בשימוש', colLeft:'נותר', colPrice:'מחיר', colCost:'עלות',
+    colTable:'שולחן', colTotal:'סה"כ',
+    totalCost:'עלות כוללת לאירוע',
+    tablesMeta:'{count} שולחנות', tablesSeat:'× {size} איש',
+    perTable:'כמות לכל שולחן:',
+    unitTotal:'סה"כ יח׳', costCol:'עלות',
+    units:'יחידות', times:'×',
+    waText:'📋 דוח סידור אירוע\n\n{summary}\n\nסה"כ עלות: ₪{total}',
+    itemRow:'{icon} {name}: {used}/{qty}',
+    tabProfit:'📈 רווח',
+    myCostLabel:'💸 עלות שלי', customerPriceLabel:'💰 מחיר ללקוח', toCustomerShort:'💰 ללקוח',
+    toCustomerSuffix:'ללקוח', costOnlyLabel:'עלות',
+    profitTabSubtitle:'עלות vs מחיר מכירה',
+    profitSecretNote:'🔒 <strong>סודי:</strong> הרווח לא מופיע בדוח ללקוח',
+    profitDetailTitle:'פירוט רווח לפי פריט', profitEmptyMsg:'הוסף פריטים ומחירים תחילה',
+    totalProfitLabel:'רווח כולל לאירוע', enterPricesToCalc:'הזן מחירים כדי לחשב',
+    unitsPcLabel:'יחידות', profitPcLabel:'רווח', lossPcLabel:'הפסד', marginPcLabel:'מרווח',
+    navProfitLbl:'רווח',
+    revenueCostMarginLine:'הכנסות: ₪{rev} · עלויות: ₪{cost} · מרווח: {margin}%',
+    myCostPcLabel:'💸 עלות שלי (₪)', customerPricePcLabel:'💰 מחיר ללקוח (₪)',
+    smNewEventTitle:'התחלת אירוע חדש', smNewEventDesc:'שומר קטלוג פריטים ומחירים, מאפס שולחנות ומלאי',
+    newEventConfirm:'להתחיל אירוע חדש? השולחנות, כמויות המלאי, התקציב והתזכורת יימחקו — שמות הפריטים והמחירים יישארו.',
+    smPinTitle:'נעילת טאב רווח', smPinDesc:'קוד גישה לטאב הרווח בלבד',
+    pinModalTitle:'🔒 קוד גישה', pinWrong:'קוד שגוי',
+    pinSettingsHint:'קוד בן 4 ספרות שיידרש לפני כניסה לטאב הרווח. שים לב: זו הגנה בסיסית בצד לקוח בלבד ולא אבטחה אמיתית — אין לשתף את קישור האפליקציה עצמו עם לקוחות.',
+    smBackupTitle:'גיבוי ושחזור', smShareBackup:'שתף קובץ גיבוי', smShareBackupDesc:'ווטסאפ / מייל / Drive דרך תפריט השיתוף',
+    smDownloadBackup:'הורד קובץ גיבוי', smDownloadBackupDesc:'שמירה ידנית למחשב/טלפון',
+    smImportBackup:'ייבוא מקובץ גיבוי', smImportBackupDesc:'שחזור נתונים מקובץ JSON',
+    importConfirm:'לייבא קובץ זה? הנתונים הנוכחיים יוחלפו.',
+    importInvalid:'קובץ לא תקין',
+    deleteTableConfirm:'למחוק את "{name}"? הכמויות שלו יימחקו.',
+    deleteItemConfirm:'למחוק את "{name}" מהמלאי ומכל השולחנות?',
+    saveFailed:'⚠️ שמירת הנתונים נכשלה — ייתכן שהאחסון מלא או שאתה בגלישה פרטית',
+  },
+  en: {
+    appTitle:'Hall Setup', appSub:'Flowers · Candles · Decorations',
+    obTitle:'Welcome!', obSub:'Hall Setup · Flowers & Candles',
+    obT1:'Add inventory items', obD1:'Roses, candles, vases — everything you have',
+    obT2:'Define tables', obD2:'How many tables, how many seats each',
+    obT3:'Assign quantities', obD3:'Items per table — the app calculates everything',
+    obBtn:'Get Started 🚀',
+    hcPlanTitle:'Event Setup', hcPlanDesc:'Manage tables, inventory and quantities in real time',
+    hcCostTitle:'Cost Calculator', hcCostDesc:'Enter item prices and get total event cost',
+    hcSetTitle:'Settings & Tools', hcSetDesc:'Reminders, checklist, language and more',
+    planTitle:'🌹 Event Setup', costTitle:'💰 Cost Calculator',
+    tabPlan:'🪑 Tables', tabCost:'💰 Costs',
+    invSection:'Event Inventory', addTableTitle:'Add Table',
+    invEmpty:'No items added yet', stockEmpty:'Add inventory items from the menu',
+    tablesSection:'Hall Tables', tablesEmpty:'Add tables from the menu',
+    lblTname:'Table Name', lblTcount:'Number of Tables', lblTsize:'Seats', lblTnote:'Note (optional)',
+    btnAddInv:'+ Add', btnAddTable:'+ Add Table',
+    priceSection:'Price per Item', costInvEmpty:'Add inventory items in the "Tables" tab first',
+    costTip:'Enter your cost and customer price per item. "Total Event Cost" uses the customer price: quantity × tables × price.',
+    tbLabel:'Total Event Cost', grandSubEmpty:'Enter prices in the right menu',
+    costDetailTitle:'Breakdown by Item', costEmpty:'Add inventory items and enter prices',
+    pdfTitle:'📄 Event Report', pdfPrint:'💾 Download / Print',
+    smTools:'Tools', smApp:'App', smLang:'Language / שפה',
+    smChecklistTitle:'Prep Checklist', smChecklistDesc:"Don't forget anything for the event",
+    smReminderTitle:'Event Reminder', smReminderDesc:'Set date & time, get a notification',
+    smPdfTitle:'PDF Report + Share', smPdfDesc:'Download, print, send via WhatsApp or email',
+    smBudgetTitle:'Budget Target', smBudgetDesc:'Set a maximum budget for the event',
+    smResetTitle:'Reset All', smResetDesc:'Delete all data',
+    reminderBadge:'Active',
+    navTables:'Tables', navInv:'Inventory', navMenu:'Menu',
+    presets:[
+      {icon:'🌹',name:'Roses'},{icon:'🌸',name:'Flowers'},{icon:'🕯️',name:'Candles'},
+      {icon:'🏺',name:'Vase'},{icon:'🌿',name:'Greens'},{icon:'🎀',name:'Ribbons'},
+      {icon:'✨',name:'Glitter'},{icon:'🪴',name:'Plant'},{icon:'➕',name:'Other...'}
+    ],
+    customPlaceholder:'Item name', customQtyPlaceholder:'Qty',
+    clModalTitle:'✅ Prep Checklist',
+    tmplGeneral:'General', tmplWedding:'Wedding', tmplBarMitzvah:'Bar Mitzvah',
+    btnAddCheck:'+ Add', btnSaveTmpl:'💾 Save as New Template', btnClClose:'Close',
+    newTmplPrompt:'Name for new template:',
+    rmModalTitle:'🔔 Event Reminder',
+    lblEventName:'Event Name', lblEventDate:'Date', lblEventTime:'Time',
+    btnSaveReminder:'🔔 Save Reminder', btnClearReminder:'Delete',
+    reminderSet:'✅ Reminder saved!',
+    reminderPermDenied:'⚠️ Notification permission denied. Enable in settings.',
+    bgModalTitle:'🎯 Budget Target',
+    lblBudget:'Maximum Event Budget (₪)',
+    budgetTip:'The app will alert you when the event cost approaches or exceeds the budget',
+    btnSaveBudget:'Save', btnCancelBudget:'Cancel',
+    budgetWarning:'⚠️ Approaching budget! Cost: ₪{cost} of ₪{budget}',
+    budgetOver:'🚨 Over budget! Cost: ₪{cost} of ₪{budget}',
+    resetConfirm:'Reset everything? Inventory, tables and prices will be deleted.',
+    reportTitle:'🌹 Event Setup Report',
+    invSummary:'📦 Inventory Summary', tableDetail:'🪑 Table Breakdown',
+    colItem:'Item', colStock:'In Stock', colUsed:'Used', colLeft:'Left', colPrice:'Price', colCost:'Cost',
+    colTable:'Table', colTotal:'Total',
+    totalCost:'Total Event Cost',
+    tablesMeta:'{count} tables', tablesSeat:'× {size} seats',
+    perTable:'Qty per table:',
+    unitTotal:'Total units', costCol:'Cost',
+    units:'units', times:'×',
+    waText:'📋 Event Setup Report\n\n{summary}\n\nTotal cost: ₪{total}',
+    itemRow:'{icon} {name}: {used}/{qty}',
+    tabProfit:'📈 Profit',
+    myCostLabel:'💸 My Cost', customerPriceLabel:'💰 Customer Price', toCustomerShort:'💰 To Customer',
+    toCustomerSuffix:'to customer', costOnlyLabel:'Cost',
+    profitTabSubtitle:'Cost vs Sale Price',
+    profitSecretNote:'🔒 <strong>Secret:</strong> profit does not appear in the client report',
+    profitDetailTitle:'Profit Breakdown by Item', profitEmptyMsg:'Add items and prices first',
+    totalProfitLabel:'Total Event Profit', enterPricesToCalc:'Enter prices to calculate',
+    unitsPcLabel:'units', profitPcLabel:'Profit', lossPcLabel:'Loss', marginPcLabel:'Margin',
+    navProfitLbl:'Profit',
+    revenueCostMarginLine:'Revenue: ₪{rev} · Costs: ₪{cost} · Margin: {margin}%',
+    myCostPcLabel:'💸 My Cost (₪)', customerPricePcLabel:'💰 Customer Price (₪)',
+    smNewEventTitle:'Start New Event', smNewEventDesc:'Keeps item catalog and prices, clears tables and stock',
+    newEventConfirm:'Start a new event? Tables, stock quantities, budget and reminder will be cleared — item names and prices stay.',
+    smPinTitle:'Lock Profit Tab', smPinDesc:'Access code for the Profit tab only',
+    pinModalTitle:'🔒 Access Code', pinWrong:'Wrong code',
+    pinSettingsHint:'A 4-digit code required before entering the Profit tab. Note: this is a basic client-side deterrent only, not real security — never share the app link itself with clients.',
+    smBackupTitle:'Backup & Restore', smShareBackup:'Share Backup File', smShareBackupDesc:'WhatsApp / Email / Drive via the share menu',
+    smDownloadBackup:'Download Backup File', smDownloadBackupDesc:'Manual save to computer/phone',
+    smImportBackup:'Import Backup File', smImportBackupDesc:'Restore data from a JSON file',
+    importConfirm:'Import this file? Current data will be replaced.',
+    importInvalid:'Invalid file',
+    deleteTableConfirm:'Delete "{name}"? Its quantities will be removed.',
+    deleteItemConfirm:'Delete "{name}" from inventory and all tables?',
+    saveFailed:'⚠️ Saving failed — storage may be full or you are in private browsing',
+  }
+};
+function t(k){ return (T[lang]||T['he'])[k]||k; }
+// ══════════════════════════════════════════════════════
+// PERSIST
+// ══════════════════════════════════════════════════════
+function save(){
+  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:3,inventory,tables,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin})); }
+  catch(e){
+    if(!save._warned){ save._warned=true; alert(t('saveFailed')); }
+  }
+}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem('sidur-v3')||'null');
+    if(d){
+      inventory=d.inventory||[]; tables=d.tables||[]; prices=d.prices||{};
+      sellPrices=d.sellPrices||{}; nextId=d.nextId||1; budgetTarget=d.budgetTarget||0;
+      reminder=d.reminder||{}; checklists=d.checklists||{};
+      activeTemplate=d.activeTemplate||'general'; lang=d.lang||'he';
+      profitPin=d.profitPin||null;
+    }
+  }catch(e){}
+}
+// ══════════════════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════════════════
+function showOnboarding(){
+  document.getElementById('onboarding').style.display='flex';
+  document.getElementById('home-screen').style.display='none';
+}
+function finishOnboarding(){
+  save();
+  localStorage.setItem('sidur-v3-onboarded','1');
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('home-screen').style.display='flex';
+}
+// ══════════════════════════════════════════════════════
+// LANGUAGE
+// ══════════════════════════════════════════════════════
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.documentElement.dir=l==='he'?'rtl':'ltr';
+  document.getElementById('lang-he-btn').classList.toggle('active',l==='he');
+  document.getElementById('lang-en-btn').classList.toggle('active',l==='en');
+  applyTranslations();
+  save();
+}
+function applyTranslations(){
+  // null-safe setters: some ids are replaced by dynamic renders (renderStockBar etc.)
+  const st=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const sh=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=v;};
+  const sp=(id,v)=>{const el=document.getElementById(id);if(el)el.placeholder=v;};
+  // onboarding
+  st('ob-title',t('obTitle')); st('ob-sub',t('obSub'));
+  st('ob-t1',t('obT1')); st('ob-d1',t('obD1'));
+  st('ob-t2',t('obT2')); st('ob-d2',t('obD2'));
+  st('ob-t3',t('obT3')); st('ob-d3',t('obD3'));
+  st('ob-start-btn',t('obBtn'));
+  // home
+  st('hs-title',t('appTitle')); st('hs-sub',t('appSub'));
+  st('hc-plan-title',t('hcPlanTitle')); st('hc-plan-desc',t('hcPlanDesc'));
+  st('hc-cost-title',t('hcCostTitle')); st('hc-cost-desc',t('hcCostDesc'));
+  st('hc-set-title',t('hcSetTitle')); st('hc-set-desc',t('hcSetDesc'));
+  // header
+  st('tab-planner',t('tabPlan')); st('tab-costs',t('tabCost')); st('tab-profit',t('tabProfit'));
+  // profit tab
+  st('profit-subtitle',t('profitTabSubtitle'));
+  st('profit-inv-empty-static',t('costInvEmpty'));
+  sh('profit-secret-note',t('profitSecretNote'));
+  st('profit-total-label',t('totalProfitLabel'));
+  st('profit-detail-h2',t('profitDetailTitle'));
+  st('profit-grid-empty-static',t('profitEmptyMsg'));
+  // sidebar
+  st('inv-section-title',t('invSection')); st('add-table-title',t('addTableTitle'));
+  st('lbl-tname',t('lblTname')); st('lbl-tcount',t('lblTcount'));
+  st('lbl-tsize',t('lblTsize')); st('lbl-tnote',t('lblTnote'));
+  st('btn-add-inv',t('btnAddInv')); st('btn-add-table',t('btnAddTable'));
+  sp('new-inv-name',t('customPlaceholder')); sp('new-inv-qty',t('customQtyPlaceholder'));
+  // main
+  st('inv-empty-msg',t('invEmpty'));
+  st('stock-empty-msg',t('stockEmpty'));
+  st('tables-section-title',t('tablesSection'));
+  st('tables-empty-msg',t('tablesEmpty'));
+  // costs
+  st('price-section-title',t('priceSection'));
+  st('cost-inv-empty',t('costInvEmpty'));
+  st('cost-tip',t('costTip'));
+  st('tb-label',t('tbLabel'));
+  st('cost-detail-title',t('costDetailTitle'));
+  st('cost-empty-msg',t('costEmpty'));
+  // nav
+  st('nav-main-lbl',t('navTables')); st('nav-inv-lbl',t('navInv')); st('nav-menu-lbl',t('navMenu'));
+  // side menu
+  st('sm-s-tools',t('smTools')); st('sm-s-app',t('smApp'));
+  st('sm-checklist-title',t('smChecklistTitle')); st('sm-checklist-desc',t('smChecklistDesc'));
+  st('sm-reminder-title',t('smReminderTitle')); st('sm-reminder-desc',t('smReminderDesc'));
+  st('sm-pdf-title',t('smPdfTitle')); st('sm-pdf-desc',t('smPdfDesc'));
+  st('sm-budget-title',t('smBudgetTitle')); st('sm-budget-desc',t('smBudgetDesc'));
+  st('sm-reset-title',t('smResetTitle')); st('sm-reset-desc',t('smResetDesc'));
+  st('reminder-badge',t('reminderBadge'));
+  st('sm-newevent-title',t('smNewEventTitle')); st('sm-newevent-desc',t('smNewEventDesc'));
+  st('sm-pin-title',t('smPinTitle')); st('sm-pin-desc',t('smPinDesc'));
+  st('sm-s-backup',t('smBackupTitle'));
+  st('sm-sharebackup-title',t('smShareBackup')); st('sm-sharebackup-desc',t('smShareBackupDesc'));
+  st('sm-downloadbackup-title',t('smDownloadBackup')); st('sm-downloadbackup-desc',t('smDownloadBackupDesc'));
+  st('sm-importbackup-title',t('smImportBackup')); st('sm-importbackup-desc',t('smImportBackupDesc'));
+  st('pin-modal-title-h',t('pinModalTitle'));
+  st('pin-settings-title',t('smPinTitle'));
+  // modals
+  st('cl-modal-title',t('clModalTitle'));
+  st('btn-add-check',t('btnAddCheck'));
+  st('btn-save-tmpl',t('btnSaveTmpl'));
+  st('btn-cl-close',t('btnClClose'));
+  st('rm-modal-title',t('rmModalTitle'));
+  st('lbl-event-name',t('lblEventName'));
+  st('lbl-event-date',t('lblEventDate'));
+  st('lbl-event-time',t('lblEventTime'));
+  st('btn-save-reminder',t('btnSaveReminder'));
+  st('btn-clear-reminder',t('btnClearReminder'));
+  st('bg-modal-title',t('bgModalTitle'));
+  st('lbl-budget',t('lblBudget'));
+  st('budget-tip',t('budgetTip'));
+  st('btn-save-budget',t('btnSaveBudget'));
+  st('btn-cancel-budget',t('btnCancelBudget'));
+  // pdf
+  st('pdf-title',t('pdfTitle'));
+  st('pdf-print-btn',t('pdfPrint'));
+  // presets
+  renderPresets();
+  renderAll();
+}
+// ══════════════════════════════════════════════════════
+// HOME / NAV
+// ══════════════════════════════════════════════════════
+function openMode(mode){
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('app-shell').style.display='flex';
+  document.getElementById('app-shell').style.flexDirection='column';
+  document.getElementById('ah-logo').textContent=mode==='planner'?t('planTitle'):t('costTitle');
+  switchTab(mode);
+  renderAll();
+}
+function goHome(){
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('home-screen').style.display='flex';
+}
+function switchTab(tab){
+  if(tab==='profit' && profitPin && !profitUnlockedThisSession){
+    openPinModal(()=>actuallySwitchTab('profit'));
+    return;
+  }
+  actuallySwitchTab(tab);
+}
+function actuallySwitchTab(tab){
+  currentTab=tab;
+  document.getElementById('planner-body').style.display=tab==='planner'?'grid':'none';
+  document.getElementById('costs-body').style.display=tab==='costs'?'grid':'none';
+  document.getElementById('profit-body').style.display=tab==='profit'?'grid':'none';
+  document.getElementById('tab-planner').classList.toggle('active',tab==='planner');
+  document.getElementById('tab-costs').classList.toggle('active',tab==='costs');
+  document.getElementById('tab-profit').classList.toggle('active',tab==='profit');
+  document.getElementById('nav-main-icon').textContent=tab==='planner'?'🪑':tab==='costs'?'💰':'📈';
+  document.getElementById('nav-main-lbl').textContent=tab==='planner'?t('navTables'):tab==='costs'?t('tabCost'):t('navProfitLbl');
+  if(tab==='costs') renderCosts();
+  if(tab==='profit') renderProfit();
+  mobileShowMain();
+}
+// ══════════════════════════════════════════════════════
+// SIDE MENU
+// ══════════════════════════════════════════════════════
+function openSideMenu(){
+  document.getElementById('side-menu').classList.add('open');
+  document.getElementById('side-menu-overlay').classList.add('open');
+  updateReminderBadge();
+}
+function closeSideMenu(){
+  document.getElementById('side-menu').classList.remove('open');
+  document.getElementById('side-menu-overlay').classList.remove('open');
+}
+function updateReminderBadge(){
+  document.getElementById('reminder-badge').style.display=reminder.date?'block':'none';
+}
+// ══════════════════════════════════════════════════════
+// MOBILE PANELS
+// ══════════════════════════════════════════════════════
+function mobileShowMain(){
+  if(window.innerWidth>700) return;
+  ['planner-sidebar','costs-sidebar','profit-sidebar'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('mob-show')});
+  ['planner-main','costs-main','profit-main'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('mob-hide')});
+  document.getElementById('nav-main').classList.add('active');
+  document.getElementById('nav-side').classList.remove('active');
+}
+function mobileShowSide(){
+  if(window.innerWidth>700) return;
+  const sid=currentTab==='planner'?'planner-sidebar':currentTab==='costs'?'costs-sidebar':'profit-sidebar';
+  const mid=currentTab==='planner'?'planner-main':currentTab==='costs'?'costs-main':'profit-main';
+  document.getElementById(sid).classList.add('mob-show');
+  document.getElementById(mid).classList.add('mob-hide');
+  document.getElementById('nav-main').classList.remove('active');
+  document.getElementById('nav-side').classList.add('active');
+}
+// ══════════════════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════════════════
+function renderPresets(){
+  const bar=document.getElementById('preset-bar');
+  bar.innerHTML=t('presets').map(p=>`
+    <div class="preset-chip" onclick="selectPreset('${p.icon}','${p.name}')">${p.icon} ${p.name}</div>
+  `).join('');
+}
+function selectPreset(icon, name){
+  if(name===t('presets').at(-1).name){
+    // "Other" — show custom row
+    document.getElementById('custom-add-row').classList.add('show');
+    document.getElementById('new-inv-name').focus();
+    return;
+  }
+  // quick-add preset — duplicate check across both languages (ורדים === Roses)
+  let idx=T.he.presets.findIndex(p=>p.name===name);
+  if(idx<0) idx=T.en.presets.findIndex(p=>p.name===name);
+  const equivNames=[name];
+  if(idx>-1){
+    if(T.he.presets[idx]) equivNames.push(T.he.presets[idx].name);
+    if(T.en.presets[idx]) equivNames.push(T.en.presets[idx].name);
+  }
+  const existing=inventory.find(i=>equivNames.includes(i.name));
+  if(existing){ flash('inv-list'); return; }
+  const id=nextId++;
+  inventory.push({id,icon,name,qty:0,color:COLORS[inventory.length%COLORS.length]});
+  prices[id]=0; sellPrices[id]=0;
+  tables.forEach(t2=>{t2.items[id]=0});
+  save(); renderAll();
+  document.getElementById('new-inv-qty') && (document.getElementById('new-inv-qty').focus());
+}
+// ══════════════════════════════════════════════════════
+// INVENTORY
+// ══════════════════════════════════════════════════════
+function addInvItem(){
+  const icon=document.getElementById('chosen-emoji').textContent.trim();
+  const name=document.getElementById('new-inv-name').value.trim();
+  const qty=parseInt(document.getElementById('new-inv-qty').value)||0;
+  if(!name){flash('new-inv-name');return;}
+  const id=nextId++;
+  inventory.push({id,icon,name,qty,color:COLORS[inventory.length%COLORS.length]});
+  prices[id]=0; sellPrices[id]=0;
+  tables.forEach(t2=>{t2.items[id]=0});
+  document.getElementById('new-inv-name').value='';
+  document.getElementById('new-inv-qty').value='';
+  save(); renderAll();
+  document.getElementById('new-inv-name').focus();
+}
+async function removeInvItem(id){
+  const it=inventory.find(i=>i.id===id);
+  const ok=await askConfirm(t('deleteItemConfirm').replace('{name}',it?it.name:''));
+  if(!ok) return;
+  inventory=inventory.filter(i=>i.id!==id);
+  tables.forEach(t2=>delete t2.items[id]);
+  delete prices[id]; delete sellPrices[id];
+  save(); renderAll();
+}
+function updateInvQty(id,val){
+  const it=inventory.find(i=>i.id===id);
+  if(it) it.qty=Math.max(0,parseInt(val)||0);
+  save(); renderStockBar(); recalc();
+}
+function updateInvName(id,val){
+  const it=inventory.find(i=>i.id===id);
+  if(it) it.name=val;
+  save(); renderStockBar(); renderTables(); renderCosts();
+}
+function renderInvList(){
+  const el=document.getElementById('inv-list');
+  if(!inventory.length){el.innerHTML=`<p style="font-size:12px;color:var(--mid)" id="inv-empty-msg">${t('invEmpty')}</p>`;return;}
+  el.innerHTML=inventory.map(it=>`
+    <div class="inv-row">
+      <span class="inv-icon" onclick="openPicker(${it.id})">${it.icon}</span>
+      <input class="inv-name" value="${esc(it.name)}" oninput="updateInvName(${it.id},this.value)">
+      <input class="inv-qty" type="number" min="0" value="${it.qty}" oninput="updateInvQty(${it.id},this.value)">
+      <button class="del-inv" onclick="removeInvItem(${it.id})">✕</button>
+    </div>`).join('');
+}
+// ══════════════════════════════════════════════════════
+// EMOJI PICKER
+// ══════════════════════════════════════════════════════
+document.getElementById('chosen-emoji').addEventListener('click',()=>{
+  pickerFor=null;
+  document.getElementById('emoji-picker').classList.toggle('open');
+});
+function openPicker(id){
+  pickerFor=id;
+  document.getElementById('emoji-picker').classList.add('open');
+}
+document.getElementById('emoji-picker').addEventListener('click',e=>{
+  const sp=e.target.closest('span'); if(!sp) return;
+  const em=sp.textContent.trim();
+  if(pickerFor===null){document.getElementById('chosen-emoji').textContent=em;}
+  else{const it=inventory.find(i=>i.id===pickerFor);if(it){it.icon=em;save();renderAll();}}
+  document.getElementById('emoji-picker').classList.remove('open'); pickerFor=null;
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#emoji-picker')&&!e.target.closest('.inv-icon')&&!e.target.closest('#chosen-emoji'))
+    document.getElementById('emoji-picker').classList.remove('open');
+});
+// ══════════════════════════════════════════════════════
+// STOCK BAR
+// ══════════════════════════════════════════════════════
+function calcUsed(invId){return tables.reduce((s,t2)=>s+(t2.items[invId]||0)*t2.count,0);}
+function renderStockBar(){
+  const bar=document.getElementById('stock-bar');
+  if(!inventory.length){bar.innerHTML=`<p style="font-size:13px;color:var(--mid);padding-bottom:6px;">${t('stockEmpty')}</p>`;return;}
+  bar.innerHTML=inventory.map(it=>{
+    const used=calcUsed(it.id),rem=it.qty-used;
+    const pct=it.qty>0?Math.max(0,Math.min(100,(rem/it.qty)*100)):0;
+    const warn=rem<0?`⚠ חסר ${Math.abs(rem)}!`:(rem===0&&it.qty>0?'✓':'');
+    return `<div class="stock-card" style="--ic:${it.color}">
+      <div class="sc-icon">${it.icon}</div>
+      <div class="sc-name">${esc(it.name)}</div>
+      <div class="sc-rem" style="color:${rem<0?'#e05050':'var(--charcoal)'}">${rem}</div>
+      <div class="sc-sub">${used}/${it.qty}</div>
+      <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:${pct}%"></div></div>
+      <div class="sc-warn">${warn}</div>
+    </div>`;
+  }).join('');
+}
+// ══════════════════════════════════════════════════════
+// TABLES
+// ══════════════════════════════════════════════════════
+function addTable(){
+  const name=document.getElementById('new-name').value.trim();
+  const count=parseInt(document.getElementById('new-count').value);
+  const size=parseInt(document.getElementById('new-size').value)||null;
+  const note=document.getElementById('new-note').value.trim();
+  if(!count||count<1){flash('new-count');return;}
+  const items={};inventory.forEach(it=>items[it.id]=0);
+  tables.push({id:nextId++,name:name||(size?`${t('tablesMeta').replace('{count}',count)} ${size?t('tablesSeat').replace('{size}',size):''}`.trim():`${lang==='he'?'שולחן':'Table'} ${tables.length+1}`),count,size,note,items});
+  document.getElementById('new-name').value='';
+  document.getElementById('new-count').value='';
+  document.getElementById('new-size').value='';
+  document.getElementById('new-note').value='';
+  save(); renderTables(); recalc();
+  document.getElementById('new-name').focus();
+}
+async function removeTable(id){
+  const t2=tables.find(x=>x.id===id);
+  const ok=await askConfirm(t('deleteTableConfirm').replace('{name}',t2?t2.name:''));
+  if(!ok) return;
+  tables=tables.filter(x=>x.id!==id);
+  save();renderTables();renderStockBar();recalc();updateCostTotalsOnly();if(currentTab==='profit')renderProfit();
+}
+function updateTableItem(tid,iid,val){
+  const t2=tables.find(t2=>t2.id===tid);if(t2) t2.items[iid]=Math.max(0,parseInt(val)||0);
+  const el=document.getElementById('tc-tot-'+tid);if(el)el.innerHTML=buildTotals(t2);
+  save(); renderStockBar(); recalc(); updateCostTotalsOnly();
+}
+function buildTotals(t2){
+  if(!inventory.length) return '<span style="font-size:11px;color:var(--mid)">—</span>';
+  return inventory.map(it=>{
+    const total=(t2.items[it.id]||0)*t2.count;
+    return `<div class="tc-tot"><strong>${total}</strong><span>${it.icon}</span></div>`;
+  }).join('');
+}
+function updateTable(id, field, val){
+  const t2=tables.find(t=>t.id===id); if(!t2) return;
+  if(field==='name') t2.name=val;
+  else if(field==='count') t2.count=Math.max(1,parseInt(val)||1);
+  else if(field==='size') t2.size=parseInt(val)||null;
+  else if(field==='note') t2.note=val;
+  // update header display without full re-render
+  const metaEl=document.getElementById('tc-meta-'+id);
+  if(metaEl) metaEl.textContent=`${t2.count} ${lang==='he'?'שולחנות':'tables'}`+(t2.size?` × ${t2.size} ${lang==='he'?'איש':'seats'}`:'');
+  save(); renderStockBar(); recalc();
+  // update count label
+  const totEl=document.getElementById('tables-count');
+  const totT=tables.reduce((s,t2)=>s+t2.count,0), totS=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
+  if(totEl) totEl.textContent=`${totT} ${lang==='he'?'שולחנות':'tables'}`+(totS?` · ${totS} ${lang==='he'?'מוזמנים':'guests'}`:'');
+  // recalc totals row
+  const totalsEl=document.getElementById('tc-tot-'+id);
+  if(totalsEl) totalsEl.innerHTML=buildTotals(t2);
+}
+function renderTables(){
+  const grid=document.getElementById('tables-grid'),cntEl=document.getElementById('tables-count');
+  if(!tables.length){grid.innerHTML=`<div class="empty-state"><div class="ei">🪑</div><p>${t('tablesEmpty')}</p></div>`;cntEl.textContent='';return;}
+  const totT=tables.reduce((s,t2)=>s+t2.count,0),totS=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
+  cntEl.textContent=`${totT} ${lang==='he'?'שולחנות':'tables'}`+(totS?` · ${totS} ${lang==='he'?'מוזמנים':'guests'}`:'');
+  grid.innerHTML=tables.map(t2=>{
+    const meta=`${t2.count} ${lang==='he'?'שולחנות':'tables'}`+(t2.size?` × ${t2.size} ${lang==='he'?'איש':'seats'}`:'');
+    const rows=inventory.length?inventory.map(it=>`
+      <div class="tc-row">
+        <span class="tci">${it.icon}</span>
+        <span class="tcl">${esc(it.name)}</span>
+        <input type="number" min="0" value="${t2.items[it.id]||0}" oninput="updateTableItem(${t2.id},${it.id},this.value)" placeholder="0">
+      </div>`).join(''):`<p style="font-size:11px;color:var(--mid);margin-top:4px;">${lang==='he'?'הוסף פריטי מלאי תחילה':'Add inventory first'}</p>`;
+    return `<div class="table-card">
+      <div class="tc-header">
+        <div style="flex:1;min-width:0">
+          <input
+            value="${esc(t2.name)}"
+            oninput="updateTable(${t2.id},'name',this.value)"
+            style="font-family:'Playfair Display',serif;font-size:13px;color:var(--charcoal);border:none;background:transparent;outline:none;width:100%;font-weight:400"
+            placeholder="${lang==='he'?'שם שולחן':'Table name'}">
+          <div style="display:flex;gap:6px;margin-top:3px;align-items:center">
+            <input type="number" min="1" value="${t2.count}"
+              oninput="updateTable(${t2.id},'count',this.value)"
+              style="width:42px;font-size:11px;color:var(--mid);border:1px solid var(--border);border-radius:5px;padding:2px 4px;text-align:center;background:var(--warm)">
+            <span style="font-size:10px;color:var(--mid)">${lang==='he'?'שולחן':'tbl'}</span>
+            <input type="number" min="1" value="${t2.size||''}"
+              oninput="updateTable(${t2.id},'size',this.value)"
+              placeholder="${lang==='he'?'מקומות':'seats'}"
+              style="width:48px;font-size:11px;color:var(--mid);border:1px solid var(--border);border-radius:5px;padding:2px 4px;text-align:center;background:var(--warm)">
+            <span style="font-size:10px;color:var(--mid)" id="tc-meta-${t2.id}">${meta}</span>
+          </div>
+          ${t2.note?`<div class="tc-note">📝 <input value="${esc(t2.note)}" oninput="updateTable(${t2.id},'note',this.value)" style="border:none;background:transparent;font-size:10px;color:var(--teal);font-style:italic;outline:none;width:calc(100% - 18px)"></div>`:
+          `<div style="margin-top:3px"><input placeholder="📝 ${lang==='he'?'הוסף הערה...':'Add note...'}" oninput="updateTable(${t2.id},'note',this.value)" style="border:none;background:transparent;font-size:10px;color:var(--mid);font-style:italic;outline:none;width:100%"></div>`}
+        </div>
+        <button class="tc-del" onclick="removeTable(${t2.id})">✕</button>
+      </div>
+      <div class="tc-body">
+        <div class="tc-label">${t('perTable')}</div>
+        ${rows}
+        <div class="tc-totals" id="tc-tot-${t2.id}">${buildTotals(t2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+// ══════════════════════════════════════════════════════
+// RECALC
+// ══════════════════════════════════════════════════════
+function recalc(){
+  const alerts=[];
+  inventory.forEach(it=>{const rem=it.qty-calcUsed(it.id);if(rem<0)alerts.push(`${lang==='he'?'חסרים':'Missing'} ${Math.abs(rem)} ${it.name}`);});
+  const el=document.getElementById('stock-alert');
+  if(alerts.length){el.classList.add('show');document.getElementById('alert-msg').textContent=alerts.join('  |  ');}
+  else el.classList.remove('show');
+}
+// ══════════════════════════════════════════════════════
+// COST CALCULATOR
+// ══════════════════════════════════════════════════════
+function syncPriceField(invId,role,value){
+  const display=value?value:'';
+  document.querySelectorAll(`input[data-inv-id="${invId}"][data-role="${role}"]`).forEach(el=>{
+    if(el!==document.activeElement && el.value!=String(display)) el.value=display;
+  });
+}
+function updatePrice(invId,val){
+  const cleaned=String(val).replace(',','.');
+  prices[invId]=Math.max(0,parseFloat(cleaned)||0);
+  syncPriceField(invId,'cost',prices[invId]);
+  save(); updateCostTotalsOnly(); updateProfitTotalsOnly();
+}
+function updateCostTotalsOnly(){
+  let grandTotal=0;
+  inventory.forEach(it=>{
+    const sell=sellPrices[it.id]||0, used=calcUsed(it.id), total=used*sell;
+    grandTotal+=total;
+    const card=document.getElementById('cost-card-'+it.id);
+    if(card){
+      const tableRows=tables.map(t2=>{
+        const qty=(t2.items[it.id]||0)*t2.count, cost2=qty*sell;
+        return `<tr><td>${esc(t2.name)}</td><td style="text-align:center">${t2.count}×${t2.items[it.id]||0}</td><td style="text-align:center">${qty}</td><td style="text-align:center">${sell?'₪'+cost2.toFixed(2):'—'}</td></tr>`;
+      }).join('');
+      const tbody=card.querySelector('.cost-table-body');
+      if(tbody) tbody.innerHTML=tableRows+`<tr style="background:#f5e0ef;font-weight:700"><td colspan="2" style="padding:4px 6px;border:1px solid #f0c8e4">${t('colTotal')}</td><td style="text-align:center;padding:4px;border:1px solid #f0c8e4">${used}</td><td style="text-align:center;padding:4px;border:1px solid #f0c8e4">${sell?'₪'+total.toFixed(2):'—'}</td></tr>`;
+      const resTotal=card.querySelector('.cr-total'), resSub=card.querySelector('.cr-sub');
+      if(resTotal) resTotal.textContent=sell?'₪'+total.toFixed(2):'—';
+      if(resSub) resSub.textContent=`${used} ${t('units')} × ₪${sell||0} ${t('toCustomerSuffix')}`;
+      syncPriceField(it.id,'sell',sellPrices[it.id]);
+      syncPriceField(it.id,'cost',prices[it.id]);
+    }
+  });
+  const gt=document.getElementById('grand-total'), gs=document.getElementById('grand-sub');
+  if(gt) gt.textContent=grandTotal?grandTotal.toFixed(2):'0';
+  if(gs){
+    const hasSell=inventory.some(it=>(sellPrices[it.id]||0)>0);
+    gs.textContent=hasSell?`${inventory.length} ${lang==='he'?'פריטים':'items'} · ${tables.reduce((s,t2)=>s+t2.count,0)} ${lang==='he'?'שולחנות':'tables'}`:t('grandSubEmpty');
+  }
+  checkBudget(grandTotal);
+}
+function renderCosts(){
+  const clist=document.getElementById('cost-inv-list');
+  if(!inventory.length){clist.innerHTML=`<p style="font-size:12px;color:var(--mid)">${t('costInvEmpty')}</p>`;return;}
+  clist.innerHTML=inventory.map(it=>`
+    <div style="background:var(--warm);border-radius:10px;padding:9px 10px;border:1px solid var(--border);margin-bottom:7px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+        <span>${it.icon}</span>
+        <span style="flex:1;font-size:13px;font-weight:600">${esc(it.name)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div>
+          <div style="font-size:10px;color:var(--mid);font-weight:600;margin-bottom:3px">${t('myCostLabel')}</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--mid)">₪</span>
+            <input id="price-side-${it.id}" data-inv-id="${it.id}" data-role="cost" class="inv-price" type="text" inputmode="decimal" value="${prices[it.id]||''}" placeholder="0.00" oninput="updatePrice(${it.id},this.value)" style="flex:1">
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#2e7d32;font-weight:600;margin-bottom:3px">${t('customerPriceLabel')}</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--mid)">₪</span>
+            <input id="sell-side-${it.id}" data-inv-id="${it.id}" data-role="sell" class="inv-price" type="text" inputmode="decimal" value="${sellPrices[it.id]||''}" placeholder="0.00" oninput="updateSellPrice(${it.id},this.value)" style="flex:1;border-color:#a5d6a7;background:#f1f8e9">
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+  const grid=document.getElementById('cost-grid');
+  if(!inventory.length||!tables.length){
+    grid.innerHTML=`<div class="empty-state"><div class="ei">💰</div><p>${t('costEmpty')}</p></div>`;
+    document.getElementById('grand-total').textContent='0';
+    document.getElementById('grand-sub').textContent=t('grandSubEmpty');
+    return;
+  }
+  let grandTotal=0;
+  grid.innerHTML=inventory.map(it=>{
+    const price=prices[it.id]||0, sell=sellPrices[it.id]||0;
+    const used=calcUsed(it.id), total=used*sell; // show customer price
+    grandTotal+=total;
+    const tableRows=tables.map(t2=>{
+      const qty=(t2.items[it.id]||0)*t2.count;
+      const cost2=qty*sell;
+      return `<tr><td>${esc(t2.name)}</td><td style="text-align:center">${t2.count}×${t2.items[it.id]||0}</td><td style="text-align:center">${qty}</td><td style="text-align:center">${sell?'₪'+cost2.toFixed(2):'—'}</td></tr>`;
+    }).join('');
+    return `<div class="cost-card" id="cost-card-${it.id}">
+      <div class="cc-header"><span class="cc-icon">${it.icon}</span><span class="cc-name">${esc(it.name)}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:10px;color:var(--mid);font-weight:600;display:block;margin-bottom:3px">${t('myCostLabel')}</label>
+          <div style="display:flex;align-items:center;gap:4px">
+            <input class="price-input" data-inv-id="${it.id}" data-role="cost" type="text" inputmode="decimal" value="${price||''}" placeholder="0.00" oninput="updatePrice(${it.id},this.value)">
+            <span style="font-size:11px;color:var(--mid)">₪</span>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:#2e7d32;font-weight:600;display:block;margin-bottom:3px">${t('toCustomerShort')}</label>
+          <div style="display:flex;align-items:center;gap:4px">
+            <input class="price-input" data-inv-id="${it.id}" data-role="sell" type="text" inputmode="decimal" value="${sell||''}" placeholder="0.00" oninput="updateSellPrice(${it.id},this.value)" style="border-color:#a5d6a7;background:#f1f8e9">
+            <span style="font-size:11px;color:#2e7d32">₪</span>
+          </div>
+        </div>
+      </div>
+      <table style="font-size:11px;width:100%;border-collapse:collapse;margin-top:4px">
+        <tr style="background:#fce8f3"><th style="padding:4px 6px;text-align:right;border:1px solid #f0c8e4">${t('colTable')}</th><th style="padding:4px;border:1px solid #f0c8e4">×</th><th style="padding:4px;border:1px solid #f0c8e4">${t('unitTotal')}</th><th style="padding:4px;border:1px solid #f0c8e4">${t('toCustomerSuffix')}</th></tr>
+        <tbody class="cost-table-body">${tableRows}
+        <tr style="background:#f5e0ef;font-weight:700"><td colspan="2" style="padding:4px 6px;border:1px solid #f0c8e4">${t('colTotal')}</td><td style="text-align:center;padding:4px;border:1px solid #f0c8e4">${used}</td><td style="text-align:center;padding:4px;border:1px solid #f0c8e4">${sell?'₪'+total.toFixed(2):'—'}</td></tr>
+        </tbody>
+      </table>
+      <div class="cc-result">
+        <div class="cr-total">${sell?'₪'+total.toFixed(2):'—'}</div>
+        <div class="cr-sub">${used} ${t('units')} × ₪${sell||0} ${t('toCustomerSuffix')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('grand-total').textContent=grandTotal?grandTotal.toFixed(2):'0';
+  const hasSell=inventory.some(it=>(sellPrices[it.id]||0)>0);
+  document.getElementById('grand-sub').textContent=hasSell?`${inventory.length} ${lang==='he'?'פריטים':'items'} · ${tables.reduce((s,t2)=>s+t2.count,0)} ${lang==='he'?'שולחנות':'tables'}`:t('grandSubEmpty');
+  checkBudget(grandTotal);
+}
+// ══════════════════════════════════════════════════════
+// PROFIT MODULE
+// ══════════════════════════════════════════════════════
+function updateCostPrice(invId,val){
+  const cleaned=String(val).replace(',','.');
+  prices[invId]=Math.max(0,parseFloat(cleaned)||0);
+  syncPriceField(invId,'cost',prices[invId]);
+  save(); updateCostTotalsOnly(); updateProfitTotalsOnly();
+}
+function updateSellPrice(invId,val){
+  const cleaned=String(val).replace(',','.');
+  sellPrices[invId]=Math.max(0,parseFloat(cleaned)||0);
+  syncPriceField(invId,'sell',sellPrices[invId]);
+  save(); updateCostTotalsOnly(); updateProfitTotalsOnly();
+}
+function profitStatsHTML(it){
+  const cost=prices[it.id]||0, sell=sellPrices[it.id]||0, used=calcUsed(it.id);
+  const rev=used*sell, profit=rev-used*cost;
+  const margin=rev>0?((profit/rev)*100).toFixed(1):0;
+  const profitColor=profit>=0?'green':'red';
+  return `<div class="pc-stat"><strong>${used}</strong><span>${t('unitsPcLabel')}</span></div>
+    <div class="pc-stat ${profitColor}"><strong>₪${Math.abs(profit).toFixed(2)}</strong><span>${profit>=0?t('profitPcLabel'):t('lossPcLabel')}</span></div>
+    <div class="pc-stat ${profitColor}"><strong>${margin}%</strong><span>${t('marginPcLabel')}</span></div>`;
+}
+// update profit numbers WITHOUT rebuilding the grid — keeps input focus while typing
+function updateProfitTotalsOnly(){
+  let totalCost=0, totalRevenue=0;
+  inventory.forEach(it=>{
+    const used=calcUsed(it.id);
+    totalCost+=used*(prices[it.id]||0);
+    totalRevenue+=used*(sellPrices[it.id]||0);
+    const res=document.getElementById('pc-result-'+it.id);
+    if(res) res.innerHTML=profitStatsHTML(it);
+    syncPriceField(it.id,'cost',prices[it.id]);
+    syncPriceField(it.id,'sell',sellPrices[it.id]);
+  });
+  const totalProfit=totalRevenue-totalCost;
+  const totalMargin=totalRevenue>0?((totalProfit/totalRevenue)*100).toFixed(1):0;
+  const tp=document.getElementById('total-profit');
+  if(tp) tp.textContent=Math.abs(totalProfit).toFixed(2);
+  const banner=document.getElementById('profit-summary-banner');
+  if(banner) banner.style.background=totalProfit>=0?'linear-gradient(135deg,#1b5e20,#43a047)':'linear-gradient(135deg,#b71c1c,#e53935)';
+  const mt=document.getElementById('profit-margin-text');
+  if(mt) mt.textContent=totalRevenue>0?t('revenueCostMarginLine').replace('{rev}',totalRevenue.toFixed(2)).replace('{cost}',totalCost.toFixed(2)).replace('{margin}',totalMargin):t('enterPricesToCalc');
+}
+function renderProfit(){
+  const sidebar=document.getElementById('profit-inv-list');
+  const grid=document.getElementById('profit-grid');
+  if(!inventory.length){
+    sidebar.innerHTML=`<p style="font-size:12px;color:var(--mid)">${t('costInvEmpty')}</p>`;
+    grid.innerHTML=`<div class="empty-state"><div class="ei">📈</div><p>${t('profitEmptyMsg')}</p></div>`;
+    return;
+  }
+  // sidebar — cost price inputs
+  sidebar.innerHTML=inventory.map(it=>`
+    <div class="inv-row">
+      <span>${it.icon}</span>
+      <span style="flex:1;font-size:13px;font-weight:600">${esc(it.name)}</span>
+      <span style="font-size:10px;color:var(--mid)">${t('costOnlyLabel')}</span>
+      <input id="cost-side-${it.id}" data-inv-id="${it.id}" data-role="cost" class="inv-price" type="text" inputmode="decimal" value="${prices[it.id]||''}" placeholder="0.00" oninput="updateCostPrice(${it.id},this.value)">
+    </div>`).join('');
+  grid.innerHTML=inventory.map(it=>{
+    const cost=prices[it.id]||0;
+    const sell=sellPrices[it.id]||0;
+    return `<div class="profit-card" id="profit-card-${it.id}">
+      <div class="pc-header"><span class="pc-icon">${it.icon}</span><span class="pc-name">${esc(it.name)}</span></div>
+      <div class="pc-inputs">
+        <div class="pc-input-group">
+          <label>${t('myCostPcLabel')}</label>
+          <input data-inv-id="${it.id}" data-role="cost" type="text" inputmode="decimal" value="${cost||''}" placeholder="0.00" oninput="updateCostPrice(${it.id},this.value)">
+        </div>
+        <div class="pc-input-group sell">
+          <label>${t('customerPricePcLabel')}</label>
+          <input data-inv-id="${it.id}" data-role="sell" type="text" inputmode="decimal" value="${sell||''}" placeholder="0.00" oninput="updateSellPrice(${it.id},this.value)">
+        </div>
+      </div>
+      <div class="pc-result" id="pc-result-${it.id}">${profitStatsHTML(it)}</div>
+    </div>`;
+  }).join('');
+  updateProfitTotalsOnly();
+}
+// ══════════════════════════════════════════════════════
+// SUMMARY SCREEN
+// ══════════════════════════════════════════════════════
+function openSummary(){
+  const totalTables=tables.reduce((s,t2)=>s+t2.count,0);
+  const totalSeated=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
+  const totalItems=inventory.reduce((s,it)=>s+calcUsed(it.id),0);
+  const grandCost=inventory.reduce((s,it)=>s+calcUsed(it.id)*(prices[it.id]||0),0);
+  const grandRevenue=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
+  const grandProfit=grandRevenue-grandCost;
+  const statsHTML=`
+    <div class="summary-stat-grid">
+      <div class="summary-stat" style="--c1:#3d2b45;--c2:#5bbcb8">
+        <div class="ss-val">${totalTables}</div><div class="ss-label">שולחנות</div>
+      </div>
+      <div class="summary-stat" style="--c1:#e891bb;--c2:#d45e9b">
+        <div class="ss-val">${totalSeated||'—'}</div><div class="ss-label">מוזמנים</div>
+      </div>
+      <div class="summary-stat" style="--c1:#5bbcb8;--c2:#48a8a4">
+        <div class="ss-val">${inventory.length}</div><div class="ss-label">סוגי פריטים</div>
+      </div>
+      <div class="summary-stat" style="--c1:#7a6580;--c2:#3d2b45">
+        <div class="ss-val">${totalItems}</div><div class="ss-label">סה"כ פריטים</div>
+      </div>
+    </div>`;
+  const invBarsHTML=inventory.map(it=>{
+    const used=calcUsed(it.id), pct=it.qty>0?Math.min(100,(used/it.qty)*100):0;
+    const col=it.color||'#e891bb';
+    return `<div class="summary-inv-row">
+      <span style="font-size:18px;width:24px">${it.icon}</span>
+      <span style="font-size:13px;font-weight:600;min-width:80px">${esc(it.name)}</span>
+      <div class="summary-inv-bar" style="margin:0 10px">
+        <div class="summary-inv-bar-fill" style="width:${pct}%;background:${col}"></div>
+      </div>
+      <span style="font-size:12px;color:var(--mid);min-width:60px;text-align:left">${used} / ${it.qty}</span>
+    </div>`;
+  }).join('');
+  const costHTML=grandCost>0?`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <div style="background:var(--warm);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--mid);margin-bottom:4px">עלות לאירוע</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--charcoal)">₪${grandCost.toFixed(2)}</div>
+      </div>
+      ${grandRevenue>0?`<div style="background:#f1f8e9;border-radius:10px;padding:14px;text-align:center;border:1px solid #a5d6a7">
+        <div style="font-size:11px;color:#2e7d32;margin-bottom:4px">רווח צפוי</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:${grandProfit>=0?'#2e7d32':'#c62828'}">₪${grandProfit.toFixed(2)}</div>
+      </div>`:''}
+    </div>`:'<p style="font-size:13px;color:var(--mid)">הזן מחירים בלשונית "עלויות" לקבל סיכום כספי</p>';
+  const tableListHTML=tables.map(t2=>{
+    const meta=`${t2.count} שולחנות${t2.size?` × ${t2.size} איש`:''}`;
+    const itemsList=inventory.filter(it=>(t2.items[it.id]||0)>0).map(it=>`${it.icon} ${it.name}: ${t2.items[it.id]} × ${t2.count} = ${(t2.items[it.id]||0)*t2.count}`).join('<br>');
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:700;font-size:14px">${esc(t2.name)}</div>
+      <div style="font-size:11px;color:var(--mid);margin-bottom:4px">${meta}${t2.note?` · 📝 ${esc(t2.note)}`:''}</div>
+      <div style="font-size:12px;color:var(--charcoal);line-height:1.8">${itemsList||'<span style="color:var(--mid)">אין פריטים</span>'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('summary-body').innerHTML=`
+    <div class="summary-section">
+      <h3>🎯 נתוני האירוע</h3>
+      ${statsHTML}
+    </div>
+    ${inventory.length?`<div class="summary-section">
+      <h3>📦 ניצול מלאי</h3>
+      ${invBarsHTML}
+    </div>`:''}
+    <div class="summary-section">
+      <h3>💰 סיכום כספי</h3>
+      ${costHTML}
+    </div>
+    ${tables.length?`<div class="summary-section">
+      <h3>🪑 פירוט שולחנות</h3>
+      ${tableListHTML}
+    </div>`:''}
+  `;
+  document.getElementById('summary-screen').style.display='block';
+}
+function closeSummary(){document.getElementById('summary-screen').style.display='none';}
+// ══════════════════════════════════════════════════════
+// COUNTDOWN TIMER
+// ══════════════════════════════════════════════════════
+let countdownInterval=null;
+function startCountdown(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  const strip=document.getElementById('countdown-strip');
+  function update(){
+    if(!reminder.date||!reminder.time){strip.style.display='none';return;}
+    const eventTime=new Date(reminder.date+'T'+reminder.time);
+    const now=new Date();
+    const diff=eventTime-now;
+    const evName=reminder.name||(lang==='he'?'האירוע':'The event');
+    if(diff<=0){strip.style.display='block';strip.textContent=`📅 ${evName} — ${lang==='he'?'עכשיו!':'now!'}`;return;}
+    const days=Math.floor(diff/86400000);
+    const hrs=Math.floor((diff%86400000)/3600000);
+    const mins=Math.floor((diff%3600000)/60000);
+    let txt=`⏱️ ${evName} — `;
+    if(days>0) txt+=`${days} ${lang==='he'?'ימים':'days'}, `;
+    txt+=lang==='he'?`${hrs} שעות, ${mins} דקות`:`${hrs} hrs, ${mins} min`;
+    strip.textContent=txt;
+    strip.style.display='block';
+  }
+  update();
+  countdownInterval=setInterval(update,30000);
+}
+// ══════════════════════════════════════════════════════
+// SAVE PDF (download)
+// ══════════════════════════════════════════════════════
+function savePDF(){
+  // Use print to PDF — best cross-browser option for PWA
+  window.print();
+}
+// ══════════════════════════════════════════════════════
+// ADD SUMMARY TO SIDE MENU
+// ══════════════════════════════════════════════════════
+function openBudget(){
+  document.getElementById('budget-input').value=budgetTarget||'';
+  document.getElementById('budget-modal').classList.add('open');
+}
+function closeBudget(){document.getElementById('budget-modal').classList.remove('open');}
+function saveBudget(){
+  const val=String(document.getElementById('budget-input').value).replace(',','.');
+  budgetTarget=Math.max(0,parseFloat(val)||0);
+  save(); closeBudget(); updateCostTotalsOnly();
+}
+function checkBudget(cost){
+  const el=document.getElementById('budget-alert');
+  if(!budgetTarget||!cost){el.classList.remove('show','over');return;}
+  const ratio=cost/budgetTarget;
+  if(ratio>=1){
+    el.classList.add('show','over');
+    el.textContent=t('budgetOver').replace('{cost}',cost.toFixed(2)).replace('{budget}',budgetTarget.toFixed(2));
+  } else if(ratio>=0.85){
+    el.classList.add('show'); el.classList.remove('over');
+    el.textContent=t('budgetWarning').replace('{cost}',cost.toFixed(2)).replace('{budget}',budgetTarget.toFixed(2));
+  } else {el.classList.remove('show','over');}
+}
+// ══════════════════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════════════════
+function openChecklist(){
+  // init empty templates if needed
+  if(!checklists.general) checklists.general=[];
+  if(!checklists.wedding)  checklists.wedding=[];
+  if(!checklists.barMitzvah) checklists.barMitzvah=[];
+  document.getElementById('checklist-modal').classList.add('open');
+  renderTemplateTabs();
+  renderChecklist();
+}
+function closeChecklist(){document.getElementById('checklist-modal').classList.remove('open');}
+function renderTemplateTabs(){
+  const builtins=[
+    {key:'general',label:t('tmplGeneral')},
+    {key:'wedding',label:t('tmplWedding')},
+    {key:'barMitzvah',label:t('tmplBarMitzvah')},
+  ];
+  const custom=Object.keys(checklists).filter(k=>!['general','wedding','barMitzvah'].includes(k));
+  const all=[...builtins,...custom.map(k=>({key:k,label:k}))];
+  // data-key + dataset instead of inlining the key into a JS string — names with quotes (צ'קליסט) broke the onclick
+  document.getElementById('tmpl-tabs').innerHTML=all.map(({key,label})=>`
+    <div class="tmpl-tab ${activeTemplate===key?'active':''}" data-key="${esc(key)}" onclick="selectTemplate(this.dataset.key)">${esc(label)}</div>
+  `).join('');
+}
+function selectTemplate(key){
+  activeTemplate=key;
+  if(!checklists[key]) checklists[key]=[];
+  save(); renderTemplateTabs(); renderChecklist();
+}
+function renderChecklist(){
+  const items=checklists[activeTemplate]||[];
+  document.getElementById('checklist-list').innerHTML=items.map((item,i)=>`
+    <div class="checklist-item" style="${item.done?'opacity:0.6;text-decoration:line-through':''}">
+      <input type="checkbox" ${item.done?'checked':''} onchange="toggleCheck(${i})">
+      <span class="ci-text">${esc(item.text)}</span>
+      <button class="ci-del" onclick="deleteCheck(${i})">✕</button>
+    </div>`).join('');
+}
+function toggleCheck(i){
+  checklists[activeTemplate][i].done=!checklists[activeTemplate][i].done;
+  save(); renderChecklist();
+}
+function deleteCheck(i){
+  checklists[activeTemplate].splice(i,1);
+  save(); renderChecklist();
+}
+function addCheckItem(){
+  const inp=document.getElementById('new-check-item');
+  const text=inp.value.trim(); if(!text) return;
+  if(!checklists[activeTemplate]) checklists[activeTemplate]=[];
+  checklists[activeTemplate].push({text,done:false});
+  inp.value=''; save(); renderChecklist();
+  inp.focus();
+}
+async function saveNewTemplate(){
+  const name=await askPrompt(t('newTmplPrompt'));
+  if(!name) return;
+  const key=name;
+  checklists[key]=[...(checklists[activeTemplate]||[])];
+  activeTemplate=key; save(); renderTemplateTabs(); renderChecklist();
+}
+document.getElementById('new-check-item').addEventListener('keydown',e=>{if(e.key==='Enter')addCheckItem();});
+// ══════════════════════════════════════════════════════
+// REMINDER
+// ══════════════════════════════════════════════════════
+function openReminder(){
+  document.getElementById('reminder-name').value=reminder.name||'';
+  document.getElementById('reminder-date').value=reminder.date||'';
+  document.getElementById('reminder-time').value=reminder.time||'';
+  document.getElementById('reminder-status').textContent='';
+  document.getElementById('reminder-modal').classList.add('open');
+}
+function closeReminder(){document.getElementById('reminder-modal').classList.remove('open');}
+async function saveReminder(){
+  reminder.name=document.getElementById('reminder-name').value.trim();
+  reminder.date=document.getElementById('reminder-date').value;
+  reminder.time=document.getElementById('reminder-time').value;
+  save(); updateReminderBadge();
+  // request notification permission
+  if('Notification' in window){
+    const perm=await Notification.requestPermission();
+    if(perm==='granted'){
+      scheduleReminder();
+      document.getElementById('reminder-status').textContent=t('reminderSet');
+    } else {
+      document.getElementById('reminder-status').textContent=t('reminderPermDenied');
+    }
+  } else {
+    document.getElementById('reminder-status').textContent=t('reminderSet');
+  }
+}
+let _reminderTimer=null;
+const MAX_TIMEOUT=2147483647; // ~24.8 days — setTimeout limit; beyond it the timer fires immediately
+function scheduleReminder(){
+  if(_reminderTimer){clearTimeout(_reminderTimer);_reminderTimer=null;}
+  if(!reminder.date||!reminder.time) return;
+  // reminder day before at 9am
+  const eventDate=new Date(reminder.date+'T'+reminder.time);
+  const dayBefore=new Date(eventDate.getTime()-24*60*60*1000);
+  dayBefore.setHours(9,0,0,0);
+  const msUntil=dayBefore.getTime()-Date.now();
+  if(msUntil>0&&msUntil<=MAX_TIMEOUT){
+    _reminderTimer=setTimeout(showReminderNotification,msUntil);
+  }
+  // farther than 24.8 days: rescheduled automatically on each app open (init calls scheduleReminder)
+}
+function showReminderNotification(){
+  _reminderTimer=null;
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const title=lang==='he'?'תזכורת: אירוע מחר!':'Reminder: Event tomorrow!';
+  const opts={body:reminder.name||'',icon:'icon-192.png'};
+  // Android Chrome requires SW registration.showNotification(); new Notification() throws there
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(reg&&reg.showNotification) reg.showNotification(title,opts);
+      else try{new Notification(title,opts);}catch(e){}
+    }).catch(()=>{try{new Notification(title,opts);}catch(e){}});
+  } else {
+    try{new Notification(title,opts);}catch(e){}
+  }
+}
+function clearReminder(){
+  if(_reminderTimer){clearTimeout(_reminderTimer);_reminderTimer=null;}
+  reminder={};save();updateReminderBadge();
+  document.getElementById('reminder-name').value='';
+  document.getElementById('reminder-date').value='';
+  document.getElementById('reminder-time').value='';
+  document.getElementById('reminder-status').textContent='';
+  closeReminder();
+}
+// ══════════════════════════════════════════════════════
+// PDF / SHARE
+// ══════════════════════════════════════════════════════
+function buildReportHTML(){
+  const today=new Date().toLocaleDateString(lang==='he'?'he-IL':'en-US',{year:'numeric',month:'long',day:'numeric'});
+  const totalTables=tables.reduce((s,t2)=>s+t2.count,0);
+  const totalSeated=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
+  // Use sell price (customer-facing) in PDF
+  const invRows=inventory.map(it=>{
+    const used=calcUsed(it.id),rem=it.qty-used,sell=sellPrices[it.id]||0,cost=used*sell;
+    return `<tr><td>${it.icon} ${esc(it.name)}</td><td style="text-align:center">${it.qty}</td><td style="text-align:center">${used}</td><td style="text-align:center;color:${rem<0?'#e05050':'inherit'}">${rem}</td><td style="text-align:center">${sell?'₪'+sell:'-'}</td><td style="text-align:center">${sell?'₪'+cost.toFixed(2):'-'}</td></tr>`;
+  }).join('');
+  const invHeaders=inventory.map(it=>`<th>${it.icon} ${esc(it.name)}</th>`).join('');
+  const tableRows=tables.map(t2=>{
+    const meta=`${t2.count} ${lang==='he'?'שולחנות':'tables'}${t2.size?` × ${t2.size} ${lang==='he'?'איש':'seats'}`:''}`;
+    const itemCells=inventory.map(it=>`<td style="text-align:center">${t2.items[it.id]||0}</td>`).join('');
+    const totalCost=inventory.reduce((s,it)=>s+(t2.items[it.id]||0)*t2.count*(sellPrices[it.id]||0),0);
+    return `<tr><td><strong>${esc(t2.name)}</strong><br><span style="font-size:11px;color:#7a6580">${meta}</span>${t2.note?`<br><span style="font-size:10px;color:#5bbcb8">📝 ${esc(t2.note)}</span>`:''}</td>${itemCells}<td style="text-align:center;font-weight:700">${Object.values(sellPrices).some(p=>p>0)?'₪'+totalCost.toFixed(2):'-'}</td></tr>`;
+  }).join('');
+  const grandTotal=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
+  const hasSell=inventory.some(it=>(sellPrices[it.id]||0)>0);
+  return `<div class="print-doc" id="pdf-content">
+    <div class="pd-header">
+      <div class="pd-title">${t('reportTitle')}</div>
+      <div class="pd-date">${today} · ${totalTables} ${lang==='he'?'שולחנות':'tables'}${totalSeated?` · ${totalSeated} ${lang==='he'?'מוזמנים':'guests'}`:''}</div>
+      ${reminder.name?`<div style="font-size:12px;color:#5bbcb8;margin-top:4px">📅 ${esc(reminder.name)}${reminder.date?' · '+esc(reminder.date):''}</div>`:''}
+    </div>
+    ${inventory.length?`<div class="pd-section"><div class="pd-section-title">${t('invSummary')}</div>
+    <table><tr><th>${t('colItem')}</th><th>${t('colStock')}</th><th>${t('colUsed')}</th><th>${t('colLeft')}</th><th>${t('colPrice')}</th><th>${t('colCost')}</th></tr>${invRows}</table></div>`:''}
+    ${tables.length&&inventory.length?`<div class="pd-section"><div class="pd-section-title">${t('tableDetail')}</div>
+    <table><tr><th>${t('colTable')}</th>${invHeaders}<th>${t('colCost')}</th></tr>${tableRows}</table></div>`:''}
+    ${hasSell?`<div class="pd-grand-total"><div class="gt-label">${t('totalCost')}</div><div class="gt-amount">₪${grandTotal.toFixed(2)}</div></div>`:''}
+  </div>`;
+}
+function openPdfPreview(){
+  document.getElementById('pdf-body').innerHTML=buildReportHTML();
+  document.getElementById('pdf-preview').classList.add('open');
+}
+function closePdfPreview(){document.getElementById('pdf-preview').classList.remove('open');}
+function printDoc(){window.print();}
+function buildShareText(){
+  const summary=inventory.map(it=>t('itemRow').replace('{icon}',it.icon).replace('{name}',it.name).replace('{used}',calcUsed(it.id)).replace('{qty}',it.qty)).join('\n');
+  const grandTotal=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
+  return t('waText').replace('{summary}',summary).replace('{total}',grandTotal.toFixed(2));
+}
+function shareWA(){
+  const text=encodeURIComponent(buildShareText());
+  window.open(`https://wa.me/?text=${text}`,'_blank');
+}
+function shareMail(){
+  const subject=encodeURIComponent(t('reportTitle'));
+  const body=encodeURIComponent(buildShareText());
+  window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+// ══════════════════════════════════════════════════════
+// BACKUP / RESTORE (JSON export — share sheet covers WhatsApp/Gmail/Drive)
+// ══════════════════════════════════════════════════════
+function backupFileName(){
+  return `sidur-olam-backup-${new Date().toISOString().slice(0,10)}.json`;
+}
+function exportBackupJSON(){
+  // profitPin deliberately NOT exported — backups are shared, the PIN protects cost data
+  return JSON.stringify({
+    inventory,tables,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
+    activeTemplate,lang,exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
+  },null,2);
+}
+function downloadBackup(){
+  const json=exportBackupJSON();
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=backupFileName();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+async function shareBackup(){
+  const json=exportBackupJSON();
+  const filename=backupFileName();
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const file=new File([blob],filename,{type:'application/json'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:t('reportTitle')});
+      return;
+    }
+  }catch(e){
+    if(e&&e.name==='AbortError') return; // user cancelled the share sheet — don't force a download
+  }
+  downloadBackup();
+}
+// icons are injected into HTML unescaped (emoji) — strip any markup chars from imported values
+function sanitizeIcon(v){ return String(v==null?'':v).replace(/[<>&"'`]/g,'').slice(0,16)||'🌹'; }
+async function importBackupFile(inputEl){
+  const file=inputEl.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      // only accept real backup files — any other JSON would silently wipe the data
+      if(!d||typeof d!=='object'||Array.isArray(d)||d.format!=='sidur-olam-backup-v1') throw new Error('bad format');
+      const ok=await askConfirm(t('importConfirm'));
+      if(!ok){ inputEl.value=''; return; }
+      inventory=(Array.isArray(d.inventory)?d.inventory:[]).map((it,idx)=>({
+        id:parseInt(it.id)||0,
+        icon:sanitizeIcon(it.icon),
+        name:String(it.name==null?'':it.name),
+        qty:Math.max(0,parseInt(it.qty)||0),
+        color:/^#[0-9a-fA-F]{3,8}$/.test(String(it.color||''))?it.color:COLORS[idx%COLORS.length]
+      }));
+      tables=(Array.isArray(d.tables)?d.tables:[]).map(t2=>({
+        id:parseInt(t2.id)||0,
+        name:String(t2.name==null?'':t2.name),
+        count:Math.max(1,parseInt(t2.count)||1),
+        size:parseInt(t2.size)||null,
+        note:String(t2.note==null?'':t2.note),
+        items:(t2.items&&typeof t2.items==='object'&&!Array.isArray(t2.items))?t2.items:{}
+      }));
+      prices=(d.prices&&typeof d.prices==='object')?d.prices:{};
+      sellPrices=(d.sellPrices&&typeof d.sellPrices==='object')?d.sellPrices:{};
+      nextId=Math.max(1,parseInt(d.nextId)||1,...inventory.map(i=>i.id+1),...tables.map(x=>x.id+1));
+      budgetTarget=Math.max(0,parseFloat(d.budgetTarget)||0);
+      reminder=(d.reminder&&typeof d.reminder==='object')?d.reminder:{};
+      checklists=(d.checklists&&typeof d.checklists==='object')?d.checklists:{};
+      activeTemplate=typeof d.activeTemplate==='string'?d.activeTemplate:'general';
+      if(typeof d.profitPin==='string'&&d.profitPin) profitPin=d.profitPin; // old backups only; new exports omit it
+      profitUnlockedThisSession=false;
+      setLang(d.lang==='en'?'en':'he'); // updates dir + lang buttons + translations + save
+      renderAll(); updateReminderBadge(); startCountdown(); scheduleReminder();
+    }catch(err){
+      alert(t('importInvalid'));
+    }
+    inputEl.value='';
+  };
+  reader.readAsText(file);
+}
+// ══════════════════════════════════════════════════════
+// GENERIC CONFIRM / PROMPT MODALS (replace native confirm()/prompt())
+// ══════════════════════════════════════════════════════
+let _confirmResolve=null, _promptResolve=null;
+function askConfirm(text){
+  return new Promise(resolve=>{
+    _confirmResolve=resolve;
+    document.getElementById('confirm-modal-text').textContent=text;
+    document.getElementById('confirm-modal').classList.add('open');
+  });
+}
+function closeConfirmModal(result){
+  document.getElementById('confirm-modal').classList.remove('open');
+  const cb=_confirmResolve; _confirmResolve=null;
+  if(cb) cb(result);
+}
+function askPrompt(title){
+  return new Promise(resolve=>{
+    _promptResolve=resolve;
+    document.getElementById('prompt-modal-title').textContent=title;
+    const inp=document.getElementById('prompt-modal-input');
+    inp.value='';
+    document.getElementById('prompt-modal').classList.add('open');
+    setTimeout(()=>inp.focus(),50);
+  });
+}
+function closePromptModal(shouldSave){
+  const val=document.getElementById('prompt-modal-input').value.trim();
+  document.getElementById('prompt-modal').classList.remove('open');
+  const cb=_promptResolve; _promptResolve=null;
+  if(cb) cb(shouldSave&&val?val:null);
+}
+document.getElementById('prompt-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')closePromptModal(true);});
+// ══════════════════════════════════════════════════════
+// PROFIT TAB PIN LOCK (client-side deterrent only — not real security)
+// ══════════════════════════════════════════════════════
+let profitPin=null, profitUnlockedThisSession=false, _pinCallback=null;
+function openPinModal(onSuccess){
+  _pinCallback=onSuccess;
+  document.getElementById('pin-modal-input').value='';
+  document.getElementById('pin-modal-error').textContent='';
+  document.getElementById('pin-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pin-modal-input').focus(),50);
+}
+function closePinModal(){
+  document.getElementById('pin-modal').classList.remove('open');
+  _pinCallback=null;
+}
+function submitPin(){
+  const val=document.getElementById('pin-modal-input').value.trim();
+  if(val===profitPin){
+    document.getElementById('pin-modal').classList.remove('open');
+    profitUnlockedThisSession=true;
+    const cb=_pinCallback; _pinCallback=null;
+    if(cb) cb();
+  } else {
+    document.getElementById('pin-modal-error').textContent=t('pinWrong');
+  }
+}
+document.getElementById('pin-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitPin();});
+function openPinSettings(){
+  document.getElementById('pin-settings-input').value=profitPin||'';
+  document.getElementById('pin-settings-hint').textContent=t('pinSettingsHint');
+  document.getElementById('pin-settings-modal').classList.add('open');
+}
+function closePinSettings(){document.getElementById('pin-settings-modal').classList.remove('open');}
+function savePinSetting(){
+  const val=document.getElementById('pin-settings-input').value.trim();
+  profitPin=val?val:null;
+  profitUnlockedThisSession=false;
+  save(); closePinSettings();
+}
+function removePinSetting(){
+  profitPin=null; profitUnlockedThisSession=false; save(); closePinSettings();
+}
+// ══════════════════════════════════════════════════════
+// RESET / NEW EVENT / HELPERS
+// ══════════════════════════════════════════════════════
+async function resetAll(){
+  const ok=await askConfirm(t('resetConfirm'));
+  if(!ok) return;
+  inventory=[]; tables=[]; prices={}; sellPrices={}; nextId=1; budgetTarget=0;
+  save(); renderAll();
+}
+async function newEvent(){
+  const ok=await askConfirm(t('newEventConfirm'));
+  if(!ok) return;
+  tables=[];
+  inventory.forEach(it=>it.qty=0);
+  budgetTarget=0;
+  reminder={};
+  save(); renderAll(); updateReminderBadge();
+  const strip=document.getElementById('countdown-strip');
+  if(strip) strip.style.display='none';
+}
+function renderAll(){renderInvList();renderStockBar();renderTables();recalc();if(currentTab==='costs')renderCosts();if(currentTab==='profit')renderProfit();}
+function flash(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.borderColor='#e05050';
+  setTimeout(()=>el.style.borderColor='',1200);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ══════════════════════════════════════════════════════
+// ENTER SHORTCUTS
+// ══════════════════════════════════════════════════════
+['new-name','new-count','new-size','new-note'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('keydown',e=>{if(e.key==='Enter')addTable();});
+});
+['new-inv-name','new-inv-qty'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('keydown',e=>{if(e.key==='Enter')addInvItem();});
+});
+// ══════════════════════════════════════════════════════
+// ESCAPE KEY — close whichever modal is open
+// ══════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  if(document.getElementById('pdf-preview').classList.contains('open')){closePdfPreview();return;}
+  if(document.getElementById('summary-screen').style.display==='block'){closeSummary();return;}
+  const openModal=document.querySelector('.modal-overlay.open');
+  if(openModal){
+    const closers={
+      'confirm-modal':()=>closeConfirmModal(false),
+      'prompt-modal':()=>closePromptModal(false),
+      'pin-modal':closePinModal,
+      'pin-settings-modal':closePinSettings,
+      'checklist-modal':closeChecklist,
+      'reminder-modal':closeReminder,
+      'budget-modal':closeBudget
+    };
+    (closers[openModal.id]||(()=>openModal.classList.remove('open')))();
+    return;
+  }
+  if(document.getElementById('side-menu').classList.contains('open')) closeSideMenu();
+});
+// ══════════════════════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════════════════════
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+load();
+applyTranslations();
+renderPresets();
+startCountdown();
+const onboarded=localStorage.getItem('sidur-v3-onboarded');
+if(onboarded){
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('home-screen').style.display='flex';
+} else {
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('onboarding').style.display='flex';
+}
+scheduleReminder();
+</script>
+</body>
+</html>
