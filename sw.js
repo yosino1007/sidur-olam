@@ -1,4 +1,4 @@
-const CACHE = 'sidur-olam-v12';
+const CACHE = 'sidur-olam-v14';
 const ASSETS = ['./index.html', './manifest.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -10,6 +10,8 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // never intercept cross-origin requests (Firebase/Google auth scripts and APIs)
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   const isNavigation = e.request.mode === 'navigate' || e.request.url.includes('index.html');
   if (isNavigation) {
     // network-first for the app shell — otherwise users never receive new deploys

@@ -168,7 +168,11 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 .cost-card .cc-name{font-size:14px;font-weight:700;flex:1}
 .cost-card .cc-price-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .cost-card label{font-size:11px;color:var(--mid);font-weight:600}
-.cost-card input.price-input{flex:1;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;background:var(--warm);text-align:center}
+.cost-card .cc-inputs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px}
+.cost-card .cc-inputs>div{min-width:0}
+.cost-card .cc-result .cr-cost{font-size:12px;color:var(--charcoal);margin-top:4px;font-weight:600}
+.cost-card .cc-result .cr-profit{font-size:13px;margin-top:3px;font-weight:700}
+.cost-card input.price-input{flex:1;min-width:0;width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;background:var(--warm);text-align:center}
 .cost-card input.price-input:focus{outline:none;border-color:var(--teal);background:#fff}
 .cost-card .cc-result{background:linear-gradient(135deg,#fce8f322,#a8e6e422);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-top:8px;text-align:center}
 .cost-card .cc-result .cr-total{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal)}
@@ -263,7 +267,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 .profit-card .pc-stat.red strong{color:#c62828}
 .profit-card .pc-stat span{font-size:10px;color:var(--mid)}
 /* ══ SUMMARY SCREEN ══ */
-#summary-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
+#summary-screen,#clients-screen,#archive-screen,#shopping-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
 .summary-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(16px + var(--safe-top)) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
 .summary-header h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;flex:1}
 .summary-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
@@ -340,6 +344,12 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   <div class="home-logo">🌹</div>
   <div class="home-title" id="hs-title">סידור אולם</div>
   <div class="home-sub" id="hs-sub">פרחים · נרות · קישוטים</div>
+  <div id="home-account" onclick="homeAccountClick()" style="display:none;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;margin:0 16px 14px;font-size:13px;font-weight:600;color:var(--charcoal);box-shadow:0 2px 9px var(--shadow)"></div>
+  <div id="backup-banner" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;background:#fff3cd;border:1.5px solid #ffc107;border-radius:12px;padding:10px 14px;margin:0 16px 14px;font-size:13px;color:#856404;font-weight:600">
+    <span>💾 <span id="backup-banner-text"></span></span>
+    <button onclick="shareBackup()" id="backup-now-btn" style="background:#5bbcb8;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-family:'Heebo',sans-serif;font-weight:700;cursor:pointer">גבה עכשיו</button>
+    <button onclick="snoozeBackup()" id="backup-later-btn" style="background:none;border:1px solid #ffc107;color:#856404;border-radius:8px;padding:6px 12px;font-family:'Heebo',sans-serif;cursor:pointer">אחר כך</button>
+  </div>
   <div class="home-cards">
     <div class="home-card" onclick="openMode('planner')">
       <div class="hc-icon">🪑</div>
@@ -425,7 +435,58 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       <div class="sm-item-desc" id="sm-pin-desc">קוד גישה לטאב הרווח בלבד</div>
     </div>
   </div>
+  <div class="sm-item" onclick="closeSideMenu();openShoppingScreen()">
+    <div class="sm-item-icon">🛒</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-shopping-title">רשימת קניות</div>
+      <div class="sm-item-desc" id="sm-shopping-desc">מה חסר לקנות לאירוע הזה</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openQuote()">
+    <div class="sm-item-icon">🧾</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-quote-title">הצעת מחיר ללקוח</div>
+      <div class="sm-item-desc" id="sm-quote-desc">PDF עם מחירי לקוח, מקדמה ויתרה — בלי נתוני רווח</div>
+    </div>
+  </div>
+  <div class="sm-section" id="sm-s-clients">לקוחות וארכיון</div>
+  <div class="sm-item" onclick="closeSideMenu();openClientPayment()">
+    <div class="sm-item-icon">💳</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-clientpayment-title">לקוח ותשלום</div>
+      <div class="sm-item-desc" id="sm-clientpayment-desc">צרף לקוח, מקדמה ותאריך תשלום לאירוע הנוכחי</div>
+    </div>
+    <div class="sm-item-badge" id="clientpay-badge" style="display:none">⚠️</div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openClientsScreen()">
+    <div class="sm-item-icon">👤</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-allclients-title">כל הלקוחות</div>
+      <div class="sm-item-desc" id="sm-allclients-desc">ניהול רשימת הלקוחות</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();saveEventToArchive()">
+    <div class="sm-item-icon">🗄️</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-savearchive-title">שמור אירוע לארכיון</div>
+      <div class="sm-item-desc" id="sm-savearchive-desc">שומר עותק של האירוע הנוכחי — לא מוחק כלום</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openArchiveScreen()">
+    <div class="sm-item-icon">📚</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-archive-title">ארכיון אירועים</div>
+      <div class="sm-item-desc" id="sm-archive-desc">אירועים שנשמרו לצפייה או שכפול</div>
+    </div>
+  </div>
   <div class="sm-section" id="sm-s-backup">גיבוי ושחזור</div>
+  <div class="sm-item" onclick="closeSideMenu();openAccount()">
+    <div class="sm-item-icon">☁️</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-account-title">חשבון וסנכרון</div>
+      <div class="sm-item-desc" id="sm-account-desc">התחברות עם Google ושמירת הנתונים בענן</div>
+    </div>
+  </div>
   <div class="sm-item" onclick="closeSideMenu();shareBackup()">
     <div class="sm-item-icon">📤</div>
     <div class="sm-item-text">
@@ -473,7 +534,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       </div>
     </div>
     <div class="mode-tabs">
-      <div class="mode-tab active" id="tab-planner" onclick="switchTab('planner')">🪑 שולחנות</div>
+      <div class="mode-tab active" id="tab-planner" onclick="switchTab('planner')">📍 עמדות אירוע</div>
       <div class="mode-tab" id="tab-costs" onclick="switchTab('costs')">💰 עלויות</div>
       <div class="mode-tab" id="tab-profit" onclick="switchTab('profit')">📈 רווח</div>
     </div>
@@ -523,6 +584,18 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
           <button class="btn-pink" onclick="addTable()" id="btn-add-table">+ הוסף שולחן</button>
         </div>
       </div>
+      <div>
+        <div class="section-title">💐 <span id="add-station-title">הוסף פריט מיוחד</span></div>
+        <div class="preset-bar" id="station-preset-bar"></div>
+        <!-- CUSTOM ADD ROW (shown when "אחר" selected) -->
+        <div class="preset-custom" id="station-custom-add-row">
+          <div class="add-row">
+            <span class="emoji-pick" id="station-chosen-emoji">✨</span>
+            <input type="text" id="new-station-name" style="flex:2;min-width:60px">
+            <button class="btn-teal" onclick="addStationCustom()" id="btn-add-station">+ הוסף</button>
+          </div>
+        </div>
+      </div>
     </aside>
     <main class="main-panel" id="planner-main">
       <div class="stock-bar" id="stock-bar">
@@ -536,6 +609,13 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       <div class="tables-grid" id="tables-grid">
         <div class="empty-state"><div class="ei">🪑</div><p id="tables-empty-msg">הוסף שולחנות מהתפריט</p></div>
       </div>
+      <div class="section-header" style="margin-top:20px">
+        <h2 id="stations-section-title">💐 פריטים מיוחדים</h2>
+        <span id="stations-count" style="font-size:11px;color:var(--mid)"></span>
+      </div>
+      <div class="tables-grid" id="stations-grid">
+        <div class="empty-state"><div class="ei">💐</div><p id="stations-empty-msg">רכב, חופה, זר כלה ועוד — הוסף מהתפריט</p></div>
+      </div>
     </main>
   </div>
   <!-- COSTS -->
@@ -543,7 +623,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     <aside class="sidebar" id="costs-sidebar">
       <div>
         <div class="section-title">💰 <span id="price-section-title">מחיר לפריט</span></div>
-        <div id="cost-inv-list"><p style="font-size:12px;color:var(--mid)" id="cost-inv-empty">הוסף פריטי מלאי בלשונית "שולחנות" תחילה</p></div>
+        <div id="cost-inv-list"><p style="font-size:12px;color:var(--mid)" id="cost-inv-empty">הוסף פריטי מלאי בלשונית "עמדות אירוע" תחילה</p></div>
       </div>
       <div style="background:var(--warm);border-radius:11px;padding:12px;border:1px solid var(--border);font-size:12px;color:var(--mid);line-height:1.6">
         💡 <span id="cost-tip">הזן מחיר לכל פריט. המחשבון מחשב: כמות × שולחנות × מחיר.</span>
@@ -569,7 +649,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     <aside class="sidebar" id="profit-sidebar">
       <div>
         <div class="section-title">📈 <span id="profit-subtitle">עלות vs מחיר מכירה</span></div>
-        <div id="profit-inv-list"><p style="font-size:12px;color:var(--mid)" id="profit-inv-empty-static">הוסף פריטי מלאי בלשונית "שולחנות" תחילה</p></div>
+        <div id="profit-inv-list"><p style="font-size:12px;color:var(--mid)" id="profit-inv-empty-static">הוסף פריטי מלאי בלשונית "עמדות אירוע" תחילה</p></div>
       </div>
       <div style="background:#e8f5e9;border-radius:11px;padding:12px;border:1px solid #a5d6a7;font-size:12px;color:#2e7d32;line-height:1.6" id="profit-secret-note">
         🔒 <strong>סודי:</strong> הרווח לא מופיע בדוח ללקוח
@@ -590,7 +670,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav" id="bottom-nav">
     <button class="nav-btn active" id="nav-main" onclick="mobileShowMain()">
-      <span class="nav-icon" id="nav-main-icon">🪑</span><span id="nav-main-lbl">שולחנות</span>
+      <span class="nav-icon" id="nav-main-icon">📍</span><span id="nav-main-lbl">עמדות</span>
     </button>
     <button class="nav-btn" id="nav-side" onclick="mobileShowSide()">
       <span class="nav-icon">📦</span><span id="nav-inv-lbl">מלאי</span>
@@ -608,6 +688,32 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     <button class="ah-btn" onclick="openPdfPreview()" style="font-size:12px">📄 PDF</button>
   </div>
   <div class="summary-body" id="summary-body"></div>
+</div>
+<!-- ══════ CLIENTS SCREEN ══════ -->
+<div id="clients-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeClientsScreen()">←</button>
+    <h2 id="clients-screen-title">👤 כל הלקוחות</h2>
+    <button class="ah-btn" onclick="addClient()" style="font-size:12px" id="clients-add-btn">+ הוסף לקוח</button>
+  </div>
+  <div class="summary-body" id="clients-body"></div>
+</div>
+<!-- ══════ ARCHIVE SCREEN ══════ -->
+<div id="archive-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeArchiveScreen()">←</button>
+    <h2 id="archive-screen-title">🗄️ ארכיון אירועים</h2>
+  </div>
+  <div class="summary-body" id="archive-body"></div>
+</div>
+<!-- ══════ SHOPPING SCREEN ══════ -->
+<div id="shopping-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeShoppingScreen()">←</button>
+    <h2 id="shopping-screen-title">🛒 רשימת קניות</h2>
+    <button class="ah-btn" onclick="shareShopping()" style="font-size:12px" id="shopping-share-btn">📤 שתף רשימה</button>
+  </div>
+  <div class="summary-body" id="shopping-body"></div>
 </div>
 <!-- ══════ PDF MODAL ══════ -->
 <div id="pdf-preview">
@@ -695,6 +801,62 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     </div>
   </div>
 </div>
+<!-- ══════ CLIENT & PAYMENT MODAL ══════ -->
+<div class="modal-overlay" id="clientpay-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="cp-modal-title">💳 לקוח ותשלום</h3>
+      <button class="modal-close" onclick="closeClientPayment()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="margin-bottom:12px">
+        <label id="lbl-cp-client">לקוח</label>
+        <select id="cp-client-select" onchange="onClientSelectChange()" style="padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px;background:#fff"></select>
+      </div>
+      <div class="fg" id="cp-new-client-row" style="display:none;margin-bottom:12px;gap:8px">
+        <label id="lbl-cp-newname">שם הלקוח</label>
+        <input type="text" id="cp-new-name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px;margin-bottom:8px">
+        <label id="lbl-cp-newphone">טלפון</label>
+        <input type="tel" id="cp-new-phone" placeholder="050-0000000" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+      </div>
+      <div class="fg" style="margin-bottom:12px">
+        <label id="lbl-cp-deposit">מקדמה (₪)</label>
+        <input type="text" inputmode="decimal" id="cp-deposit" placeholder="0" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <input type="checkbox" id="cp-deposit-paid" style="width:18px;height:18px">
+        <label for="cp-deposit-paid" id="lbl-cp-depositpaid" style="font-size:13px">המקדמה שולמה</label>
+      </div>
+      <div class="fg" style="margin-bottom:16px">
+        <label id="lbl-cp-duedate">תאריך יעד ליתרה</label>
+        <input type="date" id="cp-duedate" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px">
+      </div>
+      <div style="background:var(--warm);border-radius:10px;padding:12px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span id="lbl-cp-grandtotal">סה"כ לאירוע</span><strong id="cp-grand-total">₪0</strong></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span id="lbl-cp-balance">יתרה לתשלום</span><strong id="cp-balance">₪0</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="saveClientPayment()" id="btn-save-cp">שמור</button>
+        <button class="btn-cancel" onclick="closeClientPayment()" id="btn-cancel-cp">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ ACCOUNT & SYNC MODAL ══════ -->
+<div class="modal-overlay" id="account-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="acc-modal-title">☁️ חשבון וסנכרון</h3>
+      <button class="modal-close" onclick="closeAccount()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="acc-status" style="font-size:14px;line-height:1.6;text-align:center;margin-bottom:6px"></p>
+      <p id="acc-lastsync" style="font-size:12px;color:var(--mid);text-align:center;margin-bottom:10px"></p>
+      <div class="modal-actions" id="acc-actions"></div>
+      <p id="acc-privacy" style="font-size:11px;color:var(--mid);text-align:center;margin-top:12px"></p>
+    </div>
+  </div>
+</div>
 <!-- ══════ GENERIC CONFIRM MODAL ══════ -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal-box">
@@ -766,9 +928,11 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
-let inventory=[], tables=[], prices={}, sellPrices={}, nextId=1;
+let inventory=[], tables=[], stations=[], prices={}, sellPrices={}, nextId=1;
 let pickerFor=null, currentTab='planner', lang='he';
 let budgetTarget=0, reminder={}, checklists={}, activeTemplate='general';
+let clients=[], archivedEvents=[], activeClientId=null;
+let payment={deposit:0,depositPaid:false,dueDate:''};
 const COLORS=['#e891bb','#5bbcb8','#f4a7c8','#7dd4d1','#d4a0e8','#8ed4b8','#f0b8d8','#6bc8c5'];
 // ══════════════════════════════════════════════════════
 // TRANSLATIONS
@@ -785,13 +949,13 @@ const T = {
     hcCostTitle:'חישוב עלויות', hcCostDesc:'הזן מחיר לפריט וקבל עלות כוללת לכל האירוע',
     hcSetTitle:'הגדרות וכלים', hcSetDesc:'תזכורות, צ׳קליסט, שפה ועוד',
     planTitle:'🌹 סידור אירוע', costTitle:'💰 חישוב עלויות',
-    tabPlan:'🪑 שולחנות', tabCost:'💰 עלויות',
+    tabPlan:'📍 עמדות אירוע', tabCost:'💰 עלויות',
     invSection:'מלאי לאירוע', addTableTitle:'הוסף שולחן',
     invEmpty:'עוד לא הוספת פריטים', stockEmpty:'הוסף פריטי מלאי מהתפריט',
     tablesSection:'שולחנות האולם', tablesEmpty:'הוסף שולחנות מהתפריט',
     lblTname:'שם השולחן', lblTcount:'כמות שולחנות', lblTsize:'מקומות', lblTnote:'הערה (אופציונלי)',
     btnAddInv:'+ הוסף', btnAddTable:'+ הוסף שולחן',
-    priceSection:'מחיר לפריט', costInvEmpty:'הוסף פריטי מלאי בלשונית "שולחנות" תחילה',
+    priceSection:'מחיר לפריט', costInvEmpty:'הוסף פריטי מלאי בלשונית "עמדות אירוע" תחילה',
     costTip:'הזן עלות שלך ומחיר ללקוח לכל פריט. "עלות כוללת לאירוע" מחושבת לפי מחיר ללקוח: כמות × שולחנות × מחיר.',
     tbLabel:'עלות כוללת לאירוע', grandSubEmpty:'הזן מחירים בתפריט הימני',
     costDetailTitle:'פירוט לפי פריט', costEmpty:'הוסף פריטי מלאי וזן מחירים',
@@ -803,13 +967,19 @@ const T = {
     smBudgetTitle:'יעד תקציב', smBudgetDesc:'הגדר תקציב מקסימלי לאירוע',
     smResetTitle:'איפוס הכל', smResetDesc:'מחק את כל הנתונים',
     reminderBadge:'פעיל',
-    navTables:'שולחנות', navInv:'מלאי', navMenu:'תפריט',
+    navTables:'עמדות', navInv:'מלאי', navMenu:'תפריט',
     presets:[
       {icon:'🌹',name:'ורדים'},{icon:'🌸',name:'פרחים'},{icon:'🕯️',name:'נרות'},
       {icon:'🏺',name:'אגרטל'},{icon:'🌿',name:'ירק'},{icon:'🎀',name:'סרטים'},
       {icon:'✨',name:'נצנצים'},{icon:'🪴',name:'עציץ'},{icon:'➕',name:'אחר...'}
     ],
     customPlaceholder:'שם פריט',customQtyPlaceholder:'כמות',
+    addStationTitle:'הוסף פריט מיוחד', stationNamePlaceholder:'שם הפריט',
+    stationsSection:'💐 פריטים מיוחדים', stationsEmpty:'רכב, חופה, זר כלה ועוד — הוסף מהתפריט',
+    deleteStationConfirm:'למחוק את "{name}"?',
+    stationPresets:[
+      {icon:'🚗',name:'רכב'},{icon:'💒',name:'חופה'},{icon:'💐',name:'זר כלה'},{icon:'➕',name:'אחר...'}
+    ],
     clModalTitle:'✅ צ׳קליסט הכנה',
     tmplGeneral:'כללי', tmplWedding:'חתונה', tmplBarMitzvah:'בר מצווה',
     btnAddCheck:'+ הוסף', btnSaveTmpl:'💾 שמור כתבנית חדשה', btnClClose:'סגור',
@@ -825,11 +995,11 @@ const T = {
     btnSaveBudget:'שמור', btnCancelBudget:'ביטול',
     budgetWarning:'⚠️ מתקרב לתקציב! עלות: ₪{cost} מתוך ₪{budget}',
     budgetOver:'🚨 חרגת מהתקציב! עלות: ₪{cost} מתוך ₪{budget}',
-    resetConfirm:'לאפס הכל? המלאי, השולחנות והמחירים יימחקו.',
+    resetConfirm:'לאפס הכל? המלאי, השולחנות, הפריטים המיוחדים והמחירים יימחקו. הלקוח והתשלום לאירוע הנוכחי יאופסו. רשימת הלקוחות והארכיון יישמרו.',
     reportTitle:'🌹 דוח סידור אירוע',
-    invSummary:'📦 סיכום מלאי', tableDetail:'🪑 פירוט שולחנות',
+    invSummary:'📦 סיכום מלאי', tableDetail:'🪑 פירוט שולחנות', stationDetail:'💐 פירוט פריטים מיוחדים',
     colItem:'פריט', colStock:'במלאי', colUsed:'בשימוש', colLeft:'נותר', colPrice:'מחיר', colCost:'עלות',
-    colTable:'שולחן', colTotal:'סה"כ',
+    colTable:'שולחן', colStation:'פריט', colCount:'כמות', colTotal:'סה"כ',
     totalCost:'עלות כוללת לאירוע',
     tablesMeta:'{count} שולחנות', tablesSeat:'× {size} איש',
     perTable:'כמות לכל שולחן:',
@@ -849,7 +1019,7 @@ const T = {
     revenueCostMarginLine:'הכנסות: ₪{rev} · עלויות: ₪{cost} · מרווח: {margin}%',
     myCostPcLabel:'💸 עלות שלי (₪)', customerPricePcLabel:'💰 מחיר ללקוח (₪)',
     smNewEventTitle:'התחלת אירוע חדש', smNewEventDesc:'שומר קטלוג פריטים ומחירים, מאפס שולחנות ומלאי',
-    newEventConfirm:'להתחיל אירוע חדש? השולחנות, כמויות המלאי, התקציב והתזכורת יימחקו — שמות הפריטים והמחירים יישארו.',
+    newEventConfirm:'להתחיל אירוע חדש? השולחנות, הפריטים המיוחדים, כמויות המלאי, התקציב, התזכורת והתשלום יימחקו — שמות הפריטים, המחירים ורשימת הלקוחות יישארו. שקול לשמור לארכיון קודם.',
     smPinTitle:'נעילת טאב רווח', smPinDesc:'קוד גישה לטאב הרווח בלבד',
     pinModalTitle:'🔒 קוד גישה', pinWrong:'קוד שגוי',
     pinSettingsHint:'קוד בן 4 ספרות שיידרש לפני כניסה לטאב הרווח. שים לב: זו הגנה בסיסית בצד לקוח בלבד ולא אבטחה אמיתית — אין לשתף את קישור האפליקציה עצמו עם לקוחות.',
@@ -861,6 +1031,43 @@ const T = {
     deleteTableConfirm:'למחוק את "{name}"? הכמויות שלו יימחקו.',
     deleteItemConfirm:'למחוק את "{name}" מהמלאי ומכל השולחנות?',
     saveFailed:'⚠️ שמירת הנתונים נכשלה — ייתכן שהאחסון מלא או שאתה בגלישה פרטית',
+    smClientsSection:'לקוחות וארכיון',
+    smClientPayment:'לקוח ותשלום', smClientPaymentDesc:'צרף לקוח, מקדמה ותאריך תשלום לאירוע הנוכחי',
+    smAllClients:'כל הלקוחות', smAllClientsDesc:'ניהול רשימת הלקוחות',
+    smArchive:'ארכיון אירועים', smArchiveDesc:'אירועים שנשמרו לצפייה או שכפול',
+    smSaveArchive:'שמור אירוע לארכיון', smSaveArchiveDesc:'שומר עותק של האירוע הנוכחי — לא מוחק כלום',
+    cpModalTitle:'💳 לקוח ותשלום', lblClient:'לקוח', noClient:'ללא לקוח',
+    newClientOpt:'➕ לקוח חדש', lblClientName:'שם הלקוח', lblClientPhone:'טלפון',
+    lblDeposit:'מקדמה (₪)', lblDepositPaid:'המקדמה שולמה', lblDueDate:'תאריך יעד ליתרה',
+    grandTotalLabel:'סה"כ לאירוע', balanceLabel:'יתרה לתשלום', balanceOverdue:'⚠️ יתרה באיחור',
+    btnSaveClientPayment:'שמור', clientsModalTitle:'👤 כל הלקוחות',
+    addClientBtn:'+ הוסף לקוח', clientNoPhone:'ללא טלפון', clientEventsCount:'{count} אירועים בארכיון',
+    clientsEmpty:'עוד אין לקוחות. הוסיפו לקוח ראשון.',
+    deleteClientConfirm:'למחוק את "{name}"? האירועים שלו בארכיון יישארו, אבל בלי שיוך ללקוח.',
+    archiveModalTitle:'🗄️ ארכיון אירועים', archiveEmpty:'עוד אין אירועים שמורים בארכיון',
+    archiveSaveConfirm:'לשמור עותק של האירוע הנוכחי לארכיון?', archiveSaved:'✅ האירוע נשמר לארכיון',
+    archiveEventNamePrompt:'שם לאירוע שנשמר:', archiveDuplicateConfirm:'לשכפל את "{name}"? השולחנות, הפריטים המיוחדים והמלאי הנוכחיים יוחלפו בעותק מהארכיון.',
+    deleteArchiveConfirm:'למחוק את "{name}" מהארכיון לצמיתות?',
+    btnDuplicateArchive:'📋 שכפל כתבנית', btnViewArchive:'צפייה', btnCloseArchiveView:'סגור',
+    archiveNoClient:'ללא לקוח', archiveSavedAt:'נשמר',
+    netProfitLabel:'רווח נטו',
+    smShopping:'רשימת קניות', smShoppingDesc:'מה חסר לקנות לאירוע הזה',
+    shoppingTitle:'🛒 רשימת קניות', shoppingEmpty:'אין מה לקנות — כל הכמויות הנדרשות קיימות במלאי',
+    shoppingNeed:'לקנות', shoppingTotalEst:'עלות משוערת (לפי העלות שלי)', shoppingShare:'📤 שתף רשימה',
+    smQuote:'הצעת מחיר ללקוח', smQuoteDesc:'PDF עם מחירי לקוח, מקדמה ויתרה — בלי נתוני רווח',
+    quoteTitle:'הצעת מחיר', quoteClient:'לקוח', quotePhone:'טלפון', quoteEvent:'אירוע',
+    quoteColQty:'כמות', quoteColUnit:'מחיר ליחידה', quoteColTotal:'סה"כ',
+    quoteTotal:'סה"כ לתשלום', quoteDeposit:'מקדמה', quoteDepositPaidTag:'(שולמה)',
+    quoteBalance:'יתרה לתשלום', quoteDueDate:'תאריך יעד לתשלום היתרה',
+    backupReminderText:'לא גיבית את הנתונים כבר {days} ימים', backupNow:'גבה עכשיו', backupLater:'אחר כך',
+    smAccount:'חשבון וסנכרון', smAccountDesc:'התחברות עם Google ושמירת הנתונים בענן',
+    accModalTitle:'☁️ חשבון וסנכרון', accNotConfigured:'הסנכרון לענן עדיין לא הוגדר באפליקציה.',
+    accSignedOut:'לא מחובר. הנתונים נשמרים רק במכשיר הזה.', accSignIn:'התחבר עם Google',
+    accSignedInAs:'מחובר כ-{email}', accSignOut:'התנתק', accSyncNow:'סנכרן עכשיו',
+    accLastSync:'סנכרון אחרון: {time}', accSyncing:'מסנכרן…', accError:'⚠️ הסנכרון נכשל. הנתונים נשארו במכשיר ויסונכרנו בהזדמנות הבאה.',
+    accPrivacy:'הנתונים נשמרים בחשבון שלך בלבד. כל משתמש רואה רק את הנתונים של עצמו.',
+    homeSignInHint:'שמירת הנתונים בענן',
+    cloudConflictConfirm:'כבר יש נתונים בחשבון הענן. אישור = להחליף את הנתונים במכשיר בנתוני הענן. ביטול = להעלות את נתוני המכשיר ולדרוס את הענן.',
   },
   en: {
     appTitle:'Hall Setup', appSub:'Flowers · Candles · Decorations',
@@ -873,13 +1080,13 @@ const T = {
     hcCostTitle:'Cost Calculator', hcCostDesc:'Enter item prices and get total event cost',
     hcSetTitle:'Settings & Tools', hcSetDesc:'Reminders, checklist, language and more',
     planTitle:'🌹 Event Setup', costTitle:'💰 Cost Calculator',
-    tabPlan:'🪑 Tables', tabCost:'💰 Costs',
+    tabPlan:'📍 Event Stations', tabCost:'💰 Costs',
     invSection:'Event Inventory', addTableTitle:'Add Table',
     invEmpty:'No items added yet', stockEmpty:'Add inventory items from the menu',
     tablesSection:'Hall Tables', tablesEmpty:'Add tables from the menu',
     lblTname:'Table Name', lblTcount:'Number of Tables', lblTsize:'Seats', lblTnote:'Note (optional)',
     btnAddInv:'+ Add', btnAddTable:'+ Add Table',
-    priceSection:'Price per Item', costInvEmpty:'Add inventory items in the "Tables" tab first',
+    priceSection:'Price per Item', costInvEmpty:'Add inventory items in the "Event Stations" tab first',
     costTip:'Enter your cost and customer price per item. "Total Event Cost" uses the customer price: quantity × tables × price.',
     tbLabel:'Total Event Cost', grandSubEmpty:'Enter prices in the right menu',
     costDetailTitle:'Breakdown by Item', costEmpty:'Add inventory items and enter prices',
@@ -891,13 +1098,19 @@ const T = {
     smBudgetTitle:'Budget Target', smBudgetDesc:'Set a maximum budget for the event',
     smResetTitle:'Reset All', smResetDesc:'Delete all data',
     reminderBadge:'Active',
-    navTables:'Tables', navInv:'Inventory', navMenu:'Menu',
+    navTables:'Stations', navInv:'Inventory', navMenu:'Menu',
     presets:[
       {icon:'🌹',name:'Roses'},{icon:'🌸',name:'Flowers'},{icon:'🕯️',name:'Candles'},
       {icon:'🏺',name:'Vase'},{icon:'🌿',name:'Greens'},{icon:'🎀',name:'Ribbons'},
       {icon:'✨',name:'Glitter'},{icon:'🪴',name:'Plant'},{icon:'➕',name:'Other...'}
     ],
     customPlaceholder:'Item name', customQtyPlaceholder:'Qty',
+    addStationTitle:'Add Special Item', stationNamePlaceholder:'Item name',
+    stationsSection:'💐 Special Items', stationsEmpty:'Car, chuppah, bridal bouquet & more — add from the menu',
+    deleteStationConfirm:'Delete "{name}"?',
+    stationPresets:[
+      {icon:'🚗',name:'Car'},{icon:'💒',name:'Chuppah'},{icon:'💐',name:'Bridal Bouquet'},{icon:'➕',name:'Other...'}
+    ],
     clModalTitle:'✅ Prep Checklist',
     tmplGeneral:'General', tmplWedding:'Wedding', tmplBarMitzvah:'Bar Mitzvah',
     btnAddCheck:'+ Add', btnSaveTmpl:'💾 Save as New Template', btnClClose:'Close',
@@ -913,11 +1126,11 @@ const T = {
     btnSaveBudget:'Save', btnCancelBudget:'Cancel',
     budgetWarning:'⚠️ Approaching budget! Cost: ₪{cost} of ₪{budget}',
     budgetOver:'🚨 Over budget! Cost: ₪{cost} of ₪{budget}',
-    resetConfirm:'Reset everything? Inventory, tables and prices will be deleted.',
+    resetConfirm:'Reset everything? Inventory, tables, special items and prices will be deleted. The current event\'s client and payment will be cleared. Your client list and archive will be kept.',
     reportTitle:'🌹 Event Setup Report',
-    invSummary:'📦 Inventory Summary', tableDetail:'🪑 Table Breakdown',
+    invSummary:'📦 Inventory Summary', tableDetail:'🪑 Table Breakdown', stationDetail:'💐 Special Items Breakdown',
     colItem:'Item', colStock:'In Stock', colUsed:'Used', colLeft:'Left', colPrice:'Price', colCost:'Cost',
-    colTable:'Table', colTotal:'Total',
+    colTable:'Table', colStation:'Item', colCount:'Qty', colTotal:'Total',
     totalCost:'Total Event Cost',
     tablesMeta:'{count} tables', tablesSeat:'× {size} seats',
     perTable:'Qty per table:',
@@ -937,7 +1150,7 @@ const T = {
     revenueCostMarginLine:'Revenue: ₪{rev} · Costs: ₪{cost} · Margin: {margin}%',
     myCostPcLabel:'💸 My Cost (₪)', customerPricePcLabel:'💰 Customer Price (₪)',
     smNewEventTitle:'Start New Event', smNewEventDesc:'Keeps item catalog and prices, clears tables and stock',
-    newEventConfirm:'Start a new event? Tables, stock quantities, budget and reminder will be cleared — item names and prices stay.',
+    newEventConfirm:'Start a new event? Tables, special items, stock quantities, budget, reminder and payment will be cleared — item names, prices and the client list stay. Consider saving to the archive first.',
     smPinTitle:'Lock Profit Tab', smPinDesc:'Access code for the Profit tab only',
     pinModalTitle:'🔒 Access Code', pinWrong:'Wrong code',
     pinSettingsHint:'A 4-digit code required before entering the Profit tab. Note: this is a basic client-side deterrent only, not real security — never share the app link itself with clients.',
@@ -949,6 +1162,43 @@ const T = {
     deleteTableConfirm:'Delete "{name}"? Its quantities will be removed.',
     deleteItemConfirm:'Delete "{name}" from inventory and all tables?',
     saveFailed:'⚠️ Saving failed — storage may be full or you are in private browsing',
+    smClientsSection:'Clients & Archive',
+    smClientPayment:'Client & Payment', smClientPaymentDesc:'Attach a client, deposit and due date to the current event',
+    smAllClients:'All Clients', smAllClientsDesc:'Manage your client list',
+    smArchive:'Event Archive', smArchiveDesc:'Saved events you can view or duplicate',
+    smSaveArchive:'Save Event to Archive', smSaveArchiveDesc:'Saves a copy of the current event — deletes nothing',
+    cpModalTitle:'💳 Client & Payment', lblClient:'Client', noClient:'No client',
+    newClientOpt:'➕ New client', lblClientName:'Client name', lblClientPhone:'Phone',
+    lblDeposit:'Deposit (₪)', lblDepositPaid:'Deposit paid', lblDueDate:'Balance due date',
+    grandTotalLabel:'Event Total', balanceLabel:'Balance Due', balanceOverdue:'⚠️ Balance overdue',
+    btnSaveClientPayment:'Save', clientsModalTitle:'👤 All Clients',
+    addClientBtn:'+ Add Client', clientNoPhone:'No phone', clientEventsCount:'{count} archived events',
+    clientsEmpty:'No clients yet. Add your first client.',
+    deleteClientConfirm:'Delete "{name}"? Their archived events stay, just unlinked from the client.',
+    archiveModalTitle:'🗄️ Event Archive', archiveEmpty:'No events saved to the archive yet',
+    archiveSaveConfirm:'Save a copy of the current event to the archive?', archiveSaved:'✅ Event saved to archive',
+    archiveEventNamePrompt:'Name for the saved event:', archiveDuplicateConfirm:'Duplicate "{name}"? Current tables, special items and inventory will be replaced with the archived copy.',
+    deleteArchiveConfirm:'Permanently delete "{name}" from the archive?',
+    btnDuplicateArchive:'📋 Duplicate as Template', btnViewArchive:'View', btnCloseArchiveView:'Close',
+    archiveNoClient:'No client', archiveSavedAt:'Saved',
+    netProfitLabel:'Net profit',
+    smShopping:'Shopping List', smShoppingDesc:'What is missing to buy for this event',
+    shoppingTitle:'🛒 Shopping List', shoppingEmpty:'Nothing to buy — all required quantities are in stock',
+    shoppingNeed:'To buy', shoppingTotalEst:'Estimated cost (my cost)', shoppingShare:'📤 Share list',
+    smQuote:'Customer Quote', smQuoteDesc:'PDF with customer prices, deposit and balance — no profit data',
+    quoteTitle:'Price Quote', quoteClient:'Client', quotePhone:'Phone', quoteEvent:'Event',
+    quoteColQty:'Qty', quoteColUnit:'Unit price', quoteColTotal:'Total',
+    quoteTotal:'Total due', quoteDeposit:'Deposit', quoteDepositPaidTag:'(paid)',
+    quoteBalance:'Balance due', quoteDueDate:'Balance due date',
+    backupReminderText:'No backup for {days} days', backupNow:'Back up now', backupLater:'Later',
+    smAccount:'Account & Sync', smAccountDesc:'Sign in with Google and keep your data in the cloud',
+    accModalTitle:'☁️ Account & Sync', accNotConfigured:'Cloud sync has not been set up in this app yet.',
+    accSignedOut:'Not signed in. Data is stored on this device only.', accSignIn:'Sign in with Google',
+    accSignedInAs:'Signed in as {email}', accSignOut:'Sign out', accSyncNow:'Sync now',
+    accLastSync:'Last sync: {time}', accSyncing:'Syncing…', accError:'⚠️ Sync failed. Your data is safe on this device and will sync later.',
+    accPrivacy:'Your data is stored in your account only. Each user sees only their own data.',
+    homeSignInHint:'keep your data in the cloud',
+    cloudConflictConfirm:'There is already data in your cloud account. OK = replace this device\'s data with the cloud data. Cancel = upload this device\'s data and overwrite the cloud.',
   }
 };
 function t(k){ return (T[lang]||T['he'])[k]||k; }
@@ -956,20 +1206,26 @@ function t(k){ return (T[lang]||T['he'])[k]||k; }
 // PERSIST
 // ══════════════════════════════════════════════════════
 function save(){
-  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:3,inventory,tables,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin})); }
+  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment})); }
   catch(e){
     if(!save._warned){ save._warned=true; alert(t('saveFailed')); }
   }
+  if(typeof scheduleCloudSync==='function') scheduleCloudSync();
 }
 function load(){
   try{
     const d=JSON.parse(localStorage.getItem('sidur-v3')||'null');
     if(d){
-      inventory=d.inventory||[]; tables=d.tables||[]; prices=d.prices||{};
+      inventory=d.inventory||[]; tables=d.tables||[]; stations=d.stations||[]; prices=d.prices||{};
       sellPrices=d.sellPrices||{}; nextId=d.nextId||1; budgetTarget=d.budgetTarget||0;
       reminder=d.reminder||{}; checklists=d.checklists||{};
       activeTemplate=d.activeTemplate||'general'; lang=d.lang||'he';
       profitPin=d.profitPin||null;
+      // migration from version<4: stations didn't exist yet; version<5: clients/archive/payment didn't exist — defaults below cover both
+      clients=Array.isArray(d.clients)?d.clients:[];
+      archivedEvents=Array.isArray(d.archivedEvents)?d.archivedEvents:[];
+      activeClientId=d.activeClientId||null;
+      payment=(d.payment&&typeof d.payment==='object')?{deposit:d.payment.deposit||0,depositPaid:!!d.payment.depositPaid,dueDate:d.payment.dueDate||''}:{deposit:0,depositPaid:false,dueDate:''};
     }
   }catch(e){}
 }
@@ -1029,11 +1285,16 @@ function applyTranslations(){
   st('lbl-tsize',t('lblTsize')); st('lbl-tnote',t('lblTnote'));
   st('btn-add-inv',t('btnAddInv')); st('btn-add-table',t('btnAddTable'));
   sp('new-inv-name',t('customPlaceholder')); sp('new-inv-qty',t('customQtyPlaceholder'));
+  st('add-station-title',t('addStationTitle'));
+  sp('new-station-name',t('stationNamePlaceholder'));
+  st('btn-add-station',t('btnAddInv'));
   // main
   st('inv-empty-msg',t('invEmpty'));
   st('stock-empty-msg',t('stockEmpty'));
   st('tables-section-title',t('tablesSection'));
   st('tables-empty-msg',t('tablesEmpty'));
+  st('stations-empty-msg',t('stationsEmpty'));
+  st('stations-section-title',t('stationsSection'));
   // costs
   st('price-section-title',t('priceSection'));
   st('cost-inv-empty',t('costInvEmpty'));
@@ -1075,11 +1336,38 @@ function applyTranslations(){
   st('budget-tip',t('budgetTip'));
   st('btn-save-budget',t('btnSaveBudget'));
   st('btn-cancel-budget',t('btnCancelBudget'));
+  st('sm-s-clients',t('smClientsSection'));
+  st('sm-clientpayment-title',t('smClientPayment')); st('sm-clientpayment-desc',t('smClientPaymentDesc'));
+  st('cp-modal-title',t('cpModalTitle'));
+  st('lbl-cp-client',t('lblClient'));
+  st('lbl-cp-newname',t('lblClientName')); st('lbl-cp-newphone',t('lblClientPhone'));
+  st('lbl-cp-deposit',t('lblDeposit')); st('lbl-cp-depositpaid',t('lblDepositPaid'));
+  st('lbl-cp-duedate',t('lblDueDate'));
+  st('lbl-cp-grandtotal',t('grandTotalLabel')); st('lbl-cp-balance',t('balanceLabel'));
+  st('btn-save-cp',t('btnSaveClientPayment')); st('btn-cancel-cp',t('btnCancelBudget'));
+  renderClientOptions();
+  st('sm-allclients-title',t('smAllClients')); st('sm-allclients-desc',t('smAllClientsDesc'));
+  st('clients-screen-title',t('clientsModalTitle')); st('clients-add-btn',t('addClientBtn'));
+  if(document.getElementById('clients-screen').style.display==='block') renderClientsScreen();
+  st('sm-savearchive-title',t('smSaveArchive')); st('sm-savearchive-desc',t('smSaveArchiveDesc'));
+  st('sm-archive-title',t('smArchive')); st('sm-archive-desc',t('smArchiveDesc'));
+  st('archive-screen-title',t('archiveModalTitle'));
+  st('sm-shopping-title',t('smShopping')); st('sm-shopping-desc',t('smShoppingDesc'));
+  st('sm-quote-title',t('smQuote')); st('sm-quote-desc',t('smQuoteDesc'));
+  st('shopping-screen-title',t('shoppingTitle')); st('shopping-share-btn',t('shoppingShare'));
+  st('backup-now-btn',t('backupNow')); st('backup-later-btn',t('backupLater'));
+  st('sm-account-title',t('smAccount')); st('sm-account-desc',t('smAccountDesc'));
+  st('acc-modal-title',t('accModalTitle')); st('acc-privacy',t('accPrivacy'));
+  if(typeof updateAccountUI==='function') updateAccountUI();
+  if(document.getElementById('shopping-screen').style.display==='block') renderShoppingScreen();
+  updateBackupBanner();
+  if(document.getElementById('archive-screen').style.display==='block') renderArchiveScreen();
   // pdf
   st('pdf-title',t('pdfTitle'));
   st('pdf-print-btn',t('pdfPrint'));
   // presets
   renderPresets();
+  renderStationPresets();
   renderAll();
 }
 // ══════════════════════════════════════════════════════
@@ -1094,6 +1382,7 @@ function openMode(mode){
   renderAll();
 }
 function goHome(){
+  if(typeof updateBackupBanner==='function') updateBackupBanner();
   document.getElementById('app-shell').style.display='none';
   document.getElementById('home-screen').style.display='flex';
 }
@@ -1112,7 +1401,7 @@ function actuallySwitchTab(tab){
   document.getElementById('tab-planner').classList.toggle('active',tab==='planner');
   document.getElementById('tab-costs').classList.toggle('active',tab==='costs');
   document.getElementById('tab-profit').classList.toggle('active',tab==='profit');
-  document.getElementById('nav-main-icon').textContent=tab==='planner'?'🪑':tab==='costs'?'💰':'📈';
+  document.getElementById('nav-main-icon').textContent=tab==='planner'?'📍':tab==='costs'?'💰':'📈';
   document.getElementById('nav-main-lbl').textContent=tab==='planner'?t('navTables'):tab==='costs'?t('tabCost'):t('navProfitLbl');
   if(tab==='costs') renderCosts();
   if(tab==='profit') renderProfit();
@@ -1125,6 +1414,7 @@ function openSideMenu(){
   document.getElementById('side-menu').classList.add('open');
   document.getElementById('side-menu-overlay').classList.add('open');
   updateReminderBadge();
+  updateClientPaymentBadge();
 }
 function closeSideMenu(){
   document.getElementById('side-menu').classList.remove('open');
@@ -1182,6 +1472,7 @@ function selectPreset(icon, name){
   inventory.push({id,icon,name,qty:0,color:COLORS[inventory.length%COLORS.length]});
   prices[id]=0; sellPrices[id]=0;
   tables.forEach(t2=>{t2.items[id]=0});
+  stations.forEach(st2=>{st2.items[id]=0});
   save(); renderAll();
   document.getElementById('new-inv-qty') && (document.getElementById('new-inv-qty').focus());
 }
@@ -1191,12 +1482,13 @@ function selectPreset(icon, name){
 function addInvItem(){
   const icon=document.getElementById('chosen-emoji').textContent.trim();
   const name=document.getElementById('new-inv-name').value.trim();
-  const qty=parseInt(document.getElementById('new-inv-qty').value)||0;
+  const qty=parseFloat(String(document.getElementById('new-inv-qty').value).replace(',','.'))||0;
   if(!name){flash('new-inv-name');return;}
   const id=nextId++;
   inventory.push({id,icon,name,qty,color:COLORS[inventory.length%COLORS.length]});
   prices[id]=0; sellPrices[id]=0;
   tables.forEach(t2=>{t2.items[id]=0});
+  stations.forEach(st2=>{st2.items[id]=0});
   document.getElementById('new-inv-name').value='';
   document.getElementById('new-inv-qty').value='';
   save(); renderAll();
@@ -1208,18 +1500,19 @@ async function removeInvItem(id){
   if(!ok) return;
   inventory=inventory.filter(i=>i.id!==id);
   tables.forEach(t2=>delete t2.items[id]);
+  stations.forEach(st2=>delete st2.items[id]);
   delete prices[id]; delete sellPrices[id];
   save(); renderAll();
 }
 function updateInvQty(id,val){
   const it=inventory.find(i=>i.id===id);
-  if(it) it.qty=Math.max(0,parseInt(val)||0);
+  if(it) it.qty=Math.max(0,parseFloat(String(val).replace(',','.'))||0);
   save(); renderStockBar(); recalc();
 }
 function updateInvName(id,val){
   const it=inventory.find(i=>i.id===id);
   if(it) it.name=val;
-  save(); renderStockBar(); renderTables(); renderCosts();
+  save(); renderStockBar(); renderTables(); renderStations(); renderCosts();
 }
 function renderInvList(){
   const el=document.getElementById('inv-list');
@@ -1228,7 +1521,7 @@ function renderInvList(){
     <div class="inv-row">
       <span class="inv-icon" onclick="openPicker(${it.id})">${it.icon}</span>
       <input class="inv-name" value="${esc(it.name)}" oninput="updateInvName(${it.id},this.value)">
-      <input class="inv-qty" type="number" min="0" value="${it.qty}" oninput="updateInvQty(${it.id},this.value)">
+      <input class="inv-qty" type="number" min="0" step="any" value="${it.qty||''}" placeholder="0" oninput="updateInvQty(${it.id},this.value)">
       <button class="del-inv" onclick="removeInvItem(${it.id})">✕</button>
     </div>`).join('');
 }
@@ -1236,40 +1529,56 @@ function renderInvList(){
 // EMOJI PICKER
 // ══════════════════════════════════════════════════════
 document.getElementById('chosen-emoji').addEventListener('click',()=>{
-  pickerFor=null;
+  pickerFor=null; stationPickerFor=null;
   document.getElementById('emoji-picker').classList.toggle('open');
 });
 function openPicker(id){
-  pickerFor=id;
+  pickerFor=id; stationPickerFor=null;
+  document.getElementById('emoji-picker').classList.add('open');
+}
+document.getElementById('station-chosen-emoji').addEventListener('click',()=>{
+  pickerFor=undefined; stationPickerFor='custom';
+  document.getElementById('emoji-picker').classList.toggle('open');
+});
+function openStationPicker(id){
+  pickerFor=undefined; stationPickerFor=id;
   document.getElementById('emoji-picker').classList.add('open');
 }
 document.getElementById('emoji-picker').addEventListener('click',e=>{
   const sp=e.target.closest('span'); if(!sp) return;
   const em=sp.textContent.trim();
-  if(pickerFor===null){document.getElementById('chosen-emoji').textContent=em;}
-  else{const it=inventory.find(i=>i.id===pickerFor);if(it){it.icon=em;save();renderAll();}}
-  document.getElementById('emoji-picker').classList.remove('open'); pickerFor=null;
+  if(stationPickerFor==='custom'){document.getElementById('station-chosen-emoji').textContent=em;}
+  else if(stationPickerFor!==null&&stationPickerFor!==undefined){
+    const st2=stations.find(s=>s.id===stationPickerFor);if(st2){st2.icon=em;save();renderStations();}
+  }
+  else if(pickerFor===null){document.getElementById('chosen-emoji').textContent=em;}
+  else if(pickerFor!==undefined){const it=inventory.find(i=>i.id===pickerFor);if(it){it.icon=em;save();renderAll();}}
+  document.getElementById('emoji-picker').classList.remove('open'); pickerFor=null; stationPickerFor=null;
 });
 document.addEventListener('click',e=>{
-  if(!e.target.closest('#emoji-picker')&&!e.target.closest('.inv-icon')&&!e.target.closest('#chosen-emoji'))
+  if(!e.target.closest('#emoji-picker')&&!e.target.closest('.inv-icon')&&!e.target.closest('#chosen-emoji')&&!e.target.closest('#station-chosen-emoji'))
     document.getElementById('emoji-picker').classList.remove('open');
 });
 // ══════════════════════════════════════════════════════
 // STOCK BAR
 // ══════════════════════════════════════════════════════
-function calcUsed(invId){return tables.reduce((s,t2)=>s+(t2.items[invId]||0)*t2.count,0);}
+function calcUsed(invId){
+  const fromTables=tables.reduce((s,t2)=>s+(t2.items[invId]||0)*t2.count,0);
+  const fromStations=stations.reduce((s,st2)=>s+(st2.items[invId]||0)*st2.count,0);
+  return fromTables+fromStations;
+}
 function renderStockBar(){
   const bar=document.getElementById('stock-bar');
   if(!inventory.length){bar.innerHTML=`<p style="font-size:13px;color:var(--mid);padding-bottom:6px;">${t('stockEmpty')}</p>`;return;}
   bar.innerHTML=inventory.map(it=>{
     const used=calcUsed(it.id),rem=it.qty-used;
     const pct=it.qty>0?Math.max(0,Math.min(100,(rem/it.qty)*100)):0;
-    const warn=rem<0?`⚠ חסר ${Math.abs(rem)}!`:(rem===0&&it.qty>0?'✓':'');
+    const warn=rem<0?`⚠ חסר ${fmtQty(Math.abs(rem))}!`:(rem===0&&it.qty>0?'✓':'');
     return `<div class="stock-card" style="--ic:${it.color}">
       <div class="sc-icon">${it.icon}</div>
       <div class="sc-name">${esc(it.name)}</div>
-      <div class="sc-rem" style="color:${rem<0?'#e05050':'var(--charcoal)'}">${rem}</div>
-      <div class="sc-sub">${used}/${it.qty}</div>
+      <div class="sc-rem" style="color:${rem<0?'#e05050':'var(--charcoal)'}">${fmtQty(rem)}</div>
+      <div class="sc-sub">${fmtQty(used)}/${fmtQty(it.qty)}</div>
       <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:${pct}%"></div></div>
       <div class="sc-warn">${warn}</div>
     </div>`;
@@ -1301,7 +1610,7 @@ async function removeTable(id){
   save();renderTables();renderStockBar();recalc();updateCostTotalsOnly();if(currentTab==='profit')renderProfit();
 }
 function updateTableItem(tid,iid,val){
-  const t2=tables.find(t2=>t2.id===tid);if(t2) t2.items[iid]=Math.max(0,parseInt(val)||0);
+  const t2=tables.find(t2=>t2.id===tid);if(t2) t2.items[iid]=Math.max(0,parseFloat(String(val).replace(',','.'))||0);
   const el=document.getElementById('tc-tot-'+tid);if(el)el.innerHTML=buildTotals(t2);
   save(); renderStockBar(); recalc(); updateCostTotalsOnly();
 }
@@ -1309,7 +1618,7 @@ function buildTotals(t2){
   if(!inventory.length) return '<span style="font-size:11px;color:var(--mid)">—</span>';
   return inventory.map(it=>{
     const total=(t2.items[it.id]||0)*t2.count;
-    return `<div class="tc-tot"><strong>${total}</strong><span>${it.icon}</span></div>`;
+    return `<div class="tc-tot"><strong>${fmtQty(total)}</strong><span>${it.icon}</span></div>`;
   }).join('');
 }
 function updateTable(id, field, val){
@@ -1341,7 +1650,7 @@ function renderTables(){
       <div class="tc-row">
         <span class="tci">${it.icon}</span>
         <span class="tcl">${esc(it.name)}</span>
-        <input type="number" min="0" value="${t2.items[it.id]||0}" oninput="updateTableItem(${t2.id},${it.id},this.value)" placeholder="0">
+        <input type="number" min="0" step="any" value="${t2.items[it.id]||''}" oninput="updateTableItem(${t2.id},${it.id},this.value)" placeholder="0">
       </div>`).join(''):`<p style="font-size:11px;color:var(--mid);margin-top:4px;">${lang==='he'?'הוסף פריטי מלאי תחילה':'Add inventory first'}</p>`;
     return `<div class="table-card">
       <div class="tc-header">
@@ -1376,11 +1685,109 @@ function renderTables(){
   }).join('');
 }
 // ══════════════════════════════════════════════════════
+// STATIONS (special items: car / chuppah / bridal bouquet / custom — single-count items, not tables)
+// ══════════════════════════════════════════════════════
+let stationPickerFor=null;
+function renderStationPresets(){
+  const bar=document.getElementById('station-preset-bar');
+  bar.innerHTML=t('stationPresets').map(p=>`
+    <div class="preset-chip" onclick="selectStationPreset('${p.icon}','${p.name}')">${p.icon} ${p.name}</div>
+  `).join('');
+}
+function selectStationPreset(icon,name){
+  if(name===t('stationPresets').at(-1).name){
+    // "Other" — show custom name row
+    document.getElementById('station-custom-add-row').classList.add('show');
+    document.getElementById('station-chosen-emoji').textContent='✨';
+    document.getElementById('new-station-name').focus();
+    return;
+  }
+  addStation(icon,name);
+}
+function addStationCustom(){
+  const icon=document.getElementById('station-chosen-emoji').textContent.trim();
+  const name=document.getElementById('new-station-name').value.trim();
+  if(!name){flash('new-station-name');return;}
+  addStation(icon,name);
+  document.getElementById('new-station-name').value='';
+  document.getElementById('station-custom-add-row').classList.remove('show');
+}
+function addStation(icon,name){
+  const items={};inventory.forEach(it=>items[it.id]=0);
+  stations.push({id:nextId++,icon,name,count:1,items});
+  save(); renderStations(); recalc(); updateCostTotalsOnly(); if(currentTab==='profit')updateProfitTotalsOnly();
+}
+async function removeStation(id){
+  const st2=stations.find(x=>x.id===id);
+  const ok=await askConfirm(t('deleteStationConfirm').replace('{name}',st2?st2.name:''));
+  if(!ok) return;
+  stations=stations.filter(x=>x.id!==id);
+  save();renderStations();renderStockBar();recalc();updateCostTotalsOnly();if(currentTab==='profit')updateProfitTotalsOnly();
+}
+function updateStationItem(sid,iid,val){
+  const st2=stations.find(s=>s.id===sid);if(st2) st2.items[iid]=Math.max(0,parseFloat(String(val).replace(',','.'))||0);
+  const el=document.getElementById('st-tot-'+sid);if(el)el.innerHTML=buildStationTotals(st2);
+  save(); renderStockBar(); recalc(); updateCostTotalsOnly(); if(currentTab==='profit')updateProfitTotalsOnly();
+}
+function updateStation(id,field,val){
+  const st2=stations.find(s=>s.id===id); if(!st2) return;
+  if(field==='name') st2.name=val;
+  else if(field==='count') st2.count=Math.max(1,parseInt(val)||1);
+  save(); renderStockBar(); recalc(); updateCostTotalsOnly(); if(currentTab==='profit')updateProfitTotalsOnly();
+  const totalsEl=document.getElementById('st-tot-'+id);
+  if(totalsEl) totalsEl.innerHTML=buildStationTotals(st2);
+  const cntEl=document.getElementById('stations-count');
+  if(cntEl) cntEl.textContent=stations.length?`${stations.length} ${lang==='he'?'פריטים':'items'}`:'';
+}
+function buildStationTotals(st2){
+  if(!inventory.length) return '<span style="font-size:11px;color:var(--mid)">—</span>';
+  return inventory.map(it=>{
+    const total=(st2.items[it.id]||0)*st2.count;
+    return `<div class="tc-tot"><strong>${fmtQty(total)}</strong><span>${it.icon}</span></div>`;
+  }).join('');
+}
+function renderStations(){
+  const grid=document.getElementById('stations-grid'),cntEl=document.getElementById('stations-count');
+  if(!stations.length){grid.innerHTML=`<div class="empty-state"><div class="ei">💐</div><p>${t('stationsEmpty')}</p></div>`;cntEl.textContent='';return;}
+  cntEl.textContent=`${stations.length} ${lang==='he'?'פריטים':'items'}`;
+  grid.innerHTML=stations.map(st2=>{
+    const rows=inventory.length?inventory.map(it=>`
+      <div class="tc-row">
+        <span class="tci">${it.icon}</span>
+        <span class="tcl">${esc(it.name)}</span>
+        <input type="number" min="0" step="any" value="${st2.items[it.id]||''}" oninput="updateStationItem(${st2.id},${it.id},this.value)" placeholder="0">
+      </div>`).join(''):`<p style="font-size:11px;color:var(--mid);margin-top:4px;">${lang==='he'?'הוסף פריטי מלאי תחילה':'Add inventory first'}</p>`;
+    return `<div class="table-card">
+      <div class="tc-header">
+        <div style="flex:1;min-width:0">
+          <span class="inv-icon" onclick="openStationPicker(${st2.id})" style="font-size:16px;cursor:pointer">${st2.icon}</span>
+          <input
+            value="${esc(st2.name)}"
+            oninput="updateStation(${st2.id},'name',this.value)"
+            style="font-family:'Playfair Display',serif;font-size:13px;color:var(--charcoal);border:none;background:transparent;outline:none;width:calc(100% - 60px);font-weight:400"
+            placeholder="${lang==='he'?'שם הפריט':'Item name'}">
+          <div style="display:flex;gap:6px;margin-top:3px;align-items:center">
+            <input type="number" min="1" value="${st2.count}"
+              oninput="updateStation(${st2.id},'count',this.value)"
+              style="width:42px;font-size:11px;color:var(--mid);border:1px solid var(--border);border-radius:5px;padding:2px 4px;text-align:center;background:var(--warm)">
+            <span style="font-size:10px;color:var(--mid)">${lang==='he'?'עותקים':'copies'}</span>
+          </div>
+        </div>
+        <button class="tc-del" onclick="removeStation(${st2.id})">✕</button>
+      </div>
+      <div class="tc-body">
+        ${rows}
+        <div class="tc-totals" id="st-tot-${st2.id}">${buildStationTotals(st2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+// ══════════════════════════════════════════════════════
 // RECALC
 // ══════════════════════════════════════════════════════
 function recalc(){
   const alerts=[];
-  inventory.forEach(it=>{const rem=it.qty-calcUsed(it.id);if(rem<0)alerts.push(`${lang==='he'?'חסרים':'Missing'} ${Math.abs(rem)} ${it.name}`);});
+  inventory.forEach(it=>{const rem=it.qty-calcUsed(it.id);if(rem<0)alerts.push(`${lang==='he'?'חסרים':'Missing'} ${fmtQty(Math.abs(rem))} ${it.name}`);});
   const el=document.getElementById('stock-alert');
   if(alerts.length){el.classList.add('show');document.getElementById('alert-msg').textContent=alerts.join('  |  ');}
   else el.classList.remove('show');
@@ -1416,6 +1823,14 @@ function updateCostTotalsOnly(){
       const resTotal=card.querySelector('.cr-total'), resSub=card.querySelector('.cr-sub');
       if(resTotal) resTotal.textContent=sell?'₪'+total.toFixed(2):'—';
       if(resSub) resSub.textContent=`${used} ${t('units')} × ₪${sell||0} ${t('toCustomerSuffix')}`;
+      const resCost=card.querySelector('.cr-cost'), pr=prices[it.id]||0;
+      if(resCost) resCost.textContent=pr?t('myCostLabel')+': ₪'+(used*pr).toFixed(2):'';
+      const resProfit=card.querySelector('.cr-profit');
+      if(resProfit){
+        const hasBoth=pr&&sell, profit=total-used*pr;
+        resProfit.textContent=hasBoth?'📈 '+t('netProfitLabel')+': ₪'+profit.toFixed(2):'';
+        resProfit.style.color=profit<0?'#c62828':'#2e7d32';
+      }
       syncPriceField(it.id,'sell',sellPrices[it.id]);
       syncPriceField(it.id,'cost',prices[it.id]);
     }
@@ -1473,7 +1888,7 @@ function renderCosts(){
     }).join('');
     return `<div class="cost-card" id="cost-card-${it.id}">
       <div class="cc-header"><span class="cc-icon">${it.icon}</span><span class="cc-name">${esc(it.name)}</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="cc-inputs">
         <div>
           <label style="font-size:10px;color:var(--mid);font-weight:600;display:block;margin-bottom:3px">${t('myCostLabel')}</label>
           <div style="display:flex;align-items:center;gap:4px">
@@ -1498,6 +1913,8 @@ function renderCosts(){
       <div class="cc-result">
         <div class="cr-total">${sell?'₪'+total.toFixed(2):'—'}</div>
         <div class="cr-sub">${used} ${t('units')} × ₪${sell||0} ${t('toCustomerSuffix')}</div>
+        <div class="cr-cost">${price?t('myCostLabel')+': ₪'+(used*price).toFixed(2):''}</div>
+        <div class="cr-profit" style="${(price&&sell)&&(total-used*price)<0?'color:#c62828':'color:#2e7d32'}">${(price&&sell)?'📈 '+t('netProfitLabel')+': ₪'+(total-used*price).toFixed(2):''}</div>
       </div>
     </div>`;
   }).join('');
@@ -1593,6 +2010,7 @@ function renderProfit(){
 function openSummary(){
   const totalTables=tables.reduce((s,t2)=>s+t2.count,0);
   const totalSeated=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
+  const totalStations=stations.reduce((s,st2)=>s+st2.count,0);
   const totalItems=inventory.reduce((s,it)=>s+calcUsed(it.id),0);
   const grandCost=inventory.reduce((s,it)=>s+calcUsed(it.id)*(prices[it.id]||0),0);
   const grandRevenue=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
@@ -1605,11 +2023,14 @@ function openSummary(){
       <div class="summary-stat" style="--c1:#e891bb;--c2:#d45e9b">
         <div class="ss-val">${totalSeated||'—'}</div><div class="ss-label">מוזמנים</div>
       </div>
+      <div class="summary-stat" style="--c1:#f4a7c8;--c2:#d4a0e8">
+        <div class="ss-val">${totalStations||'—'}</div><div class="ss-label">פריטים מיוחדים</div>
+      </div>
       <div class="summary-stat" style="--c1:#5bbcb8;--c2:#48a8a4">
         <div class="ss-val">${inventory.length}</div><div class="ss-label">סוגי פריטים</div>
       </div>
       <div class="summary-stat" style="--c1:#7a6580;--c2:#3d2b45">
-        <div class="ss-val">${totalItems}</div><div class="ss-label">סה"כ פריטים</div>
+        <div class="ss-val">${fmtQty(totalItems)}</div><div class="ss-label">סה"כ פריטים</div>
       </div>
     </div>`;
   const invBarsHTML=inventory.map(it=>{
@@ -1621,7 +2042,7 @@ function openSummary(){
       <div class="summary-inv-bar" style="margin:0 10px">
         <div class="summary-inv-bar-fill" style="width:${pct}%;background:${col}"></div>
       </div>
-      <span style="font-size:12px;color:var(--mid);min-width:60px;text-align:left">${used} / ${it.qty}</span>
+      <span style="font-size:12px;color:var(--mid);min-width:60px;text-align:left">${fmtQty(used)} / ${fmtQty(it.qty)}</span>
     </div>`;
   }).join('');
   const costHTML=grandCost>0?`
@@ -1637,10 +2058,19 @@ function openSummary(){
     </div>`:'<p style="font-size:13px;color:var(--mid)">הזן מחירים בלשונית "עלויות" לקבל סיכום כספי</p>';
   const tableListHTML=tables.map(t2=>{
     const meta=`${t2.count} שולחנות${t2.size?` × ${t2.size} איש`:''}`;
-    const itemsList=inventory.filter(it=>(t2.items[it.id]||0)>0).map(it=>`${it.icon} ${it.name}: ${t2.items[it.id]} × ${t2.count} = ${(t2.items[it.id]||0)*t2.count}`).join('<br>');
+    const itemsList=inventory.filter(it=>(t2.items[it.id]||0)>0).map(it=>`${it.icon} ${it.name}: ${fmtQty(t2.items[it.id])} × ${t2.count} = ${fmtQty((t2.items[it.id]||0)*t2.count)}`).join('<br>');
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
       <div style="font-weight:700;font-size:14px">${esc(t2.name)}</div>
       <div style="font-size:11px;color:var(--mid);margin-bottom:4px">${meta}${t2.note?` · 📝 ${esc(t2.note)}`:''}</div>
+      <div style="font-size:12px;color:var(--charcoal);line-height:1.8">${itemsList||'<span style="color:var(--mid)">אין פריטים</span>'}</div>
+    </div>`;
+  }).join('');
+  const stationListHTML=stations.map(st2=>{
+    const meta=`${st2.count} ${lang==='he'?'עותקים':'copies'}`;
+    const itemsList=inventory.filter(it=>(st2.items[it.id]||0)>0).map(it=>`${it.icon} ${it.name}: ${fmtQty(st2.items[it.id])} × ${st2.count} = ${fmtQty((st2.items[it.id]||0)*st2.count)}`).join('<br>');
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:700;font-size:14px">${st2.icon} ${esc(st2.name)}</div>
+      <div style="font-size:11px;color:var(--mid);margin-bottom:4px">${meta}</div>
       <div style="font-size:12px;color:var(--charcoal);line-height:1.8">${itemsList||'<span style="color:var(--mid)">אין פריטים</span>'}</div>
     </div>`;
   }).join('');
@@ -1660,6 +2090,10 @@ function openSummary(){
     ${tables.length?`<div class="summary-section">
       <h3>🪑 פירוט שולחנות</h3>
       ${tableListHTML}
+    </div>`:''}
+    ${stations.length?`<div class="summary-section">
+      <h3>💐 פריטים מיוחדים</h3>
+      ${stationListHTML}
     </div>`:''}
   `;
   document.getElementById('summary-screen').style.display='block';
@@ -1856,6 +2290,510 @@ function clearReminder(){
   closeReminder();
 }
 // ══════════════════════════════════════════════════════
+// CLIENT & PAYMENT (active event)
+// ══════════════════════════════════════════════════════
+function computeGrandTotal(){
+  return inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
+}
+function renderClientOptions(){
+  const sel=document.getElementById('cp-client-select');
+  if(!sel) return;
+  const prevVal=sel.value;
+  sel.innerHTML=`<option value="">${esc(t('noClient'))}</option>`+
+    clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+
+    `<option value="__new__">${esc(t('newClientOpt'))}</option>`;
+  sel.value=activeClientId?String(activeClientId):(prevVal||'');
+  if(![...sel.options].some(o=>o.value===sel.value)) sel.value='';
+}
+function onClientSelectChange(){
+  const sel=document.getElementById('cp-client-select');
+  const row=document.getElementById('cp-new-client-row');
+  row.style.display=sel.value==='__new__'?'flex':'none';
+}
+function openClientPayment(){
+  renderClientOptions();
+  document.getElementById('cp-client-select').value=activeClientId?String(activeClientId):'';
+  onClientSelectChange();
+  document.getElementById('cp-new-name').value='';
+  document.getElementById('cp-new-phone').value='';
+  document.getElementById('cp-deposit').value=payment.deposit||'';
+  document.getElementById('cp-deposit-paid').checked=!!payment.depositPaid;
+  document.getElementById('cp-duedate').value=payment.dueDate||'';
+  updateClientPaymentTotals();
+  document.getElementById('clientpay-modal').classList.add('open');
+}
+function closeClientPayment(){document.getElementById('clientpay-modal').classList.remove('open');}
+function updateClientPaymentTotals(){
+  const grand=computeGrandTotal();
+  const deposit=Math.max(0,parseFloat(String(document.getElementById('cp-deposit').value).replace(',','.'))||0);
+  const balance=Math.max(0,grand-deposit);
+  document.getElementById('cp-grand-total').textContent='₪'+grand.toFixed(2);
+  document.getElementById('cp-balance').textContent='₪'+balance.toFixed(2);
+}
+document.getElementById('cp-deposit').addEventListener('input',updateClientPaymentTotals);
+function saveClientPayment(){
+  const sel=document.getElementById('cp-client-select');
+  if(sel.value==='__new__'){
+    const name=document.getElementById('cp-new-name').value.trim();
+    if(name){
+      const phone=document.getElementById('cp-new-phone').value.trim();
+      const id=nextId++;
+      clients.push({id,name,phone});
+      activeClientId=id;
+    } else {
+      activeClientId=null;
+    }
+  } else {
+    activeClientId=sel.value?parseInt(sel.value,10):null;
+  }
+  const depositVal=String(document.getElementById('cp-deposit').value).replace(',','.');
+  payment={
+    deposit:Math.max(0,parseFloat(depositVal)||0),
+    depositPaid:document.getElementById('cp-deposit-paid').checked,
+    dueDate:document.getElementById('cp-duedate').value
+  };
+  save(); closeClientPayment(); updateClientPaymentBadge();
+}
+function updateClientPaymentBadge(){
+  const badge=document.getElementById('clientpay-badge');
+  if(!badge) return;
+  const balance=Math.max(0,computeGrandTotal()-(payment.deposit||0));
+  const overdue=payment.dueDate && balance>0 && new Date(payment.dueDate)<new Date(new Date().toDateString());
+  badge.style.display=overdue?'block':'none';
+}
+// ══════════════════════════════════════════════════════
+// CLIENTS SCREEN
+// ══════════════════════════════════════════════════════
+function openClientsScreen(){
+  document.getElementById('clients-screen').style.display='block';
+  renderClientsScreen();
+}
+function closeClientsScreen(){document.getElementById('clients-screen').style.display='none';}
+function renderClientsScreen(){
+  const body=document.getElementById('clients-body');
+  if(!clients.length){
+    body.innerHTML=`<p style="text-align:center;color:var(--mid);font-size:13px;margin-top:30px">${esc(t('clientsEmpty'))}</p>`;
+    return;
+  }
+  body.innerHTML=`<div class="tables-grid">${clients.map(c=>{
+    const count=archivedEvents.filter(a=>a.clientId===c.id).length;
+    return `<div class="table-card">
+      <div class="tc-header">
+        <div>
+          <div class="tc-name">${esc(c.name)}</div>
+          <div class="tc-meta">${c.phone?esc(c.phone):esc(t('clientNoPhone'))}</div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="tc-del" onclick="editClient(${c.id})" title="✏️">✏️</button>
+          <button class="tc-del" onclick="deleteClient(${c.id})" title="✕">✕</button>
+        </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-label">${esc(t('clientEventsCount').replace('{count}',count))}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+async function addClient(){
+  const name=await askPrompt(t('lblClientName'));
+  if(!name||!name.trim()) return;
+  const phone=await askPrompt(t('lblClientPhone'));
+  const id=nextId++;
+  clients.push({id,name:name.trim(),phone:(phone||'').trim()});
+  save(); renderClientsScreen(); renderClientOptions();
+}
+async function editClient(id){
+  const c=clients.find(c=>c.id===id);
+  if(!c) return;
+  const name=await askPrompt(t('lblClientName'));
+  if(name===null) return;
+  if(name.trim()) c.name=name.trim();
+  const phone=await askPrompt(t('lblClientPhone'));
+  if(phone!==null) c.phone=phone.trim();
+  save(); renderClientsScreen(); renderClientOptions();
+}
+async function deleteClient(id){
+  const c=clients.find(c=>c.id===id);
+  if(!c) return;
+  const ok=await askConfirm(t('deleteClientConfirm').replace('{name}',c.name));
+  if(!ok) return;
+  clients=clients.filter(c=>c.id!==id);
+  archivedEvents.forEach(a=>{if(a.clientId===id) a.clientId=null;});
+  if(activeClientId===id) activeClientId=null;
+  save(); renderClientsScreen(); renderClientOptions(); updateClientPaymentBadge();
+}
+// ══════════════════════════════════════════════════════
+// EVENT ARCHIVE
+// ══════════════════════════════════════════════════════
+let archiveExpandedId=null;
+function openArchiveScreen(){
+  document.getElementById('archive-screen').style.display='block';
+  renderArchiveScreen();
+}
+function closeArchiveScreen(){document.getElementById('archive-screen').style.display='none';}
+function toggleArchiveView(id){
+  archiveExpandedId=archiveExpandedId===id?null:id;
+  renderArchiveScreen();
+}
+function renderArchiveScreen(){
+  const body=document.getElementById('archive-body');
+  if(!archivedEvents.length){
+    body.innerHTML=`<p style="text-align:center;color:var(--mid);font-size:13px;margin-top:30px">${esc(t('archiveEmpty'))}</p>`;
+    return;
+  }
+  body.innerHTML=`<div class="tables-grid">${archivedEvents.slice().reverse().map(a=>{
+    const client=clients.find(c=>c.id===a.clientId);
+    let dateStr='';
+    try{ dateStr=new Date(a.savedAt).toLocaleDateString(lang==='he'?'he-IL':'en-US',{year:'numeric',month:'long',day:'numeric'}); }catch(e){}
+    const expanded=archiveExpandedId===a.id;
+    return `<div class="table-card">
+      <div class="tc-header">
+        <div>
+          <div class="tc-name">${esc(a.name)}</div>
+          <div class="tc-meta">${client?esc(client.name):esc(t('archiveNoClient'))} · ${esc(t('archiveSavedAt'))} ${esc(dateStr)}</div>
+        </div>
+        <button class="tc-del" onclick="deleteArchiveEvent(${a.id})">✕</button>
+      </div>
+      <div class="tc-body">
+        <div class="tc-totals">₪${(a.grandTotal||0).toFixed(2)}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn-teal" style="flex:1;font-size:11px;padding:6px" onclick="toggleArchiveView(${a.id})">${esc(t('btnViewArchive'))}</button>
+          <button class="btn-teal" style="flex:1;font-size:11px;padding:6px" onclick="loadArchiveAsTemplate(${a.id})">${esc(t('btnDuplicateArchive'))}</button>
+        </div>
+        ${expanded?`<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;font-size:11px;color:var(--mid)">
+          ${a.tables.map(t2=>`<div>🪑 ${esc(t2.name)} × ${t2.count}</div>`).join('')}
+          ${a.stations.map(st2=>`<div>${esc(st2.icon)} ${esc(st2.name)} × ${st2.count}</div>`).join('')}
+          ${a.inventory.map(it=>`<div>${esc(it.icon)} ${esc(it.name)}: ${fmtQty(it.qty)}</div>`).join('')}
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+async function saveEventToArchive(){
+  const ok=await askConfirm(t('archiveSaveConfirm'));
+  if(!ok) return;
+  const defaultName=reminder.name||(lang==='he'?'אירוע':'Event');
+  const typed=await askPrompt(t('archiveEventNamePrompt'));
+  const finalName=(typed&&typed.trim())?typed.trim():defaultName;
+  const snap={
+    id:nextId++,
+    name:finalName,
+    clientId:activeClientId,
+    savedAt:new Date().toISOString(),
+    inventory:JSON.parse(JSON.stringify(inventory)),
+    tables:JSON.parse(JSON.stringify(tables)),
+    stations:JSON.parse(JSON.stringify(stations)),
+    prices:JSON.parse(JSON.stringify(prices)),
+    sellPrices:JSON.parse(JSON.stringify(sellPrices)),
+    payment:JSON.parse(JSON.stringify(payment)),
+    grandTotal:computeGrandTotal()
+  };
+  archivedEvents.push(snap);
+  save();
+  alert(t('archiveSaved'));
+}
+async function loadArchiveAsTemplate(id){
+  const snap=archivedEvents.find(a=>a.id===id);
+  if(!snap) return;
+  const ok=await askConfirm(t('archiveDuplicateConfirm').replace('{name}',snap.name));
+  if(!ok) return;
+  // remap every id to a fresh one to avoid collisions with the current nextId counter
+  const idMap={};
+  const newInventory=snap.inventory.map(it=>{
+    const newId=nextId++;
+    idMap[it.id]=newId;
+    return {...it,id:newId};
+  });
+  const newPrices={}, newSellPrices={};
+  newInventory.forEach((it,i)=>{
+    const oldId=snap.inventory[i].id;
+    newPrices[it.id]=snap.prices[oldId]||0;
+    newSellPrices[it.id]=snap.sellPrices[oldId]||0;
+  });
+  const remapItems=(items)=>{
+    const out={};
+    Object.keys(items||{}).forEach(oldId=>{
+      const newId=idMap[oldId];
+      if(newId!=null) out[newId]=items[oldId];
+    });
+    return out;
+  };
+  const newTables=snap.tables.map(t2=>({...t2,id:nextId++,items:remapItems(t2.items)}));
+  const newStations=snap.stations.map(st2=>({...st2,id:nextId++,items:remapItems(st2.items)}));
+  inventory=newInventory; tables=newTables; stations=newStations;
+  prices=newPrices; sellPrices=newSellPrices;
+  activeClientId=snap.clientId||null;
+  payment={deposit:0,depositPaid:false,dueDate:''};
+  save(); renderAll(); closeArchiveScreen(); updateClientPaymentBadge();
+}
+async function deleteArchiveEvent(id){
+  const a=archivedEvents.find(a=>a.id===id);
+  if(!a) return;
+  const ok=await askConfirm(t('deleteArchiveConfirm').replace('{name}',a.name));
+  if(!ok) return;
+  archivedEvents=archivedEvents.filter(a=>a.id!==id);
+  if(archiveExpandedId===id) archiveExpandedId=null;
+  save(); renderArchiveScreen();
+}
+// ══════════════════════════════════════════════════════
+// SHOPPING LIST (needed − stock; priced at MY cost — internal screen, not client-facing)
+// ══════════════════════════════════════════════════════
+function shoppingItems(){
+  return inventory.map(it=>{
+    const used=calcUsed(it.id), need=Math.max(0,used-it.qty);
+    return {it,need,cost:need*(prices[it.id]||0)};
+  }).filter(x=>x.need>0);
+}
+function openShoppingScreen(){
+  document.getElementById('shopping-screen').style.display='block';
+  renderShoppingScreen();
+}
+function closeShoppingScreen(){document.getElementById('shopping-screen').style.display='none';}
+function renderShoppingScreen(){
+  const body=document.getElementById('shopping-body');
+  const list=shoppingItems();
+  if(!list.length){
+    body.innerHTML=`<p style="text-align:center;color:var(--mid);font-size:13px;margin-top:30px">${esc(t('shoppingEmpty'))}</p>`;
+    return;
+  }
+  const total=list.reduce((s,x)=>s+x.cost,0);
+  body.innerHTML=list.map(x=>`
+    <div class="inv-row" style="margin-bottom:8px">
+      <span style="font-size:20px">${esc(x.it.icon)}</span>
+      <span style="flex:1;font-size:14px;font-weight:600">${esc(x.it.name)}</span>
+      <span style="font-size:12px;color:var(--mid)">${esc(t('shoppingNeed'))}</span>
+      <strong style="font-size:15px">${fmtQty(x.need)}</strong>
+      ${x.cost?`<span style="font-size:12px;color:var(--mid);min-width:64px;text-align:left">₪${x.cost.toFixed(2)}</span>`:''}
+    </div>`).join('')+
+    (total?`<div style="margin-top:14px;text-align:center;font-weight:700">${esc(t('shoppingTotalEst'))}: ₪${total.toFixed(2)}</div>`:'');
+}
+function buildShoppingText(){
+  const list=shoppingItems();
+  const total=list.reduce((s,x)=>s+x.cost,0);
+  return t('shoppingTitle')+'\n\n'+list.map(x=>`${x.it.icon} ${x.it.name}: ${fmtQty(x.need)}`).join('\n')+(total?`\n\n${t('shoppingTotalEst')}: ₪${total.toFixed(2)}`:'');
+}
+async function shareShopping(){
+  if(!shoppingItems().length) return;
+  const text=buildShoppingText();
+  try{
+    if(navigator.share){ await navigator.share({text}); return; }
+  }catch(e){ if(e&&e.name==='AbortError') return; }
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+// ══════════════════════════════════════════════════════
+// CUSTOMER QUOTE (sell prices only — never cost/profit)
+// ══════════════════════════════════════════════════════
+let pdfMode='report';
+function fmtDateStr(s){
+  if(!s) return '';
+  try{ return new Date(s+'T00:00:00').toLocaleDateString(lang==='he'?'he-IL':'en-US',{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return s; }
+}
+function quoteData(){
+  const rows=inventory.map(it=>({it,used:calcUsed(it.id),sell:sellPrices[it.id]||0})).filter(r=>r.used>0);
+  const total=computeGrandTotal();
+  const deposit=payment.deposit||0;
+  return {rows,total,deposit,balance:Math.max(0,total-deposit),client:clients.find(c=>c.id===activeClientId)};
+}
+function buildQuoteHTML(){
+  const q=quoteData();
+  const today=new Date().toLocaleDateString(lang==='he'?'he-IL':'en-US',{year:'numeric',month:'long',day:'numeric'});
+  const rowsHTML=q.rows.map(r=>`<tr><td>${esc(r.it.icon)} ${esc(r.it.name)}</td><td style="text-align:center">${fmtQty(r.used)}</td><td style="text-align:center">${r.sell?'₪'+r.sell:'-'}</td><td style="text-align:center">${r.sell?'₪'+(r.used*r.sell).toFixed(2):'-'}</td></tr>`).join('');
+  const info=[];
+  if(q.client){ info.push(`${esc(t('quoteClient'))}: <strong>${esc(q.client.name)}</strong>${q.client.phone?' · '+esc(q.client.phone):''}`); }
+  if(reminder.name||reminder.date){ info.push(`${esc(t('quoteEvent'))}: ${esc(reminder.name||'')}${reminder.date?' · '+esc(fmtDateStr(reminder.date)):''}`); }
+  const payRows=[];
+  if(q.deposit>0){
+    payRows.push(`<tr><td>${esc(t('quoteDeposit'))} ${payment.depositPaid?esc(t('quoteDepositPaidTag')):''}</td><td style="text-align:left">₪${q.deposit.toFixed(2)}</td></tr>`);
+    payRows.push(`<tr><td><strong>${esc(t('quoteBalance'))}</strong></td><td style="text-align:left"><strong>₪${q.balance.toFixed(2)}</strong></td></tr>`);
+  }
+  if(payment.dueDate) payRows.push(`<tr><td>${esc(t('quoteDueDate'))}</td><td style="text-align:left">${esc(fmtDateStr(payment.dueDate))}</td></tr>`);
+  return `<div class="print-doc" id="pdf-content">
+    <div class="pd-header">
+      <div class="pd-title">${esc(t('quoteTitle'))}</div>
+      <div class="pd-date">${esc(today)}</div>
+      ${info.map(x=>`<div style="font-size:13px;margin-top:4px">${x}</div>`).join('')}
+    </div>
+    <div class="pd-section"><table><tr><th>${esc(t('colItem'))}</th><th>${esc(t('quoteColQty'))}</th><th>${esc(t('quoteColUnit'))}</th><th>${esc(t('quoteColTotal'))}</th></tr>${rowsHTML}</table></div>
+    <div class="pd-grand-total"><div class="gt-label">${esc(t('quoteTotal'))}</div><div class="gt-amount">₪${q.total.toFixed(2)}</div></div>
+    ${payRows.length?`<div class="pd-section"><table>${payRows.join('')}</table></div>`:''}
+  </div>`;
+}
+function buildQuoteText(){
+  const q=quoteData();
+  let s=t('quoteTitle')+'\n';
+  if(q.client) s+=`${t('quoteClient')}: ${q.client.name}\n`;
+  s+='\n'+q.rows.map(r=>`${r.it.icon} ${r.it.name}: ${fmtQty(r.used)}${r.sell?' × ₪'+r.sell:''}`).join('\n');
+  s+=`\n\n${t('quoteTotal')}: ₪${q.total.toFixed(2)}`;
+  if(q.deposit>0) s+=`\n${t('quoteDeposit')}: ₪${q.deposit.toFixed(2)}\n${t('quoteBalance')}: ₪${q.balance.toFixed(2)}`;
+  if(payment.dueDate) s+=`\n${t('quoteDueDate')}: ${fmtDateStr(payment.dueDate)}`;
+  return s;
+}
+function openQuote(){
+  pdfMode='quote';
+  document.getElementById('pdf-title').textContent='🧾 '+t('quoteTitle');
+  document.getElementById('pdf-body').innerHTML=buildQuoteHTML();
+  document.getElementById('pdf-preview').classList.add('open');
+}
+// ══════════════════════════════════════════════════════
+// BACKUP REMINDER (a web app can't write files silently — so it nudges, and the share sheet does the rest)
+// ══════════════════════════════════════════════════════
+const BK_KEY='sidur-v3-backupmeta', BK_DAYS=7, DAY_MS=86400000;
+function getBackupMeta(){ try{ return JSON.parse(localStorage.getItem(BK_KEY))||{}; }catch(e){ return {}; } }
+function setBackupMeta(m){ try{ localStorage.setItem(BK_KEY,JSON.stringify(m)); }catch(e){} }
+function hasUserData(){ return !!(inventory.length||tables.length||stations.length||clients.length||archivedEvents.length); }
+function markBackupDone(){ setBackupMeta({lastBackupAt:Date.now(),snoozeUntil:0}); updateBackupBanner(); }
+function snoozeBackup(){ const m=getBackupMeta(); m.snoozeUntil=Date.now()+3*DAY_MS; setBackupMeta(m); updateBackupBanner(); }
+function updateBackupBanner(){
+  const el=document.getElementById('backup-banner'); if(!el) return;
+  const m=getBackupMeta(), now=Date.now();
+  if(hasUserData()&&!m.lastBackupAt&&!m.firstSeenAt){ m.firstSeenAt=now; setBackupMeta(m); }
+  const ref=m.lastBackupAt||m.firstSeenAt||now;
+  const due=hasUserData()&&(now-ref)>BK_DAYS*DAY_MS&&now>(m.snoozeUntil||0);
+  el.style.display=due?'flex':'none';
+  const txt=document.getElementById('backup-banner-text');
+  if(txt) txt.textContent=t('backupReminderText').replace('{days}',Math.floor((now-ref)/DAY_MS));
+}
+// ══════════════════════════════════════════════════════
+// CLOUD SYNC (Firebase: Google sign-in + one Firestore document per user)
+// Local-first: the app always works offline from localStorage; the cloud is a synced copy.
+// ══════════════════════════════════════════════════════
+// Firebase web config — these values are identifiers, NOT secrets (protection comes from Firestore rules).
+const FIREBASE_CONFIG={
+  apiKey:'AIzaSyAVHk4YrxKmoxlVkT1pkDuNctiGYMyW7g4',
+  authDomain:'sidur-olam.firebaseapp.com',
+  projectId:'sidur-olam',
+  storageBucket:'sidur-olam.firebasestorage.app',
+  messagingSenderId:'210452752554',
+  appId:'1:210452752554:web:0e7a998e554ec081b888d3'
+};
+const FB_VERSION='10.14.1', SYNC_KEY='sidur-v3-syncmeta';
+let fb=null, fbUser=null, _cloudTimer=null, _applyingCloud=false, _syncState='idle';
+function cloudConfigured(){ return !!(FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId&&FIREBASE_CONFIG.appId); }
+function getSyncMeta(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(e){ return {}; } }
+function setSyncMeta(m){ try{ localStorage.setItem(SYNC_KEY,JSON.stringify(m)); }catch(e){} }
+async function loadFirebase(){
+  if(fb) return fb;
+  if(!cloudConfigured()) return null;
+  const base='https://www.gstatic.com/firebasejs/'+FB_VERSION+'/';
+  const [appM,authM,fsM]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+  const app=appM.initializeApp(FIREBASE_CONFIG);
+  fb={authM,fsM,auth:authM.getAuth(app),db:fsM.getFirestore(app)};
+  authM.onAuthStateChanged(fb.auth,onAuthChanged);
+  return fb;
+}
+function initCloud(){
+  if(!cloudConfigured()) return;
+  loadFirebase().catch(()=>{ _syncState='error'; updateAccountUI(); });
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&fbUser&&!_cloudTimer) initialSync(); });
+}
+async function onAuthChanged(user){
+  fbUser=user||null;
+  updateAccountUI();
+  if(fbUser) await initialSync();
+}
+async function cloudPush(){
+  if(!fb||!fbUser) return;
+  _syncState='syncing'; updateAccountUI();
+  try{
+    const updatedAt=Date.now();
+    await fb.fsM.setDoc(fb.fsM.doc(fb.db,'users',fbUser.uid),{data:exportBackupJSON(),updatedAt,email:fbUser.email||''});
+    setSyncMeta({uid:fbUser.uid,lastSyncAt:updatedAt,dirty:false});
+    _syncState='ok';
+  }catch(e){ _syncState='error'; }
+  updateAccountUI();
+}
+function applyCloud(cloud){
+  _applyingCloud=true;
+  try{
+    const d=JSON.parse(cloud.data); d.format='sidur-olam-backup-v1';
+    if(applyBackupObject(d)) setSyncMeta({uid:fbUser.uid,lastSyncAt:cloud.updatedAt||Date.now(),dirty:false});
+  }catch(e){ _syncState='error'; }
+  _applyingCloud=false;
+}
+async function initialSync(){
+  if(!fb||!fbUser) return;
+  _syncState='syncing'; updateAccountUI();
+  try{
+    const snap=await fb.fsM.getDoc(fb.fsM.doc(fb.db,'users',fbUser.uid));
+    const meta=getSyncMeta();
+    if(!snap.exists()){
+      if(hasUserData()) await cloudPush(); else { setSyncMeta({uid:fbUser.uid,lastSyncAt:Date.now(),dirty:false}); _syncState='ok'; }
+    } else {
+      const cloud=snap.data();
+      if(!hasUserData()){ applyCloud(cloud); _syncState='ok'; }
+      else if(meta.uid===fbUser.uid){
+        const cloudNewer=(cloud.updatedAt||0)>(meta.lastSyncAt||0);
+        if(!cloudNewer){ if(meta.dirty) await cloudPush(); else _syncState='ok'; }
+        else if(!meta.dirty){ applyCloud(cloud); _syncState='ok'; }
+        else { (await askConfirm(t('cloudConflictConfirm')))?applyCloud(cloud):await cloudPush(); _syncState='ok'; }
+      } else {
+        (await askConfirm(t('cloudConflictConfirm')))?applyCloud(cloud):await cloudPush();
+        _syncState='ok';
+      }
+    }
+  }catch(e){ _syncState='error'; }
+  updateAccountUI();
+}
+function scheduleCloudSync(){
+  if(!fbUser||_applyingCloud) return;
+  const m=getSyncMeta(); m.uid=fbUser.uid; m.dirty=true; setSyncMeta(m);
+  clearTimeout(_cloudTimer);
+  _cloudTimer=setTimeout(()=>{ _cloudTimer=null; cloudPush(); },2500);
+}
+async function signInGoogle(){
+  try{
+    const f=await loadFirebase(); if(!f) return;
+    await f.authM.signInWithPopup(f.auth,new f.authM.GoogleAuthProvider());
+  }catch(e){
+    if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){
+      try{ await fb.authM.signInWithRedirect(fb.auth,new fb.authM.GoogleAuthProvider()); }catch(e2){}
+    } else if(!(e&&(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'))){
+      _syncState='error'; updateAccountUI();
+    }
+  }
+}
+async function signOutGoogle(){
+  if(!fb) return;
+  if(_cloudTimer){ clearTimeout(_cloudTimer); _cloudTimer=null; await cloudPush(); }
+  await fb.authM.signOut(fb.auth);
+  setSyncMeta({}); _syncState='idle';
+}
+function openAccount(){
+  updateAccountUI();
+  document.getElementById('account-modal').classList.add('open');
+  if(cloudConfigured()&&!fb) loadFirebase().then(updateAccountUI).catch(()=>{ _syncState='error'; updateAccountUI(); });
+}
+function closeAccount(){ document.getElementById('account-modal').classList.remove('open'); }
+function homeAccountClick(){ if(!cloudConfigured()) return; if(!fbUser&&fb) signInGoogle(); else openAccount(); }
+function updateHomeAccount(){
+  const el=document.getElementById('home-account'); if(!el) return;
+  if(!cloudConfigured()){ el.style.display='none'; return; }
+  el.style.display='flex';
+  if(!fbUser){
+    el.style.background='linear-gradient(135deg,#3d2b45,#5bbcb8)'; el.style.color='#fff';
+    el.textContent='☁️ '+t('accSignIn')+' — '+t('homeSignInHint');
+  } else {
+    el.style.background='#fff'; el.style.color='var(--charcoal)';
+    el.textContent=(_syncState==='error'?'⚠️ ':_syncState==='syncing'?'⏳ ':'✅ ')+'☁️ '+(fbUser.email||'');
+  }
+}
+function updateAccountUI(){
+  updateHomeAccount();
+  const status=document.getElementById('acc-status'); if(!status) return;
+  const actions=document.getElementById('acc-actions'), last=document.getElementById('acc-lastsync');
+  last.textContent='';
+  if(!cloudConfigured()){ status.textContent=t('accNotConfigured'); actions.innerHTML=''; return; }
+  if(!fbUser){
+    status.textContent=_syncState==='error'?t('accError'):t('accSignedOut');
+    actions.innerHTML=`<button class="btn-save" onclick="signInGoogle()">${esc(t('accSignIn'))}</button>`;
+    return;
+  }
+  status.textContent=_syncState==='syncing'?t('accSyncing'):(_syncState==='error'?t('accError'):t('accSignedInAs').replace('{email}',fbUser.email||''));
+  const ts=getSyncMeta().lastSyncAt;
+  if(ts) last.textContent=t('accLastSync').replace('{time}',new Date(ts).toLocaleString(lang==='he'?'he-IL':'en-US'));
+  actions.innerHTML=`<button class="btn-save" onclick="initialSync().then(()=>{if(getSyncMeta().dirty)cloudPush()})">${esc(t('accSyncNow'))}</button><button class="btn-cancel" onclick="signOutGoogle()">${esc(t('accSignOut'))}</button>`;
+}
+// ══════════════════════════════════════════════════════
 // PDF / SHARE
 // ══════════════════════════════════════════════════════
 function buildReportHTML(){
@@ -1865,14 +2803,19 @@ function buildReportHTML(){
   // Use sell price (customer-facing) in PDF
   const invRows=inventory.map(it=>{
     const used=calcUsed(it.id),rem=it.qty-used,sell=sellPrices[it.id]||0,cost=used*sell;
-    return `<tr><td>${it.icon} ${esc(it.name)}</td><td style="text-align:center">${it.qty}</td><td style="text-align:center">${used}</td><td style="text-align:center;color:${rem<0?'#e05050':'inherit'}">${rem}</td><td style="text-align:center">${sell?'₪'+sell:'-'}</td><td style="text-align:center">${sell?'₪'+cost.toFixed(2):'-'}</td></tr>`;
+    return `<tr><td>${it.icon} ${esc(it.name)}</td><td style="text-align:center">${fmtQty(it.qty)}</td><td style="text-align:center">${fmtQty(used)}</td><td style="text-align:center;color:${rem<0?'#e05050':'inherit'}">${fmtQty(rem)}</td><td style="text-align:center">${sell?'₪'+sell:'-'}</td><td style="text-align:center">${sell?'₪'+cost.toFixed(2):'-'}</td></tr>`;
   }).join('');
   const invHeaders=inventory.map(it=>`<th>${it.icon} ${esc(it.name)}</th>`).join('');
   const tableRows=tables.map(t2=>{
     const meta=`${t2.count} ${lang==='he'?'שולחנות':'tables'}${t2.size?` × ${t2.size} ${lang==='he'?'איש':'seats'}`:''}`;
-    const itemCells=inventory.map(it=>`<td style="text-align:center">${t2.items[it.id]||0}</td>`).join('');
+    const itemCells=inventory.map(it=>`<td style="text-align:center">${fmtQty(t2.items[it.id]||0)}</td>`).join('');
     const totalCost=inventory.reduce((s,it)=>s+(t2.items[it.id]||0)*t2.count*(sellPrices[it.id]||0),0);
     return `<tr><td><strong>${esc(t2.name)}</strong><br><span style="font-size:11px;color:#7a6580">${meta}</span>${t2.note?`<br><span style="font-size:10px;color:#5bbcb8">📝 ${esc(t2.note)}</span>`:''}</td>${itemCells}<td style="text-align:center;font-weight:700">${Object.values(sellPrices).some(p=>p>0)?'₪'+totalCost.toFixed(2):'-'}</td></tr>`;
+  }).join('');
+  const stationRows=stations.map(st2=>{
+    const itemCells=inventory.map(it=>`<td style="text-align:center">${fmtQty(st2.items[it.id]||0)}</td>`).join('');
+    const totalCost=inventory.reduce((s,it)=>s+(st2.items[it.id]||0)*st2.count*(sellPrices[it.id]||0),0);
+    return `<tr><td><strong>${st2.icon} ${esc(st2.name)}</strong></td><td style="text-align:center">${st2.count}</td>${itemCells}<td style="text-align:center;font-weight:700">${Object.values(sellPrices).some(p=>p>0)?'₪'+totalCost.toFixed(2):'-'}</td></tr>`;
   }).join('');
   const grandTotal=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
   const hasSell=inventory.some(it=>(sellPrices[it.id]||0)>0);
@@ -1886,16 +2829,21 @@ function buildReportHTML(){
     <table><tr><th>${t('colItem')}</th><th>${t('colStock')}</th><th>${t('colUsed')}</th><th>${t('colLeft')}</th><th>${t('colPrice')}</th><th>${t('colCost')}</th></tr>${invRows}</table></div>`:''}
     ${tables.length&&inventory.length?`<div class="pd-section"><div class="pd-section-title">${t('tableDetail')}</div>
     <table><tr><th>${t('colTable')}</th>${invHeaders}<th>${t('colCost')}</th></tr>${tableRows}</table></div>`:''}
+    ${stations.length&&inventory.length?`<div class="pd-section"><div class="pd-section-title">${t('stationDetail')}</div>
+    <table><tr><th>${t('colStation')}</th><th>${t('colCount')}</th>${invHeaders}<th>${t('colCost')}</th></tr>${stationRows}</table></div>`:''}
     ${hasSell?`<div class="pd-grand-total"><div class="gt-label">${t('totalCost')}</div><div class="gt-amount">₪${grandTotal.toFixed(2)}</div></div>`:''}
   </div>`;
 }
 function openPdfPreview(){
+  pdfMode='report';
+  document.getElementById('pdf-title').textContent=t('pdfTitle');
   document.getElementById('pdf-body').innerHTML=buildReportHTML();
   document.getElementById('pdf-preview').classList.add('open');
 }
 function closePdfPreview(){document.getElementById('pdf-preview').classList.remove('open');}
 function printDoc(){window.print();}
 function buildShareText(){
+  if(pdfMode==='quote') return buildQuoteText();
   const summary=inventory.map(it=>t('itemRow').replace('{icon}',it.icon).replace('{name}',it.name).replace('{used}',calcUsed(it.id)).replace('{qty}',it.qty)).join('\n');
   const grandTotal=inventory.reduce((s,it)=>s+calcUsed(it.id)*(sellPrices[it.id]||0),0);
   return t('waText').replace('{summary}',summary).replace('{total}',grandTotal.toFixed(2));
@@ -1918,8 +2866,9 @@ function backupFileName(){
 function exportBackupJSON(){
   // profitPin deliberately NOT exported — backups are shared, the PIN protects cost data
   return JSON.stringify({
-    inventory,tables,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
-    activeTemplate,lang,exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
+    inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
+    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,
+    exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
   },null,2);
 }
 function downloadBackup(){
@@ -1930,6 +2879,7 @@ function downloadBackup(){
   a.href=url; a.download=backupFileName();
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),2000);
+  markBackupDone();
 }
 async function shareBackup(){
   const json=exportBackupJSON();
@@ -1939,6 +2889,7 @@ async function shareBackup(){
     const file=new File([blob],filename,{type:'application/json'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title:t('reportTitle')});
+      markBackupDone();
       return;
     }
   }catch(e){
@@ -1948,6 +2899,72 @@ async function shareBackup(){
 }
 // icons are injected into HTML unescaped (emoji) — strip any markup chars from imported values
 function sanitizeIcon(v){ return String(v==null?'':v).replace(/[<>&"'`]/g,'').slice(0,16)||'🌹'; }
+// per-inventory-item quantity maps (table.items / station.items) — force every value to a finite non-negative number
+function sanitizeItemsMap(v){
+  if(!v||typeof v!=='object'||Array.isArray(v)) return {};
+  const out={};
+  for(const k in v){ if(Object.prototype.hasOwnProperty.call(v,k)) out[k]=Math.max(0,parseFloat(v[k])||0); }
+  return out;
+}
+function sanitizePricesObj(v){ return (v&&typeof v==='object'&&!Array.isArray(v))?v:{}; }
+function sanitizeInventoryArr(arr){
+  return (Array.isArray(arr)?arr:[]).map((it,idx)=>({
+    id:parseInt(it.id)||0,
+    icon:sanitizeIcon(it.icon),
+    name:String(it.name==null?'':it.name),
+    qty:Math.max(0,parseFloat(it.qty)||0),
+    color:/^#[0-9a-fA-F]{3,8}$/.test(String(it.color||''))?it.color:COLORS[idx%COLORS.length]
+  }));
+}
+function sanitizeTablesArr(arr){
+  return (Array.isArray(arr)?arr:[]).map(t2=>({
+    id:parseInt(t2.id)||0,
+    name:String(t2.name==null?'':t2.name),
+    count:Math.max(1,parseInt(t2.count)||1),
+    size:parseInt(t2.size)||null,
+    note:String(t2.note==null?'':t2.note),
+    items:sanitizeItemsMap(t2.items)
+  }));
+}
+function sanitizeStationsArr(arr){
+  return (Array.isArray(arr)?arr:[]).map(st2=>({
+    id:parseInt(st2.id)||0,
+    icon:sanitizeIcon(st2.icon),
+    name:String(st2.name==null?'':st2.name),
+    count:Math.max(1,parseInt(st2.count)||1),
+    items:sanitizeItemsMap(st2.items)
+  }));
+}
+function sanitizePayment(p){
+  if(!p||typeof p!=='object') return {deposit:0,depositPaid:false,dueDate:''};
+  return {
+    deposit:Math.max(0,parseFloat(p.deposit)||0),
+    depositPaid:!!p.depositPaid,
+    dueDate:typeof p.dueDate==='string'?p.dueDate:''
+  };
+}
+function sanitizeClientsArr(arr){
+  return (Array.isArray(arr)?arr:[]).map(c=>({
+    id:parseInt(c.id)||0,
+    name:String(c.name==null?'':c.name),
+    phone:String(c.phone==null?'':c.phone)
+  }));
+}
+function sanitizeArchivedEventsArr(arr){
+  return (Array.isArray(arr)?arr:[]).map(a=>({
+    id:parseInt(a.id)||0,
+    name:String(a.name==null?'':a.name),
+    clientId:a.clientId!=null&&isFinite(parseInt(a.clientId))?parseInt(a.clientId):null,
+    savedAt:typeof a.savedAt==='string'?a.savedAt:new Date().toISOString(),
+    inventory:sanitizeInventoryArr(a.inventory),
+    tables:sanitizeTablesArr(a.tables),
+    stations:sanitizeStationsArr(a.stations),
+    prices:sanitizePricesObj(a.prices),
+    sellPrices:sanitizePricesObj(a.sellPrices),
+    payment:sanitizePayment(a.payment),
+    grandTotal:Math.max(0,parseFloat(a.grandTotal)||0)
+  }));
+}
 async function importBackupFile(inputEl){
   const file=inputEl.files[0];
   if(!file) return;
@@ -1959,11 +2976,22 @@ async function importBackupFile(inputEl){
       if(!d||typeof d!=='object'||Array.isArray(d)||d.format!=='sidur-olam-backup-v1') throw new Error('bad format');
       const ok=await askConfirm(t('importConfirm'));
       if(!ok){ inputEl.value=''; return; }
+      applyBackupObject(d);
+    }catch(err){
+      alert(t('importInvalid'));
+    }
+    inputEl.value='';
+  };
+  reader.readAsText(file);
+}
+// applies an already-validated backup object to the live state (file import + cloud sync share this)
+function applyBackupObject(d){
+    try{
       inventory=(Array.isArray(d.inventory)?d.inventory:[]).map((it,idx)=>({
         id:parseInt(it.id)||0,
         icon:sanitizeIcon(it.icon),
         name:String(it.name==null?'':it.name),
-        qty:Math.max(0,parseInt(it.qty)||0),
+        qty:Math.max(0,parseFloat(it.qty)||0),
         color:/^#[0-9a-fA-F]{3,8}$/.test(String(it.color||''))?it.color:COLORS[idx%COLORS.length]
       }));
       tables=(Array.isArray(d.tables)?d.tables:[]).map(t2=>({
@@ -1972,11 +3000,25 @@ async function importBackupFile(inputEl){
         count:Math.max(1,parseInt(t2.count)||1),
         size:parseInt(t2.size)||null,
         note:String(t2.note==null?'':t2.note),
-        items:(t2.items&&typeof t2.items==='object'&&!Array.isArray(t2.items))?t2.items:{}
+        items:sanitizeItemsMap(t2.items)
+      }));
+      stations=(Array.isArray(d.stations)?d.stations:[]).map(st2=>({
+        id:parseInt(st2.id)||0,
+        icon:sanitizeIcon(st2.icon),
+        name:String(st2.name==null?'':st2.name),
+        count:Math.max(1,parseInt(st2.count)||1),
+        items:sanitizeItemsMap(st2.items)
       }));
       prices=(d.prices&&typeof d.prices==='object')?d.prices:{};
       sellPrices=(d.sellPrices&&typeof d.sellPrices==='object')?d.sellPrices:{};
-      nextId=Math.max(1,parseInt(d.nextId)||1,...inventory.map(i=>i.id+1),...tables.map(x=>x.id+1));
+      clients=sanitizeClientsArr(d.clients);
+      archivedEvents=sanitizeArchivedEventsArr(d.archivedEvents);
+      activeClientId=d.activeClientId!=null&&isFinite(parseInt(d.activeClientId))?parseInt(d.activeClientId):null;
+      payment=sanitizePayment(d.payment);
+      const archiveNestedIds=archivedEvents.flatMap(a=>[a.id,...a.inventory.map(i=>i.id),...a.tables.map(x=>x.id),...a.stations.map(x=>x.id)]);
+      nextId=Math.max(1,parseInt(d.nextId)||1,
+        ...inventory.map(i=>i.id+1),...tables.map(x=>x.id+1),...stations.map(x=>x.id+1),
+        ...clients.map(c=>c.id+1),...archiveNestedIds.map(x=>x+1));
       budgetTarget=Math.max(0,parseFloat(d.budgetTarget)||0);
       reminder=(d.reminder&&typeof d.reminder==='object')?d.reminder:{};
       checklists=(d.checklists&&typeof d.checklists==='object')?d.checklists:{};
@@ -1984,13 +3026,12 @@ async function importBackupFile(inputEl){
       if(typeof d.profitPin==='string'&&d.profitPin) profitPin=d.profitPin; // old backups only; new exports omit it
       profitUnlockedThisSession=false;
       setLang(d.lang==='en'?'en':'he'); // updates dir + lang buttons + translations + save
-      renderAll(); updateReminderBadge(); startCountdown(); scheduleReminder();
+      renderAll(); updateReminderBadge(); startCountdown(); scheduleReminder(); updateClientPaymentBadge();
+      return true;
     }catch(err){
       alert(t('importInvalid'));
+      return false;
     }
-    inputEl.value='';
-  };
-  reader.readAsText(file);
 }
 // ══════════════════════════════════════════════════════
 // GENERIC CONFIRM / PROMPT MODALS (replace native confirm()/prompt())
@@ -2073,27 +3114,31 @@ function removePinSetting(){
 async function resetAll(){
   const ok=await askConfirm(t('resetConfirm'));
   if(!ok) return;
-  inventory=[]; tables=[]; prices={}; sellPrices={}; nextId=1; budgetTarget=0;
-  save(); renderAll();
+  inventory=[]; tables=[]; stations=[]; prices={}; sellPrices={}; nextId=1; budgetTarget=0;
+  activeClientId=null; payment={deposit:0,depositPaid:false,dueDate:''};
+  save(); renderAll(); updateClientPaymentBadge();
 }
 async function newEvent(){
   const ok=await askConfirm(t('newEventConfirm'));
   if(!ok) return;
-  tables=[];
+  tables=[]; stations=[];
   inventory.forEach(it=>it.qty=0);
   budgetTarget=0;
   reminder={};
-  save(); renderAll(); updateReminderBadge();
+  activeClientId=null; payment={deposit:0,depositPaid:false,dueDate:''};
+  save(); renderAll(); updateReminderBadge(); updateClientPaymentBadge();
   const strip=document.getElementById('countdown-strip');
   if(strip) strip.style.display='none';
 }
-function renderAll(){renderInvList();renderStockBar();renderTables();recalc();if(currentTab==='costs')renderCosts();if(currentTab==='profit')renderProfit();}
+function renderAll(){renderInvList();renderStockBar();renderTables();renderStations();recalc();if(currentTab==='costs')renderCosts();if(currentTab==='profit')renderProfit();}
 function flash(id){
   const el=document.getElementById(id);if(!el)return;
   el.style.borderColor='#e05050';
   setTimeout(()=>el.style.borderColor='',1200);
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// rounds to 2 decimals and drops floating-point artifacts (0.1+0.2 etc) for display of computed sums
+function fmtQty(n){ if(!isFinite(n)) return '0'; const r=Math.round((n+Number.EPSILON)*100)/100; return String(r); }
 // ══════════════════════════════════════════════════════
 // ENTER SHORTCUTS
 // ══════════════════════════════════════════════════════
@@ -2112,6 +3157,9 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   if(document.getElementById('pdf-preview').classList.contains('open')){closePdfPreview();return;}
   if(document.getElementById('summary-screen').style.display==='block'){closeSummary();return;}
+  if(document.getElementById('clients-screen').style.display==='block'){closeClientsScreen();return;}
+  if(document.getElementById('archive-screen').style.display==='block'){closeArchiveScreen();return;}
+  if(document.getElementById('shopping-screen').style.display==='block'){closeShoppingScreen();return;}
   const openModal=document.querySelector('.modal-overlay.open');
   if(openModal){
     const closers={
@@ -2121,7 +3169,8 @@ document.addEventListener('keydown',e=>{
       'pin-settings-modal':closePinSettings,
       'checklist-modal':closeChecklist,
       'reminder-modal':closeReminder,
-      'budget-modal':closeBudget
+      'budget-modal':closeBudget,
+      'clientpay-modal':closeClientPayment
     };
     (closers[openModal.id]||(()=>openModal.classList.remove('open')))();
     return;
@@ -2138,6 +3187,10 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').cat
 load();
 applyTranslations();
 renderPresets();
+updateClientPaymentBadge();
+updateBackupBanner();
+initCloud();
+renderStationPresets();
 startCountdown();
 const onboarded=localStorage.getItem('sidur-v3-onboarded');
 if(onboarded){
