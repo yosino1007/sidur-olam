@@ -267,7 +267,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 .profit-card .pc-stat.red strong{color:#c62828}
 .profit-card .pc-stat span{font-size:10px;color:var(--mid)}
 /* ══ SUMMARY SCREEN ══ */
-#summary-screen,#clients-screen,#archive-screen,#shopping-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
+#summary-screen,#clients-screen,#archive-screen,#shopping-screen,#photos-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
 .summary-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(16px + var(--safe-top)) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
 .summary-header h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;flex:1}
 .summary-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
@@ -440,6 +440,13 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     <div class="sm-item-text">
       <div class="sm-item-title" id="sm-shopping-title">רשימת קניות</div>
       <div class="sm-item-desc" id="sm-shopping-desc">מה חסר לקנות לאירוע הזה</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openPhotosScreen('active')">
+    <div class="sm-item-icon">📷</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-photos-title">תמונות האירוע</div>
+      <div class="sm-item-desc" id="sm-photos-desc">עד 10 תמונות מהמצלמה או מהגלריה</div>
     </div>
   </div>
   <div class="sm-item" onclick="closeSideMenu();openQuote()">
@@ -715,6 +722,33 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   </div>
   <div class="summary-body" id="shopping-body"></div>
 </div>
+<!-- ══════ PHOTOS SCREEN ══════ -->
+<div id="photos-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closePhotosScreen()">←</button>
+    <h2 id="photos-screen-title">📷 תמונות האירוע</h2>
+    <span id="photos-count" style="color:#fff;font-size:13px;font-weight:700"></span>
+  </div>
+  <div class="summary-body">
+    <div id="photos-add-row" style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn-teal" style="flex:1;padding:10px" onclick="document.getElementById('photo-input-camera').click()" id="photos-camera-btn">📷 צלם</button>
+      <button class="btn-teal" style="flex:1;padding:10px" onclick="document.getElementById('photo-input-gallery').click()" id="photos-gallery-btn">🖼️ מהגלריה</button>
+    </div>
+    <p id="photos-status" style="text-align:center;font-size:12px;color:var(--mid);min-height:16px;margin-bottom:8px"></p>
+    <div id="photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px"></div>
+    <input type="file" id="photo-input-camera" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFiles(this)">
+    <input type="file" id="photo-input-gallery" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this)">
+  </div>
+</div>
+<div class="modal-overlay" id="photo-lightbox" onclick="closePhotoLightbox()">
+  <div style="max-width:96vw;max-height:92vh;display:flex;flex-direction:column;gap:10px;align-items:center" onclick="event.stopPropagation()">
+    <img id="photo-lightbox-img" alt="" style="max-width:96vw;max-height:78vh;border-radius:10px;background:#000">
+    <div style="display:flex;gap:10px">
+      <button class="btn-cancel" onclick="closePhotoLightbox()">✕</button>
+      <button class="btn-save" id="photo-lightbox-del" onclick="deleteLightboxPhoto()" style="background:#c62828">🗑️</button>
+    </div>
+  </div>
+</div>
 <!-- ══════ PDF MODAL ══════ -->
 <div id="pdf-preview">
   <div class="pdf-modal">
@@ -932,6 +966,7 @@ let inventory=[], tables=[], stations=[], prices={}, sellPrices={}, nextId=1;
 let pickerFor=null, currentTab='planner', lang='he';
 let budgetTarget=0, reminder={}, checklists={}, activeTemplate='general';
 let clients=[], archivedEvents=[], activeClientId=null;
+let eventPhotos=[]; // ids of photos attached to the ACTIVE event (bytes live in IndexedDB + Firestore, never in this state)
 let payment={deposit:0,depositPaid:false,dueDate:''};
 const COLORS=['#e891bb','#5bbcb8','#f4a7c8','#7dd4d1','#d4a0e8','#8ed4b8','#f0b8d8','#6bc8c5'];
 // ══════════════════════════════════════════════════════
@@ -995,7 +1030,7 @@ const T = {
     btnSaveBudget:'שמור', btnCancelBudget:'ביטול',
     budgetWarning:'⚠️ מתקרב לתקציב! עלות: ₪{cost} מתוך ₪{budget}',
     budgetOver:'🚨 חרגת מהתקציב! עלות: ₪{cost} מתוך ₪{budget}',
-    resetConfirm:'לאפס הכל? המלאי, השולחנות, הפריטים המיוחדים והמחירים יימחקו. הלקוח והתשלום לאירוע הנוכחי יאופסו. רשימת הלקוחות והארכיון יישמרו.',
+    resetConfirm:'לאפס הכל? המלאי, השולחנות, הפריטים המיוחדים, המחירים והתמונות של האירוע הנוכחי יימחקו. הלקוח והתשלום לאירוע הנוכחי יאופסו. רשימת הלקוחות והארכיון יישמרו.',
     reportTitle:'🌹 דוח סידור אירוע',
     invSummary:'📦 סיכום מלאי', tableDetail:'🪑 פירוט שולחנות', stationDetail:'💐 פירוט פריטים מיוחדים',
     colItem:'פריט', colStock:'במלאי', colUsed:'בשימוש', colLeft:'נותר', colPrice:'מחיר', colCost:'עלות',
@@ -1019,7 +1054,7 @@ const T = {
     revenueCostMarginLine:'הכנסות: ₪{rev} · עלויות: ₪{cost} · מרווח: {margin}%',
     myCostPcLabel:'💸 עלות שלי (₪)', customerPricePcLabel:'💰 מחיר ללקוח (₪)',
     smNewEventTitle:'התחלת אירוע חדש', smNewEventDesc:'שומר קטלוג פריטים ומחירים, מאפס שולחנות ומלאי',
-    newEventConfirm:'להתחיל אירוע חדש? השולחנות, הפריטים המיוחדים, כמויות המלאי, התקציב, התזכורת והתשלום יימחקו — שמות הפריטים, המחירים ורשימת הלקוחות יישארו. שקול לשמור לארכיון קודם.',
+    newEventConfirm:'להתחיל אירוע חדש? השולחנות, הפריטים המיוחדים, כמויות המלאי, התקציב, התזכורת, התשלום והתמונות יימחקו — שמות הפריטים, המחירים ורשימת הלקוחות יישארו. תמונות ששמורות בארכיון יישארו שם. שקול לשמור לארכיון קודם.',
     smPinTitle:'נעילת טאב רווח', smPinDesc:'קוד גישה לטאב הרווח בלבד',
     pinModalTitle:'🔒 קוד גישה', pinWrong:'קוד שגוי',
     pinSettingsHint:'קוד בן 4 ספרות שיידרש לפני כניסה לטאב הרווח. שים לב: זו הגנה בסיסית בצד לקוח בלבד ולא אבטחה אמיתית — אין לשתף את קישור האפליקציה עצמו עם לקוחות.',
@@ -1067,6 +1102,11 @@ const T = {
     accLastSync:'סנכרון אחרון: {time}', accSyncing:'מסנכרן…', accError:'⚠️ הסנכרון נכשל. הנתונים נשארו במכשיר ויסונכרנו בהזדמנות הבאה.',
     accPrivacy:'הנתונים נשמרים בחשבון שלך בלבד. כל משתמש רואה רק את הנתונים של עצמו.',
     homeSignInHint:'שמירת הנתונים בענן',
+    smPhotos:'תמונות האירוע', smPhotosDesc:'עד 10 תמונות מהמצלמה או מהגלריה',
+    photosTitle:'📷 תמונות האירוע', photosCamera:'📷 צלם', photosGallery:'🖼️ מהגלריה',
+    photosEmpty:'עוד אין תמונות לאירוע הזה', photosLimit:'אפשר לצרף עד 10 תמונות לאירוע',
+    photosDeleteConfirm:'למחוק את התמונה? אם היא שמורה גם בארכיון, היא תישאר שם.',
+    photosFail:'לא ניתן לטעון את התמונה (אין אינטרנט?)', photosArchiveBtn:'📷 תמונות ({n})', photosProcessing:'מעבד תמונה…',
     cloudConflictConfirm:'כבר יש נתונים בחשבון הענן. אישור = להחליף את הנתונים במכשיר בנתוני הענן. ביטול = להעלות את נתוני המכשיר ולדרוס את הענן.',
   },
   en: {
@@ -1150,7 +1190,7 @@ const T = {
     revenueCostMarginLine:'Revenue: ₪{rev} · Costs: ₪{cost} · Margin: {margin}%',
     myCostPcLabel:'💸 My Cost (₪)', customerPricePcLabel:'💰 Customer Price (₪)',
     smNewEventTitle:'Start New Event', smNewEventDesc:'Keeps item catalog and prices, clears tables and stock',
-    newEventConfirm:'Start a new event? Tables, special items, stock quantities, budget, reminder and payment will be cleared — item names, prices and the client list stay. Consider saving to the archive first.',
+    newEventConfirm:'Start a new event? Tables, special items, stock quantities, budget, reminder, payment and photos will be cleared — item names, prices and the client list stay. Photos saved in the archive stay there. Consider saving to the archive first.',
     smPinTitle:'Lock Profit Tab', smPinDesc:'Access code for the Profit tab only',
     pinModalTitle:'🔒 Access Code', pinWrong:'Wrong code',
     pinSettingsHint:'A 4-digit code required before entering the Profit tab. Note: this is a basic client-side deterrent only, not real security — never share the app link itself with clients.',
@@ -1198,6 +1238,11 @@ const T = {
     accLastSync:'Last sync: {time}', accSyncing:'Syncing…', accError:'⚠️ Sync failed. Your data is safe on this device and will sync later.',
     accPrivacy:'Your data is stored in your account only. Each user sees only their own data.',
     homeSignInHint:'keep your data in the cloud',
+    smPhotos:'Event Photos', smPhotosDesc:'Up to 10 photos from camera or gallery',
+    photosTitle:'📷 Event Photos', photosCamera:'📷 Take photo', photosGallery:'🖼️ From gallery',
+    photosEmpty:'No photos for this event yet', photosLimit:'You can attach up to 10 photos per event',
+    photosDeleteConfirm:'Delete this photo? If it is also saved in the archive, it stays there.',
+    photosFail:'Could not load the photo (offline?)', photosArchiveBtn:'📷 Photos ({n})', photosProcessing:'Processing photo…',
     cloudConflictConfirm:'There is already data in your cloud account. OK = replace this device\'s data with the cloud data. Cancel = upload this device\'s data and overwrite the cloud.',
   }
 };
@@ -1206,7 +1251,7 @@ function t(k){ return (T[lang]||T['he'])[k]||k; }
 // PERSIST
 // ══════════════════════════════════════════════════════
 function save(){
-  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment})); }
+  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment,eventPhotos})); }
   catch(e){
     if(!save._warned){ save._warned=true; alert(t('saveFailed')); }
   }
@@ -1226,6 +1271,7 @@ function load(){
       archivedEvents=Array.isArray(d.archivedEvents)?d.archivedEvents:[];
       activeClientId=d.activeClientId||null;
       payment=(d.payment&&typeof d.payment==='object')?{deposit:d.payment.deposit||0,depositPaid:!!d.payment.depositPaid,dueDate:d.payment.dueDate||''}:{deposit:0,depositPaid:false,dueDate:''};
+      eventPhotos=sanitizePhotoIds(d.eventPhotos);
     }
   }catch(e){}
 }
@@ -1355,6 +1401,9 @@ function applyTranslations(){
   st('sm-shopping-title',t('smShopping')); st('sm-shopping-desc',t('smShoppingDesc'));
   st('sm-quote-title',t('smQuote')); st('sm-quote-desc',t('smQuoteDesc'));
   st('shopping-screen-title',t('shoppingTitle')); st('shopping-share-btn',t('shoppingShare'));
+  st('sm-photos-title',t('smPhotos')); st('sm-photos-desc',t('smPhotosDesc'));
+  st('photos-screen-title',t('photosTitle')); st('photos-camera-btn',t('photosCamera')); st('photos-gallery-btn',t('photosGallery'));
+  if(document.getElementById('photos-screen').style.display==='block') renderPhotosScreen();
   st('backup-now-btn',t('backupNow')); st('backup-later-btn',t('backupLater'));
   st('sm-account-title',t('smAccount')); st('sm-account-desc',t('smAccountDesc'));
   st('acc-modal-title',t('accModalTitle')); st('acc-privacy',t('accPrivacy'));
@@ -2460,6 +2509,7 @@ function renderArchiveScreen(){
           <button class="btn-teal" style="flex:1;font-size:11px;padding:6px" onclick="toggleArchiveView(${a.id})">${esc(t('btnViewArchive'))}</button>
           <button class="btn-teal" style="flex:1;font-size:11px;padding:6px" onclick="loadArchiveAsTemplate(${a.id})">${esc(t('btnDuplicateArchive'))}</button>
         </div>
+        ${(a.photoIds||[]).length?`<button class="btn-teal" style="width:100%;margin-top:6px;font-size:11px;padding:6px" onclick="openPhotosScreen(${a.id})">${esc(t('photosArchiveBtn').replace('{n}',(a.photoIds||[]).length))}</button>`:''}
         ${expanded?`<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;font-size:11px;color:var(--mid)">
           ${a.tables.map(t2=>`<div>🪑 ${esc(t2.name)} × ${t2.count}</div>`).join('')}
           ${a.stations.map(st2=>`<div>${esc(st2.icon)} ${esc(st2.name)} × ${st2.count}</div>`).join('')}
@@ -2486,6 +2536,7 @@ async function saveEventToArchive(){
     prices:JSON.parse(JSON.stringify(prices)),
     sellPrices:JSON.parse(JSON.stringify(sellPrices)),
     payment:JSON.parse(JSON.stringify(payment)),
+    photoIds:[...eventPhotos],
     grandTotal:computeGrandTotal()
   };
   archivedEvents.push(snap);
@@ -2534,6 +2585,183 @@ async function deleteArchiveEvent(id){
   archivedEvents=archivedEvents.filter(a=>a.id!==id);
   if(archiveExpandedId===id) archiveExpandedId=null;
   save(); renderArchiveScreen();
+  releasePhotoIds(a.photoIds||[]);
+}
+// ══════════════════════════════════════════════════════
+// EVENT PHOTOS (max 10 per event). Bytes: IndexedDB locally + Firestore subcollection users/{uid}/photos/{id}.
+// The main state only holds photo IDs (eventPhotos / archivedEvents[].photoIds), so the 1MB document limit is never hit.
+// ══════════════════════════════════════════════════════
+const MAX_PHOTOS=10, PHOTOQ_KEY='sidur-v3-photoq';
+const _memPhotos=new Map(); // fallback when IndexedDB is unavailable
+let _photoDB=null;
+function photoDB(){
+  if(_photoDB) return _photoDB;
+  _photoDB=new Promise((resolve)=>{
+    try{
+      if(typeof indexedDB==='undefined'||!indexedDB){ resolve(null); return; }
+      const req=indexedDB.open('sidur-photos',1);
+      req.onupgradeneeded=()=>req.result.createObjectStore('photos');
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>resolve(null);
+    }catch(e){ resolve(null); }
+  });
+  return _photoDB;
+}
+async function photoPut(id,data){
+  const db=await photoDB();
+  if(!db){ _memPhotos.set(id,data); return; }
+  await new Promise((res,rej)=>{ const tx=db.transaction('photos','readwrite'); tx.objectStore('photos').put(data,id); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); });
+}
+async function photoGet(id){
+  const db=await photoDB();
+  if(!db) return _memPhotos.get(id)||null;
+  return new Promise((res)=>{ const r=db.transaction('photos').objectStore('photos').get(id); r.onsuccess=()=>res(r.result||null); r.onerror=()=>res(null); });
+}
+async function photoDel(id){
+  const db=await photoDB();
+  if(!db){ _memPhotos.delete(id); return; }
+  await new Promise((res)=>{ const tx=db.transaction('photos','readwrite'); tx.objectStore('photos').delete(id); tx.oncomplete=res; tx.onerror=res; });
+}
+function isSafePhotoData(s){ return typeof s==='string'&&s.length<1200000&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s); }
+function newPhotoId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+// sync queue — survives offline / failed uploads
+function getPhotoQ(){ try{ const q=JSON.parse(localStorage.getItem(PHOTOQ_KEY)); return {up:(q&&q.up)||[],del:(q&&q.del)||[]}; }catch(e){ return {up:[],del:[]}; } }
+function setPhotoQ(q){ try{ localStorage.setItem(PHOTOQ_KEY,JSON.stringify(q)); }catch(e){} }
+async function flushPhotoQueue(){
+  if(!fb||!fbUser) return;
+  const q=getPhotoQ();
+  for(const id of [...q.up]){
+    try{
+      const data=await photoGet(id);
+      if(data) await fb.fsM.setDoc(fb.fsM.doc(fb.db,'users',fbUser.uid,'photos',id),{data,createdAt:Date.now()});
+      const cur=getPhotoQ(); cur.up=cur.up.filter(x=>x!==id); setPhotoQ(cur);
+    }catch(e){ break; }
+  }
+  for(const id of [...getPhotoQ().del]){
+    try{
+      await fb.fsM.deleteDoc(fb.fsM.doc(fb.db,'users',fbUser.uid,'photos',id));
+      const cur=getPhotoQ(); cur.del=cur.del.filter(x=>x!==id); setPhotoQ(cur);
+    }catch(e){ break; }
+  }
+}
+function queuePhoto(kind,id){
+  const q=getPhotoQ();
+  if(kind==='up'){ if(!q.up.includes(id)) q.up.push(id); }
+  else { q.up=q.up.filter(x=>x!==id); if(!q.del.includes(id)) q.del.push(id); }
+  setPhotoQ(q);
+  flushPhotoQueue();
+}
+async function fetchCloudPhoto(id){
+  if(!fb||!fbUser) return null;
+  try{
+    const snap=await fb.fsM.getDoc(fb.fsM.doc(fb.db,'users',fbUser.uid,'photos',id));
+    if(snap.exists()){ const d=snap.data().data; if(isSafePhotoData(d)){ await photoPut(id,d); return d; } }
+  }catch(e){}
+  return null;
+}
+// delete photos that are no longer referenced by the active event or any archived event
+function referencedPhotoIds(){ return new Set([...eventPhotos,...archivedEvents.flatMap(a=>a.photoIds||[])]); }
+async function releasePhotoIds(ids){
+  const ref=referencedPhotoIds();
+  for(const id of (ids||[])){
+    if(ref.has(id)) continue;
+    await photoDel(id);
+    queuePhoto('del',id);
+  }
+}
+// resize + compress so each photo stays far below Firestore's 1MB document limit
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        let max=1280, q=0.72, out=null;
+        for(let i=0;i<5;i++){
+          const s=Math.min(1,max/Math.max(img.width,img.height));
+          const c=document.createElement('canvas');
+          c.width=Math.max(1,Math.round(img.width*s)); c.height=Math.max(1,Math.round(img.height*s));
+          c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+          out=c.toDataURL('image/jpeg',q);
+          if(out.length<600000) break;
+          max=Math.round(max*0.8); q=Math.max(0.5,q-0.07);
+        }
+        URL.revokeObjectURL(url);
+        isSafePhotoData(out)?resolve(out):reject(new Error('compress'));
+      }catch(e){ URL.revokeObjectURL(url); reject(e); }
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('load')); };
+    img.src=url;
+  });
+}
+let photosCtx='active', _lightboxId=null;
+function currentPhotoIds(){
+  if(photosCtx==='active') return eventPhotos;
+  const a=archivedEvents.find(x=>x.id===photosCtx);
+  return a?(a.photoIds||[]):[];
+}
+function openPhotosScreen(ctx){
+  photosCtx=ctx;
+  document.getElementById('photos-screen').style.display='block';
+  renderPhotosScreen();
+}
+function closePhotosScreen(){ document.getElementById('photos-screen').style.display='none'; }
+async function renderPhotosScreen(){
+  const ids=[...currentPhotoIds()], editable=photosCtx==='active';
+  document.getElementById('photos-count').textContent=ids.length+'/'+MAX_PHOTOS;
+  document.getElementById('photos-add-row').style.display=(editable&&ids.length<MAX_PHOTOS)?'flex':'none';
+  const grid=document.getElementById('photos-grid');
+  if(!ids.length){ grid.innerHTML=''; document.getElementById('photos-status').textContent=t('photosEmpty'); return; }
+  document.getElementById('photos-status').textContent='';
+  grid.innerHTML=ids.map(id=>`<div id="ph-${esc(id)}" style="aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--warm);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px" onclick="openPhotoLightbox('${esc(id)}')">⏳</div>`).join('');
+  for(const id of ids){
+    let data=await photoGet(id);
+    if(!data) data=await fetchCloudPhoto(id);
+    const cell=document.getElementById('ph-'+id); if(!cell) continue;
+    if(isSafePhotoData(data)){ cell.innerHTML=''; const im=document.createElement('img'); im.src=data; im.style.cssText='width:100%;height:100%;object-fit:cover'; cell.appendChild(im); }
+    else cell.textContent='⚠️';
+  }
+}
+async function handlePhotoFiles(inputEl){
+  const files=[...(inputEl.files||[])];
+  inputEl.value='';
+  if(!files.length||photosCtx!=='active') return;
+  const status=document.getElementById('photos-status');
+  const room=MAX_PHOTOS-eventPhotos.length;
+  if(room<=0){ status.textContent=t('photosLimit'); return; }
+  if(files.length>room) status.textContent=t('photosLimit');
+  for(const f of files.slice(0,room)){
+    status.textContent=t('photosProcessing');
+    try{
+      const data=await compressImage(f);
+      const id=newPhotoId();
+      await photoPut(id,data);
+      eventPhotos.push(id);
+      save();
+      queuePhoto('up',id);
+    }catch(e){ status.textContent=t('photosFail'); }
+  }
+  const failed=status.textContent===t('photosFail');
+  renderPhotosScreen(); // runs synchronously up to its first await, so the message below is set after it clears the status
+  status.textContent=failed?t('photosFail'):(files.length>room?t('photosLimit'):'');
+}
+async function openPhotoLightbox(id){
+  _lightboxId=id;
+  let data=await photoGet(id);
+  if(!data) data=await fetchCloudPhoto(id);
+  if(!isSafePhotoData(data)){ document.getElementById('photos-status').textContent=t('photosFail'); return; }
+  document.getElementById('photo-lightbox-img').src=data;
+  document.getElementById('photo-lightbox-del').style.display=photosCtx==='active'?'inline-block':'none';
+  document.getElementById('photo-lightbox').classList.add('open');
+}
+function closePhotoLightbox(){ document.getElementById('photo-lightbox').classList.remove('open'); _lightboxId=null; }
+async function deleteLightboxPhoto(){
+  const id=_lightboxId; if(!id||photosCtx!=='active') return;
+  const ok=await askConfirm(t('photosDeleteConfirm')); if(!ok) return;
+  eventPhotos=eventPhotos.filter(x=>x!==id);
+  save(); closePhotoLightbox();
+  await releasePhotoIds([id]);
+  renderPhotosScreen();
 }
 // ══════════════════════════════════════════════════════
 // SHOPPING LIST (needed − stock; priced at MY cost — internal screen, not client-facing)
@@ -2733,6 +2961,7 @@ async function initialSync(){
     }
   }catch(e){ _syncState='error'; }
   updateAccountUI();
+  flushPhotoQueue();
 }
 function scheduleCloudSync(){
   if(!fbUser||_applyingCloud) return;
@@ -2867,7 +3096,7 @@ function exportBackupJSON(){
   // profitPin deliberately NOT exported — backups are shared, the PIN protects cost data
   return JSON.stringify({
     inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
-    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,
+    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,eventPhotos,
     exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
   },null,2);
 }
@@ -2905,6 +3134,9 @@ function sanitizeItemsMap(v){
   const out={};
   for(const k in v){ if(Object.prototype.hasOwnProperty.call(v,k)) out[k]=Math.max(0,parseFloat(v[k])||0); }
   return out;
+}
+function sanitizePhotoIds(v){
+  return (Array.isArray(v)?v:[]).filter(x=>typeof x==='string'&&/^[A-Za-z0-9_-]{6,48}$/.test(x)).slice(0,10);
 }
 function sanitizePricesObj(v){ return (v&&typeof v==='object'&&!Array.isArray(v))?v:{}; }
 function sanitizeInventoryArr(arr){
@@ -2962,6 +3194,7 @@ function sanitizeArchivedEventsArr(arr){
     prices:sanitizePricesObj(a.prices),
     sellPrices:sanitizePricesObj(a.sellPrices),
     payment:sanitizePayment(a.payment),
+    photoIds:sanitizePhotoIds(a.photoIds),
     grandTotal:Math.max(0,parseFloat(a.grandTotal)||0)
   }));
 }
@@ -3015,6 +3248,7 @@ function applyBackupObject(d){
       archivedEvents=sanitizeArchivedEventsArr(d.archivedEvents);
       activeClientId=d.activeClientId!=null&&isFinite(parseInt(d.activeClientId))?parseInt(d.activeClientId):null;
       payment=sanitizePayment(d.payment);
+      eventPhotos=sanitizePhotoIds(d.eventPhotos);
       const archiveNestedIds=archivedEvents.flatMap(a=>[a.id,...a.inventory.map(i=>i.id),...a.tables.map(x=>x.id),...a.stations.map(x=>x.id)]);
       nextId=Math.max(1,parseInt(d.nextId)||1,
         ...inventory.map(i=>i.id+1),...tables.map(x=>x.id+1),...stations.map(x=>x.id+1),
@@ -3116,7 +3350,9 @@ async function resetAll(){
   if(!ok) return;
   inventory=[]; tables=[]; stations=[]; prices={}; sellPrices={}; nextId=1; budgetTarget=0;
   activeClientId=null; payment={deposit:0,depositPaid:false,dueDate:''};
+  const oldPhotos=eventPhotos; eventPhotos=[];
   save(); renderAll(); updateClientPaymentBadge();
+  releasePhotoIds(oldPhotos);
 }
 async function newEvent(){
   const ok=await askConfirm(t('newEventConfirm'));
@@ -3126,7 +3362,9 @@ async function newEvent(){
   budgetTarget=0;
   reminder={};
   activeClientId=null; payment={deposit:0,depositPaid:false,dueDate:''};
+  const oldPhotos=eventPhotos; eventPhotos=[];
   save(); renderAll(); updateReminderBadge(); updateClientPaymentBadge();
+  releasePhotoIds(oldPhotos);
   const strip=document.getElementById('countdown-strip');
   if(strip) strip.style.display='none';
 }
@@ -3159,6 +3397,8 @@ document.addEventListener('keydown',e=>{
   if(document.getElementById('summary-screen').style.display==='block'){closeSummary();return;}
   if(document.getElementById('clients-screen').style.display==='block'){closeClientsScreen();return;}
   if(document.getElementById('archive-screen').style.display==='block'){closeArchiveScreen();return;}
+  if(document.getElementById('photo-lightbox').classList.contains('open')){closePhotoLightbox();return;}
+  if(document.getElementById('photos-screen').style.display==='block'){closePhotosScreen();return;}
   if(document.getElementById('shopping-screen').style.display==='block'){closeShoppingScreen();return;}
   const openModal=document.querySelector('.modal-overlay.open');
   if(openModal){
