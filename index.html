@@ -2719,6 +2719,7 @@ function openPhotosScreen(ctx){
   catalogPhotoMode=null;
   document.getElementById('photos-screen').style.display='block';
   renderPhotosScreen();
+  window.history.pushState({screen:'photos'},null);
 }
 function openItemPhotos(itemId){
   photosCtx=null;
@@ -2726,8 +2727,18 @@ function openItemPhotos(itemId){
   if(!itemPhotos[itemId]) itemPhotos[itemId]=[];
   document.getElementById('photos-screen').style.display='block';
   renderPhotosScreen();
+  window.history.pushState({screen:'itemPhotos',itemId},null);
 }
 function closePhotosScreen(){ document.getElementById('photos-screen').style.display='none'; photosCtx=null; catalogPhotoMode=null; }
+window.addEventListener('popstate',(e)=>{
+  if(e.state&&e.state.screen==='photos'){
+    openPhotosScreen(photosCtx);
+  } else if(e.state&&e.state.screen==='itemPhotos'){
+    openItemPhotos(e.state.itemId);
+  } else {
+    closePhotosScreen();
+  }
+});
 async function renderPhotosScreen(){
   const ids=[...currentPhotoIds()], editable=(photosCtx==='active'||catalogPhotoMode);
   document.getElementById('photos-count').textContent=ids.length+'/'+MAX_PHOTOS;
