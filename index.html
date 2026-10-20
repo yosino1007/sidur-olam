@@ -96,6 +96,9 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 .inv-row input:focus{outline:none;border-color:var(--teal)}
 .del-inv{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;line-height:1}
 .del-inv:active{color:var(--pink-dark)}
+.inv-photo-btn{background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:4px 7px;font-size:13px;color:var(--charcoal);transition:all 0.15s;white-space:nowrap}
+.inv-photo-btn:hover{border-color:var(--teal);background:rgba(91,188,184,0.05)}
+.inv-photo-btn:active{border-color:var(--pink-dark)}
 /* PRESET PICKER */
 .preset-bar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .preset-chip{padding:5px 10px;background:#fff;border:1.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
@@ -967,6 +970,8 @@ let pickerFor=null, currentTab='planner', lang='he';
 let budgetTarget=0, reminder={}, checklists={}, activeTemplate='general';
 let clients=[], archivedEvents=[], activeClientId=null;
 let eventPhotos=[]; // ids of photos attached to the ACTIVE event (bytes live in IndexedDB + Firestore, never in this state)
+let itemPhotos={}; // mapping: itemId -> [photo ids] — persisted in Firestore
+let catalogPhotoMode=null; // 'view' when looking at catalog photo, itemId being edited
 let payment={deposit:0,depositPaid:false,dueDate:''};
 const COLORS=['#e891bb','#5bbcb8','#f4a7c8','#7dd4d1','#d4a0e8','#8ed4b8','#f0b8d8','#6bc8c5'];
 // ══════════════════════════════════════════════════════
@@ -1107,6 +1112,7 @@ const T = {
     photosEmpty:'עוד אין תמונות לאירוע הזה', photosLimit:'אפשר לצרף עד 10 תמונות לאירוע',
     photosDeleteConfirm:'למחוק את התמונה? אם היא שמורה גם בארכיון, היא תישאר שם.',
     photosFail:'לא ניתן לטעון את התמונה (אין אינטרנט?)', photosArchiveBtn:'📷 תמונות ({n})', photosProcessing:'מעבד תמונה…',
+    catalogPhotos:'תמונות קטלוג', catalogPhotosTitle:'📷 תמונות של הפריט',
     cloudConflictConfirm:'כבר יש נתונים בחשבון הענן. אישור = להחליף את הנתונים במכשיר בנתוני הענן. ביטול = להעלות את נתוני המכשיר ולדרוס את הענן.',
   },
   en: {
@@ -1243,6 +1249,7 @@ const T = {
     photosEmpty:'No photos for this event yet', photosLimit:'You can attach up to 10 photos per event',
     photosDeleteConfirm:'Delete this photo? If it is also saved in the archive, it stays there.',
     photosFail:'Could not load the photo (offline?)', photosArchiveBtn:'📷 Photos ({n})', photosProcessing:'Processing photo…',
+    catalogPhotos:'Item photos', catalogPhotosTitle:'📷 Item photos',
     cloudConflictConfirm:'There is already data in your cloud account. OK = replace this device\'s data with the cloud data. Cancel = upload this device\'s data and overwrite the cloud.',
   }
 };
@@ -1251,7 +1258,7 @@ function t(k){ return (T[lang]||T['he'])[k]||k; }
 // PERSIST
 // ══════════════════════════════════════════════════════
 function save(){
-  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment,eventPhotos})); }
+  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos})); }
   catch(e){
     if(!save._warned){ save._warned=true; alert(t('saveFailed')); }
   }
@@ -1272,6 +1279,8 @@ function load(){
       activeClientId=d.activeClientId||null;
       payment=(d.payment&&typeof d.payment==='object')?{deposit:d.payment.deposit||0,depositPaid:!!d.payment.depositPaid,dueDate:d.payment.dueDate||''}:{deposit:0,depositPaid:false,dueDate:''};
       eventPhotos=sanitizePhotoIds(d.eventPhotos);
+      itemPhotos=(d.itemPhotos&&typeof d.itemPhotos==='object')?Object.fromEntries(Object.entries(d.itemPhotos).map(([k,v])=>[k,Array.isArray(v)?v.filter(id=>typeof id==='string'):[]])):{};
+
     }
   }catch(e){}
 }
@@ -1566,13 +1575,17 @@ function updateInvName(id,val){
 function renderInvList(){
   const el=document.getElementById('inv-list');
   if(!inventory.length){el.innerHTML=`<p style="font-size:12px;color:var(--mid)" id="inv-empty-msg">${t('invEmpty')}</p>`;return;}
-  el.innerHTML=inventory.map(it=>`
+  el.innerHTML=inventory.map(it=>{
+    const photoCount=(itemPhotos[it.id]||[]).length;
+    return `
     <div class="inv-row">
       <span class="inv-icon" onclick="openPicker(${it.id})">${it.icon}</span>
       <input class="inv-name" value="${esc(it.name)}" oninput="updateInvName(${it.id},this.value)">
       <input class="inv-qty" type="number" min="0" step="any" value="${it.qty||''}" placeholder="0" oninput="updateInvQty(${it.id},this.value)">
+      <button class="inv-photo-btn" onclick="openItemPhotos(${it.id})" title="${t('catalogPhotos')||'ניהול תמונות'}">📷${photoCount>0?' '+photoCount:''}</button>
       <button class="del-inv" onclick="removeInvItem(${it.id})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 // ══════════════════════════════════════════════════════
 // EMOJI PICKER
@@ -2696,18 +2709,27 @@ function compressImage(file){
 }
 let photosCtx='active', _lightboxId=null;
 function currentPhotoIds(){
+  if(catalogPhotoMode) return itemPhotos[catalogPhotoMode]||[];
   if(photosCtx==='active') return eventPhotos;
   const a=archivedEvents.find(x=>x.id===photosCtx);
   return a?(a.photoIds||[]):[];
 }
 function openPhotosScreen(ctx){
   photosCtx=ctx;
+  catalogPhotoMode=null;
   document.getElementById('photos-screen').style.display='block';
   renderPhotosScreen();
 }
-function closePhotosScreen(){ document.getElementById('photos-screen').style.display='none'; }
+function openItemPhotos(itemId){
+  photosCtx=null;
+  catalogPhotoMode=itemId;
+  if(!itemPhotos[itemId]) itemPhotos[itemId]=[];
+  document.getElementById('photos-screen').style.display='block';
+  renderPhotosScreen();
+}
+function closePhotosScreen(){ document.getElementById('photos-screen').style.display='none'; photosCtx=null; catalogPhotoMode=null; }
 async function renderPhotosScreen(){
-  const ids=[...currentPhotoIds()], editable=photosCtx==='active';
+  const ids=[...currentPhotoIds()], editable=(photosCtx==='active'||catalogPhotoMode);
   document.getElementById('photos-count').textContent=ids.length+'/'+MAX_PHOTOS;
   document.getElementById('photos-add-row').style.display=(editable&&ids.length<MAX_PHOTOS)?'flex':'none';
   const grid=document.getElementById('photos-grid');
@@ -2725,9 +2747,11 @@ async function renderPhotosScreen(){
 async function handlePhotoFiles(inputEl){
   const files=[...(inputEl.files||[])];
   inputEl.value='';
-  if(!files.length||photosCtx!=='active') return;
+  if(!files.length||(photosCtx!=='active'&&!catalogPhotoMode)) return;
   const status=document.getElementById('photos-status');
-  const room=MAX_PHOTOS-eventPhotos.length;
+  const isCatalog=!!catalogPhotoMode;
+  const photosArray=isCatalog?(itemPhotos[catalogPhotoMode]||[]):eventPhotos;
+  const room=MAX_PHOTOS-photosArray.length;
   if(room<=0){ status.textContent=t('photosLimit'); return; }
   if(files.length>room) status.textContent=t('photosLimit');
   for(const f of files.slice(0,room)){
@@ -2736,7 +2760,7 @@ async function handlePhotoFiles(inputEl){
       const data=await compressImage(f);
       const id=newPhotoId();
       await photoPut(id,data);
-      eventPhotos.push(id);
+      photosArray.push(id);
       save();
       queuePhoto('up',id);
     }catch(e){ status.textContent=t('photosFail'); }
@@ -2751,14 +2775,19 @@ async function openPhotoLightbox(id){
   if(!data) data=await fetchCloudPhoto(id);
   if(!isSafePhotoData(data)){ document.getElementById('photos-status').textContent=t('photosFail'); return; }
   document.getElementById('photo-lightbox-img').src=data;
-  document.getElementById('photo-lightbox-del').style.display=photosCtx==='active'?'inline-block':'none';
+  document.getElementById('photo-lightbox-del').style.display=(photosCtx==='active'||catalogPhotoMode)?'inline-block':'none';
   document.getElementById('photo-lightbox').classList.add('open');
 }
 function closePhotoLightbox(){ document.getElementById('photo-lightbox').classList.remove('open'); _lightboxId=null; }
 async function deleteLightboxPhoto(){
-  const id=_lightboxId; if(!id||photosCtx!=='active') return;
+  const id=_lightboxId; if(!id||(photosCtx!=='active'&&!catalogPhotoMode)) return;
   const ok=await askConfirm(t('photosDeleteConfirm')); if(!ok) return;
-  eventPhotos=eventPhotos.filter(x=>x!==id);
+  if(catalogPhotoMode){
+    if(!itemPhotos[catalogPhotoMode]) itemPhotos[catalogPhotoMode]=[];
+    itemPhotos[catalogPhotoMode]=itemPhotos[catalogPhotoMode].filter(x=>x!==id);
+  } else {
+    eventPhotos=eventPhotos.filter(x=>x!==id);
+  }
   save(); closePhotoLightbox();
   await releasePhotoIds([id]);
   renderPhotosScreen();
@@ -3096,7 +3125,7 @@ function exportBackupJSON(){
   // profitPin deliberately NOT exported — backups are shared, the PIN protects cost data
   return JSON.stringify({
     inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
-    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,eventPhotos,
+    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos,
     exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
   },null,2);
 }
@@ -3257,6 +3286,7 @@ function applyBackupObject(d){
       reminder=(d.reminder&&typeof d.reminder==='object')?d.reminder:{};
       checklists=(d.checklists&&typeof d.checklists==='object')?d.checklists:{};
       activeTemplate=typeof d.activeTemplate==='string'?d.activeTemplate:'general';
+      itemPhotos=(d.itemPhotos&&typeof d.itemPhotos==='object')?Object.fromEntries(Object.entries(d.itemPhotos).map(([k,v])=>[k,Array.isArray(v)?v.filter(id=>typeof id==='string'):[]])):{};
       if(typeof d.profitPin==='string'&&d.profitPin) profitPin=d.profitPin; // old backups only; new exports omit it
       profitUnlockedThisSession=false;
       setLang(d.lang==='en'?'en':'he'); // updates dir + lang buttons + translations + save
