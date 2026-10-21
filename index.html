@@ -561,6 +561,8 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       <div class="mode-tab" id="tab-arrange-main" onclick="switchMainTab('arrange')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🎯 סידור</div>
       <div class="mode-tab" id="tab-menu-main" onclick="switchMainTab('menu')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📋 תפריט</div>
     </div>
+    <!-- TAB 1: TABLES -->
+    <div id="main-tab-tables" style="display:flex;flex:1;min-height:0">
     <aside class="sidebar" id="planner-sidebar">
       <div>
         <div class="section-title">📦 <span id="inv-section-title">מלאי לאירוע</span></div>
@@ -635,6 +637,45 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
         <div class="empty-state"><div class="ei">💐</div><p id="stations-empty-msg">רכב, חופה, זר כלה ועוד — הוסף מהתפריט</p></div>
       </div>
     </main>
+    </div>
+    <!-- TAB 2: INVENTORY -->
+    <div id="main-tab-inventory" style="display:none;flex:1;min-height:0">
+      <aside class="sidebar">
+        <div>
+          <div class="section-title">📦 הוסף פריט מלאי</div>
+          <div class="preset-bar" id="preset-bar-inv"></div>
+          <div id="inv-list-inv"></div>
+          <div class="emoji-picker" id="emoji-picker-inv">
+            <span>🌹</span><span>🌸</span><span>🌺</span><span>🌻</span><span>🌼</span>
+            <span>💐</span><span>🌷</span><span>🍀</span><span>🌿</span><span>🪷</span>
+            <span>🕯️</span><span>🪔</span><span>✨</span><span>🎀</span><span>🎊</span>
+          </div>
+          <div class="preset-custom" id="custom-add-row-inv">
+            <div class="add-row">
+              <span class="emoji-pick" id="chosen-emoji-inv">🌹</span>
+              <input type="text" id="new-inv-name-inv" style="flex:2;min-width:60px">
+              <input type="number" id="new-inv-qty-inv" min="0" style="width:62px">
+              <button class="btn-teal" onclick="addInvItem()">+ הוסף</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main class="main-panel"><p style="padding:20px;color:var(--mid)">📋 פריטי המלאי מוצגים בטאב שולחנות</p></main>
+    </div>
+    <!-- TAB 3: ARRANGE -->
+    <div id="main-tab-arrange" style="display:none;flex:1;min-height:0">
+      <aside class="sidebar">
+        <div><div class="section-title">🎯 סידור</div><p style="padding:10px;color:var(--mid);font-size:12px">עדיין בבנייה</p></div>
+      </aside>
+      <main class="main-panel"><p style="padding:20px;color:var(--mid)">🎯 סידור אירוע - בבנייה</p></main>
+    </div>
+    <!-- TAB 4: MENU -->
+    <div id="main-tab-menu" style="display:none;flex:1;min-height:0">
+      <aside class="sidebar">
+        <div><div class="section-title">📋 תפריט</div><p style="padding:10px;color:var(--mid);font-size:12px">עדיין בבנייה</p></div>
+      </aside>
+      <main class="main-panel"><p style="padding:20px;color:var(--mid)">📋 תפריט אירוע - בבנייה</p></main>
+    </div>
   </div>
   <!-- COSTS -->
   <div class="app-body" id="costs-body" style="display:none">
@@ -1479,22 +1520,16 @@ function actuallySwitchTab(tab){
 let currentMainTab='tables';
 function switchMainTab(tab){
   currentMainTab=tab;
+  // Update tab buttons
   document.getElementById('tab-tables-main').classList.toggle('active',tab==='tables');
   document.getElementById('tab-inventory-main').classList.toggle('active',tab==='inventory');
   document.getElementById('tab-arrange-main').classList.toggle('active',tab==='arrange');
   document.getElementById('tab-menu-main').classList.toggle('active',tab==='menu');
-  // Update sidebar title and content based on current tab
-  if(tab==='tables'){
-    document.getElementById('inv-section-title').textContent='מלאי לאירוע';
-    document.getElementById('add-table-title').textContent='הוסף שולחן';
-  } else if(tab==='inventory'){
-    document.getElementById('inv-section-title').textContent='הוסף פריט מלאי';
-    document.getElementById('add-table-title').textContent='(לא זמין בטאב זה)';
-  } else if(tab==='arrange'){
-    document.getElementById('inv-section-title').textContent='סידור אירוע';
-  } else if(tab==='menu'){
-    document.getElementById('inv-section-title').textContent='תפריט אירוע';
-  }
+  // Hide/show tab content
+  document.getElementById('main-tab-tables').style.display=tab==='tables'?'flex':'none';
+  document.getElementById('main-tab-inventory').style.display=tab==='inventory'?'flex':'none';
+  document.getElementById('main-tab-arrange').style.display=tab==='arrange'?'flex':'none';
+  document.getElementById('main-tab-menu').style.display=tab==='menu'?'flex':'none';
   renderAll();
 }
 // ══════════════════════════════════════════════════════
