@@ -544,7 +544,8 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       </div>
     </div>
     <div class="mode-tabs">
-      <div class="mode-tab active" id="tab-planner" onclick="switchTab('planner')">📍 עמדות אירוע</div>
+      <div class="mode-tab active" id="tab-planner" onclick="switchTab('planner')">💐 עמדות</div>
+      <div class="mode-tab" id="tab-summary" onclick="switchTab('summary')">📊 סיכום</div>
       <div class="mode-tab" id="tab-costs" onclick="switchTab('costs')">💰 עלויות</div>
       <div class="mode-tab" id="tab-profit" onclick="switchTab('profit')">📈 רווח</div>
     </div>
@@ -553,6 +554,13 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   </div>
   <!-- PLANNER -->
   <div class="app-body" id="planner-body">
+    <!-- MAIN TABS: Tables | Inventory | Arrangement | Menu -->
+    <div class="mode-tabs" style="border-bottom:2px solid var(--border);margin-bottom:0;padding:0 16px;gap:0">
+      <div class="mode-tab active" id="tab-tables-main" onclick="switchMainTab('tables')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🪑 שולחנות</div>
+      <div class="mode-tab" id="tab-inventory-main" onclick="switchMainTab('inventory')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📦 מלאי</div>
+      <div class="mode-tab" id="tab-arrange-main" onclick="switchMainTab('arrange')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🎯 סידור</div>
+      <div class="mode-tab" id="tab-menu-main" onclick="switchMainTab('menu')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📋 תפריט</div>
+    </div>
     <aside class="sidebar" id="planner-sidebar">
       <div>
         <div class="section-title">📦 <span id="inv-section-title">מלאי לאירוע</span></div>
@@ -1454,16 +1462,28 @@ function switchTab(tab){
 function actuallySwitchTab(tab){
   currentTab=tab;
   document.getElementById('planner-body').style.display=tab==='planner'?'grid':'none';
+  document.getElementById('summary-screen').style.display=tab==='summary'?'block':'none';
   document.getElementById('costs-body').style.display=tab==='costs'?'grid':'none';
   document.getElementById('profit-body').style.display=tab==='profit'?'grid':'none';
   document.getElementById('tab-planner').classList.toggle('active',tab==='planner');
+  document.getElementById('tab-summary').classList.toggle('active',tab==='summary');
   document.getElementById('tab-costs').classList.toggle('active',tab==='costs');
   document.getElementById('tab-profit').classList.toggle('active',tab==='profit');
-  document.getElementById('nav-main-icon').textContent=tab==='planner'?'📍':tab==='costs'?'💰':'📈';
-  document.getElementById('nav-main-lbl').textContent=tab==='planner'?t('navTables'):tab==='costs'?t('tabCost'):t('navProfitLbl');
+  document.getElementById('nav-main-icon').textContent=tab==='planner'?'📍':tab==='summary'?'📊':tab==='costs'?'💰':'📈';
+  document.getElementById('nav-main-lbl').textContent=tab==='planner'?t('navTables'):tab==='summary'?'סיכום':tab==='costs'?t('tabCost'):t('navProfitLbl');
   if(tab==='costs') renderCosts();
   if(tab==='profit') renderProfit();
+  if(tab==='summary') renderSummary();
   mobileShowMain();
+}
+let currentMainTab='tables';
+function switchMainTab(tab){
+  currentMainTab=tab;
+  document.getElementById('tab-tables-main').classList.toggle('active',tab==='tables');
+  document.getElementById('tab-inventory-main').classList.toggle('active',tab==='inventory');
+  document.getElementById('tab-arrange-main').classList.toggle('active',tab==='arrange');
+  document.getElementById('tab-menu-main').classList.toggle('active',tab==='menu');
+  renderAll();
 }
 // ══════════════════════════════════════════════════════
 // SIDE MENU
@@ -2069,6 +2089,9 @@ function renderProfit(){
 // ══════════════════════════════════════════════════════
 // SUMMARY SCREEN
 // ══════════════════════════════════════════════════════
+function renderSummary(){
+  openSummary();
+}
 function openSummary(){
   const totalTables=tables.reduce((s,t2)=>s+t2.count,0);
   const totalSeated=tables.reduce((s,t2)=>s+t2.count*(t2.size||0),0);
