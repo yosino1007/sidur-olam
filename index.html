@@ -1483,11 +1483,10 @@ function switchMainTab(tab){
   document.getElementById('tab-inventory-main').classList.toggle('active',tab==='inventory');
   document.getElementById('tab-arrange-main').classList.toggle('active',tab==='arrange');
   document.getElementById('tab-menu-main').classList.toggle('active',tab==='menu');
-  // Update sidebar title and content
+  // Update sidebar title and content based on current tab
   if(tab==='tables'){
     document.getElementById('inv-section-title').textContent='מלאי לאירוע';
     document.getElementById('add-table-title').textContent='הוסף שולחן';
-    document.querySelector('[style*="display:none"]')?.style?.removeProperty('display');
   } else if(tab==='inventory'){
     document.getElementById('inv-section-title').textContent='הוסף פריט מלאי';
     document.getElementById('add-table-title').textContent='(לא זמין בטאב זה)';
