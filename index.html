@@ -1483,6 +1483,19 @@ function switchMainTab(tab){
   document.getElementById('tab-inventory-main').classList.toggle('active',tab==='inventory');
   document.getElementById('tab-arrange-main').classList.toggle('active',tab==='arrange');
   document.getElementById('tab-menu-main').classList.toggle('active',tab==='menu');
+  // Update sidebar title and content
+  if(tab==='tables'){
+    document.getElementById('inv-section-title').textContent='מלאי לאירוע';
+    document.getElementById('add-table-title').textContent='הוסף שולחן';
+    document.querySelector('[style*="display:none"]')?.style?.removeProperty('display');
+  } else if(tab==='inventory'){
+    document.getElementById('inv-section-title').textContent='הוסף פריט מלאי';
+    document.getElementById('add-table-title').textContent='(לא זמין בטאב זה)';
+  } else if(tab==='arrange'){
+    document.getElementById('inv-section-title').textContent='סידור אירוע';
+  } else if(tab==='menu'){
+    document.getElementById('inv-section-title').textContent='תפריט אירוע';
+  }
   renderAll();
 }
 // ══════════════════════════════════════════════════════
@@ -2758,6 +2771,11 @@ window.addEventListener('popstate',(e)=>{
     openPhotosScreen(photosCtx);
   } else if(e.state&&e.state.screen==='itemPhotos'){
     openItemPhotos(e.state.itemId);
+  } else if(!e.state){
+    // Back button pressed without a state — stay in app, don't exit
+    if(document.getElementById('photos-screen').style.display==='block'){
+      closePhotosScreen();
+    }
   } else {
     closePhotosScreen();
   }
