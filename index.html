@@ -317,21 +317,21 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   <div class="ob-title" id="ob-title">ברוך הבא!</div>
   <div class="ob-sub" id="ob-sub">סידור אולם · פרחים ונרות</div>
   <div class="ob-steps">
-    <div class="ob-step" id="ob-s1">
+    <div class="ob-step" id="ob-s1" onclick="finishOnboarding()" style="cursor:pointer">
       <div class="ob-step-num">1</div>
       <div class="ob-step-text">
         <div class="ob-step-title" id="ob-t1">הוסף פריטי מלאי</div>
         <div class="ob-step-desc" id="ob-d1">ורדים, נרות, אגרטלים — כל מה שיש לך</div>
       </div>
     </div>
-    <div class="ob-step" id="ob-s2">
+    <div class="ob-step" id="ob-s2" onclick="finishOnboarding()" style="cursor:pointer">
       <div class="ob-step-num">2</div>
       <div class="ob-step-text">
         <div class="ob-step-title" id="ob-t2">הגדר שולחנות</div>
         <div class="ob-step-desc" id="ob-d2">כמה שולחנות יש, כמה מקומות לכל אחד</div>
       </div>
     </div>
-    <div class="ob-step" id="ob-s3">
+    <div class="ob-step" id="ob-s3" onclick="finishOnboarding()" style="cursor:pointer">
       <div class="ob-step-num">3</div>
       <div class="ob-step-text">
         <div class="ob-step-title" id="ob-t3">חלק כמויות</div>
@@ -340,7 +340,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
     </div>
   </div>
   <button class="ob-btn" id="ob-start-btn" onclick="finishOnboarding()">התחל עכשיו 🚀</button>
-  <div class="ob-skip" onclick="finishOnboarding()">דלג</div>
+  <div class="ob-skip" onclick="finishOnboarding()" style="cursor:pointer">דלג</div>
 </div>
 <!-- ══════ HOME SCREEN ══════ -->
 <div id="home-screen">
