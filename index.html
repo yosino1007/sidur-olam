@@ -344,6 +344,9 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 </div>
 <!-- ══════ HOME SCREEN ══════ -->
 <div id="home-screen">
+  <div style="width:100%;max-width:380px;display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button onclick="homeAccountClick()" style="background:var(--pink);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">📧 Gmail</button>
+  </div>
   <div class="home-logo">🌹</div>
   <div class="home-title" id="hs-title">סידור אולם</div>
   <div class="home-sub" id="hs-sub">פרחים · נרות · קישוטים</div>
@@ -561,31 +564,9 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       <div class="mode-tab" id="tab-arrange-main" onclick="switchMainTab('arrange')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🎯 סידור</div>
       <div class="mode-tab" id="tab-menu-main" onclick="switchMainTab('menu')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📋 תפריט</div>
     </div>
-    <!-- TAB 1: TABLES -->
+    <!-- TAB 1: TABLES - Only add tables -->
     <div id="main-tab-tables" style="display:flex;flex:1;min-height:0">
     <aside class="sidebar" id="planner-sidebar">
-      <div>
-        <div class="section-title">📦 <span id="inv-section-title">מלאי לאירוע</span></div>
-        <!-- PRESET CHIPS -->
-        <div class="preset-bar" id="preset-bar"></div>
-        <div id="inv-list"><p style="font-size:12px;color:var(--mid)" id="inv-empty-msg">עוד לא הוספת פריטים</p></div>
-        <div class="emoji-picker" id="emoji-picker">
-          <span>🌹</span><span>🌸</span><span>🌺</span><span>🌻</span><span>🌼</span>
-          <span>💐</span><span>🌷</span><span>🍀</span><span>🌿</span><span>🪷</span>
-          <span>🕯️</span><span>🪔</span><span>✨</span><span>🎀</span><span>🎊</span>
-          <span>🏺</span><span>🫙</span><span>🪣</span><span>🧺</span><span>🪴</span>
-          <span>🌾</span><span>🎗️</span><span>🪄</span><span>💡</span><span>🫧</span>
-        </div>
-        <!-- CUSTOM ADD ROW (shown when "אחר" selected) -->
-        <div class="preset-custom" id="custom-add-row">
-          <div class="add-row">
-            <span class="emoji-pick" id="chosen-emoji">🌹</span>
-            <input type="text" id="new-inv-name" style="flex:2;min-width:60px">
-            <input type="number" id="new-inv-qty" min="0" style="width:62px">
-            <button class="btn-teal" onclick="addInvItem()" id="btn-add-inv">+ הוסף</button>
-          </div>
-        </div>
-      </div>
       <div>
         <div class="section-title">🪑 <span id="add-table-title">הוסף שולחן</span></div>
         <div class="add-table-box">
@@ -604,63 +585,45 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
           <button class="btn-pink" onclick="addTable()" id="btn-add-table">+ הוסף שולחן</button>
         </div>
       </div>
-      <div>
-        <div class="section-title">💐 <span id="add-station-title">הוסף פריט מיוחד</span></div>
-        <div class="preset-bar" id="station-preset-bar"></div>
-        <!-- CUSTOM ADD ROW (shown when "אחר" selected) -->
-        <div class="preset-custom" id="station-custom-add-row">
-          <div class="add-row">
-            <span class="emoji-pick" id="station-chosen-emoji">✨</span>
-            <input type="text" id="new-station-name" style="flex:2;min-width:60px">
-            <button class="btn-teal" onclick="addStationCustom()" id="btn-add-station">+ הוסף</button>
-          </div>
-        </div>
-      </div>
     </aside>
     <main class="main-panel" id="planner-main">
-      <div class="stock-bar" id="stock-bar">
-        <p style="font-size:13px;color:var(--mid);padding-bottom:6px;" id="stock-empty-msg">הוסף פריטי מלאי מהתפריט</p>
-      </div>
-      <div class="alert-bar" id="stock-alert">⚠️ <span id="alert-msg"></span></div>
       <div class="section-header">
         <h2 id="tables-section-title">שולחנות האולם</h2>
         <span id="tables-count" style="font-size:11px;color:var(--mid)"></span>
       </div>
       <div class="tables-grid" id="tables-grid">
-        <div class="empty-state"><div class="ei">🪑</div><p id="tables-empty-msg">הוסף שולחנות מהתפריט</p></div>
-      </div>
-      <div class="section-header" style="margin-top:20px">
-        <h2 id="stations-section-title">💐 פריטים מיוחדים</h2>
-        <span id="stations-count" style="font-size:11px;color:var(--mid)"></span>
-      </div>
-      <div class="tables-grid" id="stations-grid">
-        <div class="empty-state"><div class="ei">💐</div><p id="stations-empty-msg">רכב, חופה, זר כלה ועוד — הוסף מהתפריט</p></div>
+        <div class="empty-state"><div class="ei">🪑</div><p id="tables-empty-msg">הוסף שולחנות מהסיידבר</p></div>
       </div>
     </main>
     </div>
-    <!-- TAB 2: INVENTORY -->
+    <!-- TAB 2: INVENTORY - Only add items -->
     <div id="main-tab-inventory" style="display:none;flex:1;min-height:0">
       <aside class="sidebar">
         <div>
           <div class="section-title">📦 הוסף פריט מלאי</div>
-          <div class="preset-bar" id="preset-bar-inv"></div>
-          <div id="inv-list-inv"></div>
-          <div class="emoji-picker" id="emoji-picker-inv">
+          <div class="preset-bar" id="preset-bar"></div>
+          <div id="inv-list"></div>
+          <div class="emoji-picker" id="emoji-picker">
             <span>🌹</span><span>🌸</span><span>🌺</span><span>🌻</span><span>🌼</span>
             <span>💐</span><span>🌷</span><span>🍀</span><span>🌿</span><span>🪷</span>
             <span>🕯️</span><span>🪔</span><span>✨</span><span>🎀</span><span>🎊</span>
+            <span>🏺</span><span>🫙</span><span>🪣</span><span>🧺</span><span>🪴</span>
+            <span>🌾</span><span>🎗️</span><span>🪄</span><span>💡</span><span>🫧</span>
           </div>
-          <div class="preset-custom" id="custom-add-row-inv">
+          <div class="preset-custom" id="custom-add-row">
             <div class="add-row">
-              <span class="emoji-pick" id="chosen-emoji-inv">🌹</span>
-              <input type="text" id="new-inv-name-inv" style="flex:2;min-width:60px">
-              <input type="number" id="new-inv-qty-inv" min="0" style="width:62px">
+              <span class="emoji-pick" id="chosen-emoji">🌹</span>
+              <input type="text" id="new-inv-name" style="flex:2;min-width:60px">
+              <input type="number" id="new-inv-qty" min="0" style="width:62px">
               <button class="btn-teal" onclick="addInvItem()">+ הוסף</button>
             </div>
           </div>
         </div>
       </aside>
-      <main class="main-panel"><p style="padding:20px;color:var(--mid)">📋 פריטי המלאי מוצגים בטאב שולחנות</p></main>
+      <main class="main-panel">
+        <div class="section-header"><h2>📊 מלאי</h2></div>
+        <div id="inv-list" style="padding:20px;color:var(--mid);font-size:13px"></div>
+      </main>
     </div>
     <!-- TAB 3: ARRANGE -->
     <div id="main-tab-arrange" style="display:none;flex:1;min-height:0">
