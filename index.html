@@ -1637,23 +1637,28 @@ function renderInvList(){
 // ══════════════════════════════════════════════════════
 // EMOJI PICKER
 // ══════════════════════════════════════════════════════
-document.getElementById('chosen-emoji').addEventListener('click',()=>{
+let el1=document.getElementById('chosen-emoji');
+if(el1) el1.addEventListener('click',()=>{
   pickerFor=null; stationPickerFor=null;
   document.getElementById('emoji-picker').classList.toggle('open');
 });
 function openPicker(id){
   pickerFor=id; stationPickerFor=null;
-  document.getElementById('emoji-picker').classList.add('open');
+  const ep=document.getElementById('emoji-picker');
+  if(ep) ep.classList.add('open');
 }
-document.getElementById('station-chosen-emoji').addEventListener('click',()=>{
+let el2=document.getElementById('station-chosen-emoji');
+if(el2) el2.addEventListener('click',()=>{
   pickerFor=undefined; stationPickerFor='custom';
   document.getElementById('emoji-picker').classList.toggle('open');
 });
 function openStationPicker(id){
   pickerFor=undefined; stationPickerFor=id;
-  document.getElementById('emoji-picker').classList.add('open');
+  const ep=document.getElementById('emoji-picker');
+  if(ep) ep.classList.add('open');
 }
-document.getElementById('emoji-picker').addEventListener('click',e=>{
+let el3=document.getElementById('emoji-picker');
+if(el3) el3.addEventListener('click',e=>{
   const sp=e.target.closest('span'); if(!sp) return;
   const em=sp.textContent.trim();
   if(stationPickerFor==='custom'){document.getElementById('station-chosen-emoji').textContent=em;}
@@ -2332,7 +2337,8 @@ async function saveNewTemplate(){
   checklists[key]=[...(checklists[activeTemplate]||[])];
   activeTemplate=key; save(); renderTemplateTabs(); renderChecklist();
 }
-document.getElementById('new-check-item').addEventListener('keydown',e=>{if(e.key==='Enter')addCheckItem();});
+let el_newcheck=document.getElementById('new-check-item');
+if(el_newcheck) el_newcheck.addEventListener('keydown',e=>{if(e.key==='Enter')addCheckItem();});
 // ══════════════════════════════════════════════════════
 // REMINDER
 // ══════════════════════════════════════════════════════
@@ -2442,7 +2448,8 @@ function updateClientPaymentTotals(){
   document.getElementById('cp-grand-total').textContent='₪'+grand.toFixed(2);
   document.getElementById('cp-balance').textContent='₪'+balance.toFixed(2);
 }
-document.getElementById('cp-deposit').addEventListener('input',updateClientPaymentTotals);
+let el_cpdeposit=document.getElementById('cp-deposit');
+if(el_cpdeposit) el_cpdeposit.addEventListener('input',updateClientPaymentTotals);
 function saveClientPayment(){
   const sel=document.getElementById('cp-client-select');
   if(sel.value==='__new__'){
@@ -3007,7 +3014,7 @@ async function loadFirebase(){
 function initCloud(){
   if(!cloudConfigured()) return;
   loadFirebase().catch(()=>{ _syncState='error'; updateAccountUI(); });
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&fbUser&&!_cloudTimer) initialSync(); });
+  if(document) document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&fbUser&&!_cloudTimer) initialSync(); });
 }
 async function onAuthChanged(user){
   fbUser=user||null;
@@ -3395,7 +3402,8 @@ function closePromptModal(shouldSave){
   const cb=_promptResolve; _promptResolve=null;
   if(cb) cb(shouldSave&&val?val:null);
 }
-document.getElementById('prompt-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')closePromptModal(true);});
+let el_prompt=document.getElementById('prompt-modal-input');
+if(el_prompt) el_prompt.addEventListener('keydown',e=>{if(e.key==='Enter')closePromptModal(true);});
 // ══════════════════════════════════════════════════════
 // PROFIT TAB PIN LOCK (client-side deterrent only — not real security)
 // ══════════════════════════════════════════════════════
@@ -3422,7 +3430,8 @@ function submitPin(){
     document.getElementById('pin-modal-error').textContent=t('pinWrong');
   }
 }
-document.getElementById('pin-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitPin();});
+let el_pin=document.getElementById('pin-modal-input');
+if(el_pin) el_pin.addEventListener('keydown',e=>{if(e.key==='Enter')submitPin();});
 function openPinSettings(){
   document.getElementById('pin-settings-input').value=profitPin||'';
   document.getElementById('pin-settings-hint').textContent=t('pinSettingsHint');
@@ -3573,13 +3582,14 @@ function fmtQty(n){ if(!isFinite(n)) return '0'; const r=Math.round((n+Number.EP
 // ══════════════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  if(document.getElementById('pdf-preview').classList.contains('open')){closePdfPreview();return;}
-  if(document.getElementById('summary-screen').style.display==='block'){closeSummary();return;}
-  if(document.getElementById('clients-screen').style.display==='block'){closeClientsScreen();return;}
-  if(document.getElementById('archive-screen').style.display==='block'){closeArchiveScreen();return;}
-  if(document.getElementById('photo-lightbox').classList.contains('open')){closePhotoLightbox();return;}
-  if(document.getElementById('photos-screen').style.display==='block'){closePhotosScreen();return;}
-  if(document.getElementById('shopping-screen').style.display==='block'){closeShoppingScreen();return;}
+  let el;
+  el=document.getElementById('pdf-preview'); if(el&&el.classList.contains('open')){closePdfPreview();return;}
+  el=document.getElementById('summary-screen'); if(el&&el.style.display==='block'){closeSummary();return;}
+  el=document.getElementById('clients-screen'); if(el&&el.style.display==='block'){closeClientsScreen();return;}
+  el=document.getElementById('archive-screen'); if(el&&el.style.display==='block'){closeArchiveScreen();return;}
+  el=document.getElementById('photo-lightbox'); if(el&&el.classList.contains('open')){closePhotoLightbox();return;}
+  el=document.getElementById('photos-screen'); if(el&&el.style.display==='block'){closePhotosScreen();return;}
+  el=document.getElementById('shopping-screen'); if(el&&el.style.display==='block'){closeShoppingScreen();return;}
   const openModal=document.querySelector('.modal-overlay.open');
   if(openModal){
     const closers={
