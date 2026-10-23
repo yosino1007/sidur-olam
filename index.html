@@ -625,12 +625,28 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
         <div id="inv-list" style="padding:20px;color:var(--mid);font-size:13px"></div>
       </main>
     </div>
-    <!-- TAB 3: ARRANGE -->
+    <!-- TAB 3: ARRANGE - Tables with items assigned -->
     <div id="main-tab-arrange" style="display:none;flex:1;min-height:0">
-      <aside class="sidebar">
-        <div><div class="section-title">🎯 סידור</div><p style="padding:10px;color:var(--mid);font-size:12px">עדיין בבנייה</p></div>
+      <aside class="sidebar" style="padding:14px">
+        <div>
+          <div class="section-title">🎯 סידור אירוע</div>
+          <p style="font-size:12px;color:var(--mid);padding:10px 0">בחר שולחן וקבע כמויות פריטים לכל שולחן</p>
+          <div id="arrange-tables-list" style="display:flex;flex-direction:column;gap:8px">
+            <div class="empty-state" style="padding:20px;text-align:center;color:var(--mid)">
+              <div style="font-size:20px;margin-bottom:8px">🪑</div>
+              <p style="font-size:12px">הוסף שולחנות בטאב שולחנות קודם</p>
+            </div>
+          </div>
+        </div>
       </aside>
-      <main class="main-panel"><p style="padding:20px;color:var(--mid)">🎯 סידור אירוע - בבנייה</p></main>
+      <main class="main-panel" id="arrange-main">
+        <div class="section-header">
+          <h2>📊 סידור פריטים לשולחן</h2>
+        </div>
+        <div id="arrange-items-area" style="padding:20px;color:var(--mid);text-align:center;font-size:13px">
+          בחר שולחן מהסיידבר כדי להתחיל סידור
+        </div>
+      </main>
     </div>
     <!-- TAB 4: MENU -->
     <div id="main-tab-menu" style="display:none;flex:1;min-height:0">
