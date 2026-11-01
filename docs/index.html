@@ -17,8 +17,16 @@
   --cream:#f8f4f9; --warm:#fce8f3; --pink:#e891bb; --pink-dark:#d45e9b;
   --teal:#5bbcb8; --teal-dark:#48a8a4; --charcoal:#3d2b45; --mid:#7a6580;
   --border:#f0c8e4; --shadow:rgba(180,100,160,0.10);
+  --bg2:#fef6fb; --text:#3d2b45; --primary:#d45e9b; --success:#2e7d32;
   --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
 }
+html[data-theme="dark"]{
+  --cream:#1b1622; --warm:#2a2234; --charcoal:#f3e9f6; --mid:#c3b3cf;
+  --border:#4a3b5a; --shadow:rgba(0,0,0,0.45); --bg2:#241d2e; --text:#f3e9f6;
+  --primary:#e891bb; --success:#7fd1a0; --pink-dark:#f0a5cc;
+}
+html[data-theme="dark"] :is(#side-menu,.preset-chip,.emoji-picker,.stock-card,.table-card,.cost-card,.modal-box,.pdf-modal,.bottom-nav,.profit-card,.summary-section,.tmpl-tab,.sm-lang-btn,.fg input,.fg textarea,.fg select,.add-row input,.add-check-row input,.inv-row input,.tc-row input,.cost-card input.price-input,.add-table-box input,select,textarea,input[type=text],input[type=number],input[type=tel],input[type=date],input[type=time],input[type=password]){background:var(--warm);color:var(--charcoal);border-color:var(--border)}
+html[data-theme="dark"] .sidebar{background:var(--bg2)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal);min-height:100dvh;font-size:14.5px;overscroll-behavior:none}
 /* ══ ONBOARDING ══ */
@@ -531,6 +539,11 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
       <div class="sm-item-title" id="sm-reset-title">איפוס הכל</div>
       <div class="sm-item-desc" id="sm-reset-desc">מחק את כל הנתונים</div>
     </div>
+  </div>
+  <div class="sm-section">מראה</div>
+  <div class="sm-lang-toggle">
+    <button class="sm-lang-btn active" id="theme-light-btn" onclick="setTheme('light')">☀️ בהיר</button>
+    <button class="sm-lang-btn" id="theme-dark-btn" onclick="setTheme('dark')">🌙 חשוך</button>
   </div>
   <div class="sm-section" id="sm-s-lang">שפה / Language</div>
   <div class="sm-lang-toggle">
@@ -1331,6 +1344,18 @@ function finishOnboarding(){
 // ══════════════════════════════════════════════════════
 // LANGUAGE
 // ══════════════════════════════════════════════════════
+function setTheme(mode){
+  const dark=mode==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  const lb=document.getElementById('theme-light-btn'), db=document.getElementById('theme-dark-btn');
+  if(lb) lb.classList.toggle('active',!dark);
+  if(db) db.classList.toggle('active',dark);
+  try{ localStorage.setItem('sidur-theme',dark?'dark':'light'); }catch(e){}
+}
+function loadTheme(){
+  let saved=null; try{ saved=localStorage.getItem('sidur-theme'); }catch(e){}
+  setTheme(saved==='dark'?'dark':'light');
+}
 function setLang(l){
   lang=l;
   document.documentElement.lang=l;
@@ -3092,6 +3117,11 @@ async function signInGoogle(){
       try{ await fb.authM.signInWithRedirect(fb.auth,new fb.authM.GoogleAuthProvider()); }catch(e2){}
     } else if(!(e&&(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'))){
       _syncState='error'; updateAccountUI();
+      const code=(e&&e.code)||'unknown';
+      const hint=code==='auth/unauthorized-domain'
+        ?'הדומיין של האתר לא מאושר ב-Firebase. הוסף אותו ב-Authentication > Settings > Authorized domains'
+        :'';
+      alert('התחברות עם Google נכשלה ('+code+')'+(hint?'\n'+hint:''));
     }
   }
 }
@@ -3605,6 +3635,7 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').cat
 // INIT
 // ══════════════════════════════════════════════════════
 load();
+loadTheme();
 applyTranslations();
 renderPresets();
 updateClientPaymentBadge();
