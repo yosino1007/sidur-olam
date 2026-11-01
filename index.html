@@ -1661,7 +1661,7 @@ let el3=document.getElementById('emoji-picker');
 if(el3) el3.addEventListener('click',e=>{
   const sp=e.target.closest('span'); if(!sp) return;
   const em=sp.textContent.trim();
-  if(stationPickerFor==='custom'){document.getElementById('station-chosen-emoji').textContent=em;}
+  if(stationPickerFor==='custom'){const ce=document.getElementById('station-chosen-emoji'); if(ce) ce.textContent=em;}
   else if(stationPickerFor!==null&&stationPickerFor!==undefined){
     const st2=stations.find(s=>s.id===stationPickerFor);if(st2){st2.icon=em;save();renderStations();}
   }
@@ -1683,6 +1683,7 @@ function calcUsed(invId){
 }
 function renderStockBar(){
   const bar=document.getElementById('stock-bar');
+  if(!bar) return;
   if(!inventory.length){bar.innerHTML=`<p style="font-size:13px;color:var(--mid);padding-bottom:6px;">${t('stockEmpty')}</p>`;return;}
   bar.innerHTML=inventory.map(it=>{
     const used=calcUsed(it.id),rem=it.qty-used;
@@ -1804,6 +1805,7 @@ function renderTables(){
 let stationPickerFor=null;
 function renderStationPresets(){
   const bar=document.getElementById('station-preset-bar');
+  if(!bar) return;
   bar.innerHTML=t('stationPresets').map(p=>`
     <div class="preset-chip" onclick="selectStationPreset('${p.icon}','${p.name}')">${p.icon} ${p.name}</div>
   `).join('');
@@ -1811,20 +1813,24 @@ function renderStationPresets(){
 function selectStationPreset(icon,name){
   if(name===t('stationPresets').at(-1).name){
     // "Other" — show custom name row
-    document.getElementById('station-custom-add-row').classList.add('show');
-    document.getElementById('station-chosen-emoji').textContent='✨';
-    document.getElementById('new-station-name').focus();
+    const row=document.getElementById('station-custom-add-row'); if(row) row.classList.add('show');
+    const ce=document.getElementById('station-chosen-emoji'); if(ce) ce.textContent='✨';
+    const ne=document.getElementById('new-station-name'); if(ne) ne.focus();
     return;
   }
   addStation(icon,name);
 }
 function addStationCustom(){
-  const icon=document.getElementById('station-chosen-emoji').textContent.trim();
-  const name=document.getElementById('new-station-name').value.trim();
+  const ce=document.getElementById('station-chosen-emoji');
+  const ne=document.getElementById('new-station-name');
+  const row=document.getElementById('station-custom-add-row');
+  if(!ce||!ne) return;
+  const icon=ce.textContent.trim();
+  const name=ne.value.trim();
   if(!name){flash('new-station-name');return;}
   addStation(icon,name);
-  document.getElementById('new-station-name').value='';
-  document.getElementById('station-custom-add-row').classList.remove('show');
+  ne.value='';
+  if(row) row.classList.remove('show');
 }
 function addStation(icon,name){
   const items={};inventory.forEach(it=>items[it.id]=0);
@@ -1862,6 +1868,7 @@ function buildStationTotals(st2){
 }
 function renderStations(){
   const grid=document.getElementById('stations-grid'),cntEl=document.getElementById('stations-count');
+  if(!grid||!cntEl) return;
   if(!stations.length){grid.innerHTML=`<div class="empty-state"><div class="ei">💐</div><p>${t('stationsEmpty')}</p></div>`;cntEl.textContent='';return;}
   cntEl.textContent=`${stations.length} ${lang==='he'?'פריטים':'items'}`;
   grid.innerHTML=stations.map(st2=>{
@@ -1903,7 +1910,9 @@ function recalc(){
   const alerts=[];
   inventory.forEach(it=>{const rem=it.qty-calcUsed(it.id);if(rem<0)alerts.push(`${lang==='he'?'חסרים':'Missing'} ${fmtQty(Math.abs(rem))} ${it.name}`);});
   const el=document.getElementById('stock-alert');
-  if(alerts.length){el.classList.add('show');document.getElementById('alert-msg').textContent=alerts.join('  |  ');}
+  if(!el) return;
+  const msg=document.getElementById('alert-msg');
+  if(alerts.length){el.classList.add('show');if(msg)msg.textContent=alerts.join('  |  ');}
   else el.classList.remove('show');
 }
 // ══════════════════════════════════════════════════════
@@ -3475,88 +3484,66 @@ async function newEvent(){
 }
 function renderAll(){renderInvList();renderStockBar();renderTables();renderStations();recalc();if(currentTab==='costs')renderCosts();if(currentTab==='profit')renderProfit();}
 // ══════════════════════════════════════════════════════
-// ARRANGE TAB - DISPLAY TABLES WITH ITEMS
+// ARRANGE TAB - per-table item quantities
+// Data model: tables[i].items[invId] = qty per seat-unit; total used = items*count (see calcUsed)
 // ══════════════════════════════════════════════════════
 let selectedArrangeTable=null;
 function renderArrange(){
   const list=document.getElementById('arrange-tables-list');
-  if(!list) return;
-
-  // If no tables, show empty state
-  if(Object.keys(tables).length===0){
-    list.innerHTML='<div class="empty-state" style="padding:20px;text-align:center;color:var(--mid)"><div style="font-size:20px;margin-bottom:8px">🪑</div><p style="font-size:12px">הוסף שולחנות בטאב שולחנות קודם</p></div>';
-    document.getElementById('arrange-items-area').innerHTML='<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">בחר שולחן מהסיידבר כדי להתחיל סידור</div>';
+  const area=document.getElementById('arrange-items-area');
+  if(!list||!area) return;
+  if(!tables.length){
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--mid);font-size:12px">הוסף שולחנות בטאב שולחנות קודם</div>';
+    area.innerHTML='<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">אין שולחנות</div>';
     return;
   }
-
-  // Build table list
-  list.innerHTML=Object.entries(tables).map(([id,t])=>`
-    <button style="padding:10px;background:${selectedArrangeTable===id?'var(--primary)':'var(--bg2)'};color:${selectedArrangeTable===id?'white':'var(--text)'};border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500" onclick="selectArrangeTable('${id}')">
-      🪑 ${esc(t.name||'שולחן')} <span style="font-size:11px;color:${selectedArrangeTable===id?'rgba(255,255,255,0.7)':'var(--mid)'}">(${t.count||1})</span>
-    </button>
-  `).join('');
-
-  // Render items for selected table
-  const itemsArea=document.getElementById('arrange-items-area');
-  if(!selectedArrangeTable){
-    itemsArea.innerHTML='<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">בחר שולחן מהסיידבר כדי להתחיל סידור</div>';
+  list.innerHTML=tables.map(t2=>{
+    const sel=selectedArrangeTable===t2.id;
+    return `<button style="padding:10px;background:${sel?'var(--primary)':'var(--bg2)'};color:${sel?'#fff':'var(--text)'};border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;text-align:start" onclick="selectArrangeTable(${t2.id})">🪑 ${esc(t2.name)} <span style="font-size:11px;opacity:.8">(${t2.count})</span></button>`;
+  }).join('');
+  const tb=tables.find(x=>x.id===selectedArrangeTable);
+  if(!tb){
+    area.innerHTML='<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">בחר שולחן מהרשימה כדי לקבוע כמויות</div>';
     return;
   }
-
-  const table=tables[selectedArrangeTable];
-  let itemsHtml='<div style="padding:20px"><h3 style="margin:0 0 15px 0;font-size:16px;color:var(--text)">📊 סידור לשולחן: '+esc(table.name||'שולחן')+'</h3>';
-
-  const tableItems=Object.entries(items).filter(([_,item])=>item.assigned&&item.assigned[selectedArrangeTable]>0);
-
-  if(tableItems.length===0){
-    itemsHtml+='<div style="padding:20px;background:var(--bg2);border-radius:8px;color:var(--mid);text-align:center;font-size:13px">אין פריטים מוקצים לשולחן זה</div>';
-  }else{
-    let hasShortage=false;
-    itemsHtml+='<div style="display:flex;flex-direction:column;gap:10px">';
-    tableItems.forEach(([itemId,item])=>{
-      const assigned=item.assigned[selectedArrangeTable]||0;
-      const shortage=Math.max(0,assigned-item.quantity);
-      if(shortage>0) hasShortage=true;
-      itemsHtml+=`
-        <div style="background:var(--bg2);padding:12px;border-radius:8px;border-left:3px solid ${shortage>0?'#e05050':'var(--primary)'}">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="font-weight:500;color:var(--text)">${esc(item.name||'פריט')}</div>
-            <div style="font-size:11px;color:var(--mid)">מזהה: ${esc(itemId)}</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px">
-            <div><span style="color:var(--mid)">מוקצה:</span> <strong>${assigned}</strong></div>
-            <div><span style="color:var(--mid)">זמין:</span> <strong style="color:${item.quantity>=assigned?'var(--primary)':'#e05050'}">${item.quantity}</strong></div>
-            <div><span style="color:var(--mid)">שארית:</span> <strong style="color:${shortage>0?'#e05050':'var(--success)'}">${Math.max(0,item.quantity-assigned)}</strong></div>
-          </div>
-          ${shortage>0?'<div style="margin-top:8px;padding:8px;background:#e0505015;border-radius:4px;color:#e05050;font-size:11px;font-weight:500">⚠️ חוסר: '+shortage+' יחידות</div>':''}
-          <div style="margin-top:10px;display:flex;gap:6px">
-            <input type="number" value="${assigned}" min="0" max="999" style="width:60px;padding:6px;border:1px solid var(--border);border-radius:4px;font-size:12px" onchange="updateArrangeQuantity('${itemId}','${selectedArrangeTable}',this.value)">
-            <span style="color:var(--mid);font-size:12px;align-self:center">יחידות</span>
-          </div>
-        </div>
-      `;
-    });
-    itemsHtml+='</div>';
-
-    if(hasShortage){
-      itemsHtml='<div style="background:#e0505020;border:1px solid #e05050;border-radius:8px;padding:12px;margin-bottom:15px;color:#e05050;font-size:13px;font-weight:500"><div style="margin-bottom:6px">⚠️ יש חוסר בפריטים!</div><div style="font-size:12px;color:#d04040">בדוק את הכמויות בסיידבר וודא שיש מספיק מלאי</div></div>'+itemsHtml;
-    }
+  const rows=inventory.map(it=>{
+    const per=(tb.items&&tb.items[it.id])||0;
+    const total=calcUsed(it.id);
+    const rem=it.qty-total;
+    return {it,per,total,rem};
+  });
+  let html=`<div style="padding:16px"><h3 style="margin:0 0 12px;font-size:16px">${esc(tb.name)} · ${tb.count} שולחנות</h3>`;
+  if(!inventory.length){
+    html+='<div style="color:var(--mid);font-size:13px">אין פריטי מלאי. הוסף פריטים בטאב מלאי.</div>';
   }
-
-  itemsHtml+='</div>';
-  itemsArea.innerHTML=itemsHtml;
+  rows.forEach(({it,per,total,rem})=>{
+    const short=rem<0;
+    html+=`<div style="background:var(--bg2);padding:12px;border-radius:8px;margin-bottom:10px;border-right:3px solid ${short?'#e05050':'var(--primary)'}">
+      <div style="font-weight:500;margin-bottom:6px">${esc(it.name)}</div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:12px">
+        <label>לשולחן זה:</label>
+        <input type="number" min="0" value="${per}" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:4px" onchange="updateArrangeQuantity(${it.id},${tb.id},this.value)">
+        <span style="color:var(--mid)">× ${tb.count} שולחנות = ${per*tb.count}</span>
+      </div>
+      <div style="font-size:12px;margin-top:6px;color:${short?'#e05050':'var(--mid)'}">
+        במלאי: ${it.qty} · נדרש בכל האירוע: ${total} · ${short?'⚠ חסר '+fmtQty(Math.abs(rem)):'נשאר '+fmtQty(rem)}
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  area.innerHTML=html;
 }
 function selectArrangeTable(tableId){
   selectedArrangeTable=tableId;
   renderArrange();
 }
-function updateArrangeQuantity(itemId,tableId,newQty){
-  const qty=Math.max(0,parseInt(newQty)||0);
-  if(!items[itemId]) items[itemId]={};
-  if(!items[itemId].assigned) items[itemId].assigned={};
-  items[itemId].assigned[tableId]=qty;
-  save();
-  renderArrange();
+function updateArrangeQuantity(invId,tableId,raw){
+  const tb=tables.find(x=>x.id===tableId);
+  if(!tb) return;
+  const qty=Math.max(0,parseInt(raw,10)||0);
+  if(!tb.items) tb.items={};
+  tb.items[invId]=qty;
+  save(); renderTables(); recalc(); renderArrange();
 }
 function flash(id){
   const el=document.getElementById(id);if(!el)return;
