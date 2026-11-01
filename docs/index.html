@@ -300,6 +300,9 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   .app-body{grid-template-columns:1fr}
   .sidebar{display:none;height:auto}
   .sidebar.mob-show{display:flex}
+  /* new tabs (tables / inventory / arrange): their add-forms must be visible on phones */
+  #main-tab-tables,#main-tab-inventory,#main-tab-arrange{flex-direction:column}
+  #main-tab-tables>.sidebar,#main-tab-inventory>.sidebar,#main-tab-arrange>.sidebar{display:flex;height:auto;border-left:none;border-bottom:1px solid var(--border)}
   .main-panel{height:auto;padding:14px;padding-bottom:80px}
   .main-panel.mob-hide{display:none}
   .tables-grid{grid-template-columns:1fr}
