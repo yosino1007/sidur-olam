@@ -2863,7 +2863,6 @@ function openPhotosScreen(ctx){
   catalogPhotoMode=null;
   document.getElementById('photos-screen').style.display='block';
   renderPhotosScreen();
-  window.history.pushState({screen:'photos'},null);
 }
 function openItemPhotos(itemId){
   photosCtx=null;
@@ -2871,22 +2870,36 @@ function openItemPhotos(itemId){
   if(!itemPhotos[itemId]) itemPhotos[itemId]=[];
   document.getElementById('photos-screen').style.display='block';
   renderPhotosScreen();
-  window.history.pushState({screen:'itemPhotos',itemId},null);
 }
 function closePhotosScreen(){ document.getElementById('photos-screen').style.display='none'; photosCtx=null; catalogPhotoMode=null; }
-window.addEventListener('popstate',(e)=>{
-  if(e.state&&e.state.screen==='photos'){
-    openPhotosScreen(photosCtx);
-  } else if(e.state&&e.state.screen==='itemPhotos'){
-    openItemPhotos(e.state.itemId);
-  } else if(!e.state){
-    // Back button pressed without a state — stay in app, don't exit
-    if(document.getElementById('photos-screen').style.display==='block'){
-      closePhotosScreen();
-    }
-  } else {
-    closePhotosScreen();
+// ── PHYSICAL BACK BUTTON ──
+// Keeps one history entry so back never exits the app: it closes the top open layer,
+// or returns from a tab to the home screen. On home it stays put.
+function isShownBlock(id){const e=document.getElementById(id);return !!e&&e.style.display==='block';}
+const LAYER_CHECKS=[
+  ()=>{const e=document.getElementById('pdf-preview');return !!e&&e.classList.contains('open');},
+  ()=>isShownBlock('summary-screen'),
+  ()=>isShownBlock('clients-screen'),
+  ()=>isShownBlock('archive-screen'),
+  ()=>{const e=document.getElementById('photo-lightbox');return !!e&&e.classList.contains('open');},
+  ()=>isShownBlock('photos-screen'),
+  ()=>isShownBlock('shopping-screen'),
+  ()=>isShownBlock('shortage-screen'),
+  ()=>isShownBlock('general-summary-screen'),
+  ()=>!!document.querySelector('.modal-overlay.open'),
+  ()=>{const e=document.getElementById('side-menu');return !!e&&e.classList.contains('open');}
+];
+function hasOpenLayer(){return LAYER_CHECKS.some(f=>f());}
+function handleBackButton(){
+  if(hasOpenLayer()){
+    document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));
+  } else if(document.getElementById('app-shell').style.display!=='none'){
+    goHome();
   }
+}
+window.addEventListener('popstate',()=>{
+  handleBackButton();
+  history.pushState({app:1},'');
 });
 async function renderPhotosScreen(){
   const ids=[...currentPhotoIds()], editable=(photosCtx==='active'||catalogPhotoMode);
@@ -3917,6 +3930,7 @@ if(onboarded){
   document.getElementById('onboarding').style.display='flex';
 }
 initNotesAndUpdates();
+history.pushState({app:1},'');
 scheduleReminder();
 </script>
 </body>
