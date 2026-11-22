@@ -3109,20 +3109,24 @@ function scheduleCloudSync(){
   _cloudTimer=setTimeout(()=>{ _cloudTimer=null; cloudPush(); },2500);
 }
 async function signInGoogle(){
+  let code='';
   try{
-    const f=await loadFirebase(); if(!f) return;
+    const f=await loadFirebase(); if(!f){ alert('החיבור לענן לא מוגדר'); return; }
     await f.authM.signInWithPopup(f.auth,new f.authM.GoogleAuthProvider());
   }catch(e){
-    if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){
-      try{ await fb.authM.signInWithRedirect(fb.auth,new fb.authM.GoogleAuthProvider()); }catch(e2){}
-    } else if(!(e&&(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'))){
-      _syncState='error'; updateAccountUI();
-      const code=(e&&e.code)||'unknown';
-      const hint=code==='auth/unauthorized-domain'
-        ?'הדומיין של האתר לא מאושר ב-Firebase. הוסף אותו ב-Authentication > Settings > Authorized domains'
-        :'';
-      alert('התחברות עם Google נכשלה ('+code+')'+(hint?'\n'+hint:''));
+    code=(e&&e.code)||(e&&e.message)||'unknown';
+    if(code==='auth/popup-blocked'||code==='auth/operation-not-supported-in-this-environment'){
+      try{ await fb.authM.signInWithRedirect(fb.auth,new fb.authM.GoogleAuthProvider()); return; }catch(e2){ code=(e2&&e2.code)||code; }
     }
+    if(code==='auth/cancelled-popup-request') return;
+    _syncState='error'; updateAccountUI();
+    const hints={
+      'auth/unauthorized-domain':'הדומיין לא מאושר ב-Firebase: Authentication > Settings > Authorized domains, והוסף את yosino1007.github.io',
+      'auth/operation-not-allowed':'ספק Google לא מופעל: Authentication > Sign-in method > Google > Enable',
+      'auth/api-key-not-valid':'מפתח ה-API מוגבל: ב-Google Cloud > Credentials הוסף ל-Website restrictions את https://yosino1007.github.io/*',
+      'auth/popup-closed-by-user':'החלון נסגר לפני סיום ההתחברות. לרוב זה דומיין לא מאושר או חסימת חלונות קופצים'
+    };
+    alert('התחברות עם Google נכשלה ('+code+')'+(hints[code]?'\n'+hints[code]:''));
   }
 }
 async function signOutGoogle(){
