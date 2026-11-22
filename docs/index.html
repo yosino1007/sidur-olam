@@ -331,6 +331,12 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 </style>
 </head>
 <body>
+<div id="install-card" style="display:none;position:fixed;left:14px;right:14px;bottom:calc(14px + var(--safe-bottom));z-index:998;background:#fff;color:#3d2b45;border-radius:14px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);align-items:center;gap:12px">
+  <span style="font-size:28px">🌹</span>
+  <div style="flex:1;font-size:14px;line-height:1.5"><strong>להתקין את סידור אולם למסך הבית?</strong><br><span style="font-size:12px;color:#6b5b73">פתיחה מהירה, בלי דפדפן.</span></div>
+  <button onclick="acceptInstallCard()" style="background:#3d2b45;color:#fff;border:none;border-radius:9px;padding:9px 12px;font-family:'Heebo',sans-serif;font-weight:700;cursor:pointer">התקן</button>
+  <button onclick="dismissInstallCard()" style="background:none;border:none;color:#6b5b73;font-family:'Heebo',sans-serif;cursor:pointer;padding:6px">לא עכשיו</button>
+</div>
 <div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#3d2b45;color:#fff;padding:10px 14px;align-items:center;justify-content:space-between;gap:10px;font-size:14px;font-weight:600">
   <span>🔄 יש עדכון חדש לאפליקציה</span>
   <button onclick="location.reload()" style="background:#f0a5cc;color:#3d2b45;border:none;border-radius:8px;padding:7px 14px;font-family:'Heebo',sans-serif;font-weight:700;cursor:pointer">רענן</button>
@@ -1551,6 +1557,7 @@ function openMode(mode){
 }
 function goHome(){
   if(typeof updateBackupBanner==='function') updateBackupBanner();
+  setTimeout(maybeShowInstallCard,0);
   document.getElementById('app-shell').style.display='none';
   document.getElementById('home-screen').style.display='flex';
 }
@@ -3867,8 +3874,25 @@ function refreshHomeButtons(){
     else nb.textContent='🔔 הפעל התראות';
   }
 }
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;refreshHomeButtons();});
-window.addEventListener('appinstalled',()=>{deferredInstall=null;refreshHomeButtons();setHomeHint('האפליקציה הותקנה.');});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;refreshHomeButtons();maybeShowInstallCard();});
+function isInstallDismissed(){ try{ return localStorage.getItem('sidur-install-dismissed')==='1'; }catch(e){ return false; } }
+function maybeShowInstallCard(){
+  const card=document.getElementById('install-card'); if(!card) return;
+  if(!deferredInstall || isStandalone() || isInstallDismissed()) return;
+  const home=document.getElementById('home-screen');
+  if(!home || getComputedStyle(home).display==='none') return;
+  card.style.display='flex';
+}
+function hideInstallCard(){ const c=document.getElementById('install-card'); if(c) c.style.display='none'; }
+async function acceptInstallCard(){
+  hideInstallCard();
+  await installApp();
+}
+function dismissInstallCard(){
+  try{ localStorage.setItem('sidur-install-dismissed','1'); }catch(e){}
+  hideInstallCard();
+}
+window.addEventListener('appinstalled',()=>{deferredInstall=null;refreshHomeButtons();hideInstallCard();setHomeHint('האפליקציה הותקנה.');});
 async function installApp(){
   if(deferredInstall){
     deferredInstall.prompt();
