@@ -3559,7 +3559,7 @@ function renderArrange(){
   rows.forEach(({it,per,total,rem})=>{
     const short=rem<0;
     html+=`<div style="background:var(--bg2);padding:12px;border-radius:8px;margin-bottom:10px;border-right:3px solid ${short?'#e05050':'var(--primary)'}">
-      <div style="font-weight:500;margin-bottom:6px">${esc(it.name)}</div>
+      <div style="font-weight:500;margin-bottom:6px">${esc(it.icon||"")} ${esc(it.name)}</div>
       <div style="display:flex;gap:8px;align-items:center;font-size:12px">
         <label>לשולחן זה:</label>
         <input type="number" min="0" value="${per}" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:4px" onchange="updateArrangeQuantity(${it.id},${tb.id},this.value)">
