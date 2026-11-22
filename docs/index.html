@@ -284,7 +284,7 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 .profit-card .pc-stat.red strong{color:#c62828}
 .profit-card .pc-stat span{font-size:10px;color:var(--mid)}
 /* ══ SUMMARY SCREEN ══ */
-#summary-screen,#clients-screen,#archive-screen,#shopping-screen,#shortage-screen,#photos-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
+#summary-screen,#clients-screen,#archive-screen,#shopping-screen,#shortage-screen,#general-summary-screen,#photos-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
 .summary-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(16px + var(--safe-top)) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
 .summary-header h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;flex:1}
 .summary-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
@@ -331,6 +331,10 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 </style>
 </head>
 <body>
+<div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#3d2b45;color:#fff;padding:10px 14px;align-items:center;justify-content:space-between;gap:10px;font-size:14px;font-weight:600">
+  <span>🔄 יש עדכון חדש לאפליקציה</span>
+  <button onclick="location.reload()" style="background:#f0a5cc;color:#3d2b45;border:none;border-radius:8px;padding:7px 14px;font-family:'Heebo',sans-serif;font-weight:700;cursor:pointer">רענן</button>
+</div>
 <!-- ══════ ONBOARDING ══════ -->
 <div id="onboarding">
   <div class="ob-logo">🌹</div>
@@ -370,6 +374,11 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
   <div class="home-logo">🌹</div>
   <div class="home-title" id="hs-title">סידור אולם</div>
   <div class="home-sub" id="hs-sub">פרחים · נרות · קישוטים</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0 16px 10px">
+    <button id="install-btn" onclick="installApp()" style="display:none;background:#fff;color:#3d2b45;border:none;border-radius:10px;padding:9px 14px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">📲 התקן כאפליקציה</button>
+    <button id="notify-btn" onclick="enableNotifications()" style="background:#fff;color:#3d2b45;border:none;border-radius:10px;padding:9px 14px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">🔔 הפעל התראות</button>
+  </div>
+  <div id="home-hint" style="display:none;font-size:12px;color:#fce8f3;text-align:center;margin:0 16px 14px;max-width:360px;line-height:1.6"></div>
   <div id="home-account" onclick="homeAccountClick()" style="display:none;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;margin:0 16px 14px;font-size:13px;font-weight:600;color:var(--charcoal);box-shadow:0 2px 9px var(--shadow)"></div>
   <div id="backup-banner" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;background:#fff3cd;border:1.5px solid #ffc107;border-radius:12px;padding:10px 14px;margin:0 16px 14px;font-size:13px;color:#856404;font-weight:600">
     <span>💾 <span id="backup-banner-text"></span></span>
@@ -594,7 +603,7 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
       <div class="mode-tab active" id="tab-tables-main" onclick="switchMainTab('tables')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🪑 שולחנות</div>
       <div class="mode-tab" id="tab-inventory-main" onclick="switchMainTab('inventory')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📦 מלאי</div>
       <div class="mode-tab" id="tab-arrange-main" onclick="switchMainTab('arrange')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🎯 סידור</div>
-      <div class="mode-tab" id="tab-menu-main" onclick="switchMainTab('menu')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📋 תפריט</div>
+      <div class="mode-tab" id="tab-menu-main" onclick="switchMainTab('menu')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📝 פתקים</div>
     </div>
     <!-- TAB 1: TABLES - Only add tables -->
     <div id="main-tab-tables" style="display:flex;flex:1;min-height:0">
@@ -682,10 +691,19 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
     </div>
     <!-- TAB 4: MENU -->
     <div id="main-tab-menu" style="display:none;flex:1;min-height:0">
-      <aside class="sidebar">
-        <div><div class="section-title">📋 תפריט</div><p style="padding:10px;color:var(--mid);font-size:12px">עדיין בבנייה</p></div>
-      </aside>
-      <main class="main-panel"><p style="padding:20px;color:var(--mid)">📋 תפריט אירוע - בבנייה</p></main>
+      <main class="main-panel" style="flex:1">
+        <div class="section-title">📝 פתקים ותזכורות</div>
+        <div class="inv-row" style="flex-direction:column;align-items:stretch;gap:8px;margin-bottom:14px">
+          <textarea id="note-text" rows="2" placeholder="כתוב פתק..." style="font-family:'Heebo',sans-serif;font-size:14px;padding:8px;border:1.5px solid var(--border);border-radius:8px;resize:vertical"></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="datetime-local" id="note-at" style="flex:1;min-width:160px;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif">
+            <button class="btn-save" onclick="addNote()" style="padding:9px 16px">+ הוסף</button>
+          </div>
+          <div style="font-size:11px;color:var(--mid)">בלי תאריך = פתק רגיל. עם תאריך ושעה = תזכורת עם התראה.</div>
+          <div id="note-status" style="font-size:12px;color:#e05050"></div>
+        </div>
+        <div id="notes-list"></div>
+      </main>
     </div>
   </div>
   <!-- COSTS -->
@@ -746,6 +764,9 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
       <span class="nav-icon">⚠️</span><span id="nav-short-lbl">חסרים</span>
       <span id="nav-short-count" class="nav-badge" style="display:none"></span>
     </button>
+    <button class="nav-btn" id="nav-summary-btn" onclick="openGeneralSummary()">
+      <span class="nav-icon">📊</span><span>סיכום</span>
+    </button>
   </nav>
 </div>
 <!-- ══════ SUMMARY SCREEN ══════ -->
@@ -782,6 +803,14 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
     <button class="ah-btn" onclick="shareShopping()" style="font-size:12px" id="shopping-share-btn">📤 שתף רשימה</button>
   </div>
   <div class="summary-body" id="shopping-body"></div>
+</div>
+<!-- ══════ GENERAL SUMMARY SCREEN ══════ -->
+<div id="general-summary-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeGeneralSummary()">←</button>
+    <h2>📊 סיכום כללי</h2>
+  </div>
+  <div class="summary-body" id="gs-body"></div>
 </div>
 <!-- ══════ SHORTAGE SCREEN ══════ -->
 <div id="shortage-screen">
@@ -1033,6 +1062,8 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 // ══════════════════════════════════════════════════════
 let inventory=[], tables=[], stations=[], prices={}, sellPrices={}, nextId=1;
 let pickerFor=null, currentTab='planner', lang='he';
+const APP_VERSION='2026-11-22-1';
+let notes=[];
 let budgetTarget=0, reminder={}, checklists={}, activeTemplate='general';
 let clients=[], archivedEvents=[], activeClientId=null;
 let eventPhotos=[]; // ids of photos attached to the ACTIVE event (bytes live in IndexedDB + Firestore, never in this state)
@@ -1324,7 +1355,7 @@ function t(k){ return (T[lang]||T['he'])[k]||k; }
 // PERSIST
 // ══════════════════════════════════════════════════════
 function save(){
-  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos})); }
+  try{ localStorage.setItem('sidur-v3',JSON.stringify({version:5,inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,activeTemplate,lang,profitPin,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos,notes})); }
   catch(e){
     if(!save._warned){ save._warned=true; alert(t('saveFailed')); }
   }
@@ -1339,6 +1370,7 @@ function load(){
       reminder=d.reminder||{}; checklists=d.checklists||{};
       activeTemplate=d.activeTemplate||'general'; lang=d.lang||'he';
       profitPin=d.profitPin||null;
+      notes=sanitizeNotes(d.notes);
       // migration from version<4: stations didn't exist yet; version<5: clients/archive/payment didn't exist — defaults below cover both
       clients=Array.isArray(d.clients)?d.clients:[];
       archivedEvents=Array.isArray(d.archivedEvents)?d.archivedEvents:[];
@@ -1557,6 +1589,7 @@ function switchMainTab(tab){
   document.getElementById('main-tab-inventory').style.display=tab==='inventory'?'flex':'none';
   document.getElementById('main-tab-arrange').style.display=tab==='arrange'?'flex':'none';
   document.getElementById('main-tab-menu').style.display=tab==='menu'?'flex':'none';
+  if(tab==='menu') renderNotes();
   renderAll();
   if(tab==='arrange') renderArrange();
 }
@@ -2931,7 +2964,8 @@ function updateShortBadge(){
   const n=shortageItems().length;
   b.textContent=n; b.style.display=n?'flex':'none';
 }
-function arrangeBanner(){
+function arrangeBanner(){ return `<div id="arrange-banner">${arrangeBannerInner()}</div>`; }
+function arrangeBannerInner(){
   const n=shortageItems().length;
   if(!n) return '';
   return `<div style="background:#e05050;color:#fff;border-radius:10px;padding:12px;text-align:center;font-weight:700;font-size:14px;margin-bottom:12px">⚠ ${n} ${esc(t('shortCount'))} (סה"כ לכל השולחנות)</div>`;
@@ -3305,7 +3339,7 @@ function exportBackupJSON(){
   // profitPin deliberately NOT exported — backups are shared, the PIN protects cost data
   return JSON.stringify({
     inventory,tables,stations,prices,sellPrices,nextId,budgetTarget,reminder,checklists,
-    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos,
+    activeTemplate,lang,clients,archivedEvents,activeClientId,payment,eventPhotos,itemPhotos,notes,
     exportedAt:new Date().toISOString(),format:'sidur-olam-backup-v1'
   },null,2);
 }
@@ -3429,6 +3463,7 @@ async function importBackupFile(inputEl){
 // applies an already-validated backup object to the live state (file import + cloud sync share this)
 function applyBackupObject(d){
     try{
+      notes=sanitizeNotes(d.notes);
       inventory=(Array.isArray(d.inventory)?d.inventory:[]).map((it,idx)=>({
         id:parseInt(it.id)||0,
         icon:sanitizeIcon(it.icon),
@@ -3616,14 +3651,14 @@ function renderArrange(){
   }
   rows.forEach(({it,per,total,rem})=>{
     const short=rem<0;
-    html+=`<div style="background:${short?'rgba(224,80,80,.12)':'var(--bg2)'};padding:12px;border-radius:8px;margin-bottom:10px;border-right:5px solid ${short?'#e05050':'var(--primary)'}">
+    html+=`<div data-row="${it.id}" style="background:${short?'rgba(224,80,80,.12)':'var(--bg2)'};padding:12px;border-radius:8px;margin-bottom:10px;border-right:5px solid ${short?'#e05050':'var(--primary)'}">
       <div style="font-weight:500;margin-bottom:6px">${esc(it.icon||"")} ${esc(it.name)}</div>
       <div style="display:flex;gap:8px;align-items:center;font-size:12px">
         <label>לשולחן זה:</label>
-        <input type="number" min="0" value="${per}" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:4px" onchange="updateArrangeQuantity(${it.id},${tb.id},this.value)">
-        <span style="color:var(--mid)">× ${tb.count} שולחנות = ${per*tb.count}</span>
+        <input type="number" min="0" value="${per}" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:4px" oninput="updateArrangeQuantity(${it.id},${tb.id},this.value)">
+        <span style="color:var(--mid)">× ${tb.count} שולחנות = <span data-per>${per*tb.count}</span></span>
       </div>
-      <div style="font-size:12px;margin-top:6px;color:var(--mid)">
+      <div data-status style="font-size:12px;margin-top:6px;color:var(--mid)">
         במלאי: ${it.qty} · נדרש בכל האירוע: ${total} · ${short?`<span style="display:inline-block;background:#e05050;color:#fff;border-radius:12px;padding:2px 9px;font-weight:700">⚠ חסר ${fmtQty(Math.abs(rem))}</span>`:'נשאר '+fmtQty(rem)}
       </div>
     </div>`;
@@ -3641,7 +3676,22 @@ function updateArrangeQuantity(invId,tableId,raw){
   const qty=Math.max(0,parseInt(raw,10)||0);
   if(!tb.items) tb.items={};
   tb.items[invId]=qty;
-  save(); renderTables(); recalc(); renderArrange();
+  save(); recalc(); refreshArrangeView();
+  renderTables();
+}
+// Updates numbers in place, so the input keeps focus while typing
+function refreshArrangeView(){
+  const tb=tables.find(x=>x.id===selectedArrangeTable); if(!tb) return;
+  const bn=document.getElementById('arrange-banner'); if(bn) bn.innerHTML=arrangeBannerInner();
+  inventory.forEach(it=>{
+    const row=document.querySelector(`[data-row="${it.id}"]`); if(!row) return;
+    const per=(tb.items&&tb.items[it.id])||0, total=calcUsed(it.id), rem=it.qty-total, short=rem<0;
+    row.style.background=short?'rgba(224,80,80,.12)':'var(--bg2)';
+    row.style.borderRightColor=short?'#e05050':'var(--primary)';
+    const pe=row.querySelector('[data-per]'); if(pe) pe.textContent=per*tb.count;
+    const se=row.querySelector('[data-status]');
+    if(se) se.innerHTML=`במלאי: ${it.qty} · נדרש בכל האירוע: ${total} · ${short?`<span style="display:inline-block;background:#e05050;color:#fff;border-radius:12px;padding:2px 9px;font-weight:700">⚠ חסר ${fmtQty(Math.abs(rem))}</span>`:'נשאר '+fmtQty(rem)}`;
+  });
 }
 function flash(id){
   const el=document.getElementById(id);if(!el)return;
@@ -3676,6 +3726,7 @@ document.addEventListener('keydown',e=>{
   el=document.getElementById('photos-screen'); if(el&&el.style.display==='block'){closePhotosScreen();return;}
   el=document.getElementById('shopping-screen'); if(el&&el.style.display==='block'){closeShoppingScreen();return;}
   el=document.getElementById('shortage-screen'); if(el&&el.style.display==='block'){closeShortageScreen();return;}
+  el=document.getElementById('general-summary-screen'); if(el&&el.style.display==='block'){closeGeneralSummary();return;}
   const openModal=document.querySelector('.modal-overlay.open');
   if(openModal){
     const closers={
@@ -3696,6 +3747,154 @@ document.addEventListener('keydown',e=>{
 // ══════════════════════════════════════════════════════
 // SERVICE WORKER
 // ══════════════════════════════════════════════════════
+function sanitizeNotes(arr){
+  return (Array.isArray(arr)?arr:[]).filter(n=>n&&typeof n==='object').map(n=>({
+    id:Number(n.id)||Date.now()+Math.random(),
+    text:String(n.text==null?'':n.text).slice(0,500),
+    at:typeof n.at==='string'?n.at:'',
+    done:!!n.done,
+    notified:!!n.notified
+  }));
+}
+// ── NOTES & REMINDERS ──
+function isNoteDue(n){ return !n.done && !!n.at && new Date(n.at)<=new Date(); }
+function fmtNoteTime(at){ return new Date(at).toLocaleString('he-IL',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function renderNotes(){
+  const el=document.getElementById('notes-list'); if(!el) return;
+  if(!notes.length){ el.innerHTML='<div style="text-align:center;color:var(--mid);font-size:13px;padding:24px">אין פתקים עדיין</div>'; return; }
+  const sorted=[...notes].sort((a,b)=>(a.done-b.done)||((a.at||'9999')<(b.at||'9999')?-1:1));
+  el.innerHTML=sorted.map(n=>{
+    const due=isNoteDue(n);
+    return `<div style="display:flex;gap:10px;align-items:flex-start;background:${due?'rgba(224,80,80,.12)':'var(--warm)'};border:1px solid ${due?'#e05050':'var(--border)'};border-radius:10px;padding:10px;margin-bottom:8px;opacity:${n.done?0.55:1}">
+      <input type="checkbox" ${n.done?'checked':''} onchange="toggleNote(${n.id})" style="margin-top:4px;width:18px;height:18px;flex:none">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;white-space:pre-wrap;word-break:break-word;${n.done?'text-decoration:line-through':''}">${esc(n.text)}</div>
+        ${n.at?`<div style="font-size:12px;margin-top:4px;font-weight:600;color:${due?'#e05050':'var(--mid)'}">${due?'⏰ הגיע: ':'🔔 '}${esc(fmtNoteTime(n.at))}</div>`:''}
+      </div>
+      <button onclick="deleteNote(${n.id})" style="background:none;border:none;color:var(--mid);font-size:18px;cursor:pointer;flex:none">✕</button>
+    </div>`;
+  }).join('');
+}
+function addNote(){
+  const text=document.getElementById('note-text').value.trim();
+  if(!text) return;
+  const at=document.getElementById('note-at').value;
+  notes.push({id:Date.now()+Math.random(),text:text.slice(0,500),at,done:false,notified:false});
+  save();
+  document.getElementById('note-text').value='';
+  document.getElementById('note-at').value='';
+  const st2=document.getElementById('note-status');
+  st2.textContent=(at && (!('Notification' in window) || Notification.permission!=='granted'))?'שים לב: ההתראות לא פעילות. הפעל אותן בדף הבית.':'';
+  renderNotes();
+  checkDueNotes();
+}
+function toggleNote(id){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  n.done=!n.done; save(); renderNotes();
+}
+async function deleteNote(id){
+  if(!(await askConfirm('למחוק את הפתק?'))) return;
+  notes=notes.filter(x=>x.id!==id); save(); renderNotes();
+}
+function notifyUser(title,body){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const opts={body,icon:'icon-192.png'};
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(reg&&reg.showNotification) reg.showNotification(title,opts);
+      else try{new Notification(title,opts);}catch(e){}
+    }).catch(()=>{try{new Notification(title,opts);}catch(e){}});
+  } else { try{new Notification(title,opts);}catch(e){} }
+}
+function checkDueNotes(){
+  let changed=false;
+  notes.forEach(n=>{
+    if(!n.done && !n.notified && n.at && new Date(n.at)<=new Date()){
+      n.notified=true; changed=true;
+      notifyUser('🔔 תזכורת', n.text);
+    }
+  });
+  if(changed){ save(); renderNotes(); }
+}
+// ── GENERAL SUMMARY ──
+function openGeneralSummary(){
+  document.getElementById('general-summary-screen').style.display='block';
+  renderGeneralSummary();
+}
+function closeGeneralSummary(){document.getElementById('general-summary-screen').style.display='none';}
+function renderGeneralSummary(){
+  const body=document.getElementById('gs-body'); if(!body) return;
+  const sh=shortageItems().length;
+  const upcoming=notes.filter(n=>!n.done&&n.at).sort((a,b)=>a.at<b.at?-1:1);
+  const open=notes.filter(n=>!n.done&&!n.at);
+  const card=(title,inner)=>`<div style="background:var(--warm);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px"><div style="font-weight:700;margin-bottom:10px">${title}</div>${inner}</div>`;
+  const shortInner=sh
+    ? `<div style="color:#e05050;font-weight:700;font-size:15px;margin-bottom:10px">⚠ ${sh} פריטים חסרים במלאי</div><button onclick="closeGeneralSummary();openShortageScreen()" style="background:#e05050;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:'Heebo',sans-serif;font-weight:700;cursor:pointer">פתח סיכום חסרים</button>`
+    : `<div style="color:var(--success);font-weight:700">✓ הכל במלאי</div>`;
+  const upInner=upcoming.length
+    ? upcoming.map(n=>`<div style="padding:8px 0;border-top:1px solid var(--border);color:${isNoteDue(n)?'#e05050':'inherit'}"><strong>${esc(fmtNoteTime(n.at))}</strong> · ${esc(n.text)}</div>`).join('')
+    : '<div style="color:var(--mid);font-size:13px">אין תזכורות עתידיות</div>';
+  const openInner=open.length
+    ? open.map(n=>`<div style="padding:8px 0;border-top:1px solid var(--border);font-size:14px;white-space:pre-wrap">${esc(n.text)}</div>`).join('')
+    : '<div style="color:var(--mid);font-size:13px">אין פתקים פתוחים</div>';
+  body.innerHTML=card('⚠ חסרים במלאי',shortInner)+card('⏰ תזכורות',upInner)+card('📝 פתקים פתוחים',openInner);
+}
+// ── HOME: install, notifications, update check ──
+let deferredInstall=null;
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function setHomeHint(msg){const h=document.getElementById('home-hint'); if(!h) return; h.textContent=msg||''; h.style.display=msg?'block':'none';}
+function refreshHomeButtons(){
+  const inst=document.getElementById('install-btn'), nb=document.getElementById('notify-btn');
+  if(inst){ inst.style.display=(!isStandalone()&&(deferredInstall||isIOS()))?'inline-block':'none'; }
+  if(nb){
+    if(!('Notification' in window)) nb.textContent='🔔 התראות לא נתמכות כאן';
+    else if(Notification.permission==='granted') nb.textContent='🔔 התראות פעילות';
+    else if(Notification.permission==='denied') nb.textContent='🔕 התראות חסומות';
+    else nb.textContent='🔔 הפעל התראות';
+  }
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;refreshHomeButtons();});
+window.addEventListener('appinstalled',()=>{deferredInstall=null;refreshHomeButtons();setHomeHint('האפליקציה הותקנה.');});
+async function installApp(){
+  if(deferredInstall){
+    deferredInstall.prompt();
+    await deferredInstall.userChoice;
+    deferredInstall=null; refreshHomeButtons(); return;
+  }
+  if(isIOS()) setHomeHint('באייפון: לחץ על כפתור השיתוף ואז "הוסף למסך הבית". פתח את האפליקציה מהאייקון הזה.');
+  else setHomeHint('הדפדפן לא מציע התקנה כרגע. בתפריט הדפדפן בחר "התקן אפליקציה" או "הוסף למסך הבית".');
+}
+async function enableNotifications(){
+  if(!('Notification' in window)){
+    setHomeHint(isIOS()?'באייפון ההתראות זמינות רק אחרי "הוסף למסך הבית" ופתיחה מהאייקון.':'הדפדפן הזה לא תומך בהתראות.');
+    return;
+  }
+  if(Notification.permission==='denied'){ setHomeHint('ההתראות חסומות. אפשר לשנות בהגדרות האתר בדפדפן.'); return; }
+  if(Notification.permission==='granted'){ setHomeHint('ההתראות כבר פעילות.'); return; }
+  const perm=await Notification.requestPermission();
+  refreshHomeButtons();
+  setHomeHint(perm==='granted'
+    ? 'ההתראות פעילות. הן מגיעות כשהאפליקציה פתוחה (גם ברקע). כשהיא סגורה לגמרי, תזכורת תופיע בפתיחה הבאה.'
+    : 'ההתראות לא אושרו.');
+}
+async function checkForUpdate(){
+  try{
+    const r=await fetch('./index.html?check='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return;
+    const m=(await r.text()).match(/const APP_VERSION='([^']+)'/);
+    if(m&&m[1]!==APP_VERSION) document.getElementById('update-banner').style.display='flex';
+  }catch(e){}
+}
+function initNotesAndUpdates(){
+  renderNotes();
+  refreshHomeButtons();
+  checkDueNotes();
+  checkForUpdate();
+  setInterval(checkDueNotes,30000);
+  setInterval(checkForUpdate,600000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checkDueNotes(); checkForUpdate(); } });
+}
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 // ══════════════════════════════════════════════════════
 // INIT
@@ -3717,6 +3916,7 @@ if(onboarded){
   document.getElementById('home-screen').style.display='none';
   document.getElementById('onboarding').style.display='flex';
 }
+initNotesAndUpdates();
 scheduleReminder();
 </script>
 </body>
