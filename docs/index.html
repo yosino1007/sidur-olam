@@ -263,6 +263,8 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:3px;font-family:'Heebo',sans-serif;font-size:10px;color:var(--mid)}
 .nav-btn .nav-icon{font-size:20px}
 .nav-btn.active{color:var(--pink-dark);font-weight:600}
+.nav-btn{position:relative}
+.nav-badge{position:absolute;top:-2px;right:calc(50% - 26px);min-width:18px;height:18px;border-radius:9px;background:#e05050;color:#fff;font-size:11px;font-weight:700;align-items:center;justify-content:center;padding:0 5px}
 /* ══ PROFIT ══ */
 .profit-card{background:#fff;border-radius:11px;border:1.5px solid #c8e6c9;box-shadow:0 2px 9px rgba(0,100,0,0.08);padding:14px}
 .profit-card .pc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -282,7 +284,7 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 .profit-card .pc-stat.red strong{color:#c62828}
 .profit-card .pc-stat span{font-size:10px;color:var(--mid)}
 /* ══ SUMMARY SCREEN ══ */
-#summary-screen,#clients-screen,#archive-screen,#shopping-screen,#photos-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
+#summary-screen,#clients-screen,#archive-screen,#shopping-screen,#shortage-screen,#photos-screen{display:none;position:fixed;inset:0;background:var(--cream);z-index:450;overflow-y:auto}
 .summary-header{background:linear-gradient(135deg,#3d2b45,#5bbcb8);padding:calc(16px + var(--safe-top)) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
 .summary-header h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;flex:1}
 .summary-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
@@ -457,6 +459,13 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
     <div class="sm-item-text">
       <div class="sm-item-title" id="sm-pin-title">נעילת טאב רווח</div>
       <div class="sm-item-desc" id="sm-pin-desc">קוד גישה לטאב הרווח בלבד</div>
+    </div>
+  </div>
+  <div class="sm-item" onclick="closeSideMenu();openShortageScreen()">
+    <div class="sm-item-icon">⚠️</div>
+    <div class="sm-item-text">
+      <div class="sm-item-title" id="sm-short-title">סיכום חסרים</div>
+      <div class="sm-item-desc" id="sm-short-desc">כל מה שחסר במלאי לאירוע</div>
     </div>
   </div>
   <div class="sm-item" onclick="closeSideMenu();openShoppingScreen()">
@@ -730,14 +739,12 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
   </div>
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav" id="bottom-nav">
-    <button class="nav-btn active" id="nav-main" onclick="mobileShowMain()">
-      <span class="nav-icon" id="nav-main-icon">📍</span><span id="nav-main-lbl">עמדות</span>
-    </button>
-    <button class="nav-btn" id="nav-side" onclick="mobileShowSide()">
-      <span class="nav-icon">📦</span><span id="nav-inv-lbl">מלאי</span>
-    </button>
     <button class="nav-btn" id="nav-menu-btn" onclick="openSideMenu()">
       <span class="nav-icon">☰</span><span id="nav-menu-lbl">תפריט</span>
+    </button>
+    <button class="nav-btn" id="nav-short-btn" onclick="openShortageScreen()">
+      <span class="nav-icon">⚠️</span><span id="nav-short-lbl">חסרים</span>
+      <span id="nav-short-count" class="nav-badge" style="display:none"></span>
     </button>
   </nav>
 </div>
@@ -775,6 +782,14 @@ html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
     <button class="ah-btn" onclick="shareShopping()" style="font-size:12px" id="shopping-share-btn">📤 שתף רשימה</button>
   </div>
   <div class="summary-body" id="shopping-body"></div>
+</div>
+<!-- ══════ SHORTAGE SCREEN ══════ -->
+<div id="shortage-screen">
+  <div class="summary-header">
+    <button class="summary-close" onclick="closeShortageScreen()">←</button>
+    <h2 id="shortage-screen-title">⚠ סיכום חסרים</h2>
+  </div>
+  <div class="summary-body" id="shortage-body"></div>
 </div>
 <!-- ══════ PHOTOS SCREEN ══════ -->
 <div id="photos-screen">
@@ -1058,7 +1073,7 @@ const T = {
     smBudgetTitle:'יעד תקציב', smBudgetDesc:'הגדר תקציב מקסימלי לאירוע',
     smResetTitle:'איפוס הכל', smResetDesc:'מחק את כל הנתונים',
     reminderBadge:'פעיל',
-    navTables:'עמדות', navInv:'מלאי', navMenu:'תפריט',
+    navTables:'עמדות', navInv:'מלאי', navMenu:'תפריט', navShort:'חסרים', smShort:'סיכום חסרים', smShortDesc:'כל מה שחסר במלאי לאירוע', shortTitle:'⚠ סיכום חסרים', shortCount:'פריטים חסרים', shortNone:'אין חוסרים — הכל במלאי', shortHave:'במלאי', shortNeeded:'נדרש', shortLbl:'חסר',
     presets:[
       {icon:'🌹',name:'ורדים'},{icon:'🌸',name:'פרחים'},{icon:'🕯️',name:'נרות'},
       {icon:'🏺',name:'אגרטל'},{icon:'🌿',name:'ירק'},{icon:'🎀',name:'סרטים'},
@@ -1195,7 +1210,7 @@ const T = {
     smBudgetTitle:'Budget Target', smBudgetDesc:'Set a maximum budget for the event',
     smResetTitle:'Reset All', smResetDesc:'Delete all data',
     reminderBadge:'Active',
-    navTables:'Stations', navInv:'Inventory', navMenu:'Menu',
+    navTables:'Stations', navInv:'Inventory', navMenu:'Menu', navShort:'Missing', smShort:'Shortage summary', smShortDesc:'Everything missing from stock for the event', shortTitle:'⚠ Shortage summary', shortCount:'items short', shortNone:'Nothing missing — all in stock', shortHave:'In stock', shortNeeded:'Needed', shortLbl:'Short',
     presets:[
       {icon:'🌹',name:'Roses'},{icon:'🌸',name:'Flowers'},{icon:'🕯️',name:'Candles'},
       {icon:'🏺',name:'Vase'},{icon:'🌿',name:'Greens'},{icon:'🎀',name:'Ribbons'},
@@ -1421,7 +1436,7 @@ function applyTranslations(){
   st('cost-detail-title',t('costDetailTitle'));
   st('cost-empty-msg',t('costEmpty'));
   // nav
-  st('nav-main-lbl',t('navTables')); st('nav-inv-lbl',t('navInv')); st('nav-menu-lbl',t('navMenu'));
+  st('nav-menu-lbl',t('navMenu')); st('nav-short-lbl',t('navShort')); st('sm-short-title',t('smShort')); st('sm-short-desc',t('smShortDesc')); st('shortage-screen-title',t('shortTitle'));
   // side menu
   st('sm-s-tools',t('smTools')); st('sm-s-app',t('smApp'));
   st('sm-checklist-title',t('smChecklistTitle')); st('sm-checklist-desc',t('smChecklistDesc'));
@@ -1524,8 +1539,6 @@ function actuallySwitchTab(tab){
   document.getElementById('tab-summary').classList.toggle('active',tab==='summary');
   document.getElementById('tab-costs').classList.toggle('active',tab==='costs');
   document.getElementById('tab-profit').classList.toggle('active',tab==='profit');
-  document.getElementById('nav-main-icon').textContent=tab==='planner'?'📍':tab==='summary'?'📊':tab==='costs'?'💰':'📈';
-  document.getElementById('nav-main-lbl').textContent=tab==='planner'?t('navTables'):tab==='summary'?'סיכום':tab==='costs'?t('tabCost'):t('navProfitLbl');
   if(tab==='costs') renderCosts();
   if(tab==='profit') renderProfit();
   if(tab==='summary') renderSummary();
@@ -1570,8 +1583,6 @@ function mobileShowMain(){
   if(window.innerWidth>700) return;
   ['planner-sidebar','costs-sidebar','profit-sidebar'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('mob-show')});
   ['planner-main','costs-main','profit-main'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('mob-hide')});
-  document.getElementById('nav-main').classList.add('active');
-  document.getElementById('nav-side').classList.remove('active');
 }
 function mobileShowSide(){
   if(window.innerWidth>700) return;
@@ -1579,8 +1590,6 @@ function mobileShowSide(){
   const mid=currentTab==='planner'?'planner-main':currentTab==='costs'?'costs-main':'profit-main';
   document.getElementById(sid).classList.add('mob-show');
   document.getElementById(mid).classList.add('mob-hide');
-  document.getElementById('nav-main').classList.remove('active');
-  document.getElementById('nav-side').classList.add('active');
 }
 // ══════════════════════════════════════════════════════
 // PRESETS
@@ -1942,6 +1951,7 @@ function renderStations(){
 // RECALC
 // ══════════════════════════════════════════════════════
 function recalc(){
+  updateShortBadge();
   const alerts=[];
   inventory.forEach(it=>{const rem=it.qty-calcUsed(it.id);if(rem<0)alerts.push(`${lang==='he'?'חסרים':'Missing'} ${fmtQty(Math.abs(rem))} ${it.name}`);});
   const el=document.getElementById('stock-alert');
@@ -2910,6 +2920,50 @@ async function deleteLightboxPhoto(){
   renderPhotosScreen();
 }
 // ══════════════════════════════════════════════════════
+// SHORTAGE SUMMARY (used − stock, > 0)
+// ══════════════════════════════════════════════════════
+function shortageItems(){
+  return inventory.map(it=>{const used=calcUsed(it.id);return {it,used,short:used-it.qty};}).filter(x=>x.short>0);
+}
+function updateShortBadge(){
+  const b=document.getElementById('nav-short-count');
+  if(!b) return;
+  const n=shortageItems().length;
+  b.textContent=n; b.style.display=n?'flex':'none';
+}
+function arrangeBanner(){
+  const n=shortageItems().length;
+  if(!n) return '';
+  return `<div style="background:#e05050;color:#fff;border-radius:10px;padding:12px;text-align:center;font-weight:700;font-size:14px;margin-bottom:12px">⚠ ${n} ${esc(t('shortCount'))} (סה"כ לכל השולחנות)</div>`;
+}
+function openShortageScreen(){
+  document.getElementById('shortage-screen').style.display='block';
+  renderShortageScreen();
+}
+function closeShortageScreen(){document.getElementById('shortage-screen').style.display='none';}
+function renderShortageScreen(){
+  const body=document.getElementById('shortage-body');
+  if(!body) return;
+  const list=shortageItems();
+  if(!list.length){
+    body.innerHTML=`<div style="text-align:center;padding:40px 16px;color:var(--success);font-size:18px;font-weight:700">✓ ${esc(t('shortNone'))}</div>`;
+    return;
+  }
+  const head=`<div style="background:#e05050;color:#fff;border-radius:12px;padding:14px;text-align:center;font-size:17px;font-weight:700;margin-bottom:14px">⚠ ${list.length} ${esc(t('shortCount'))}</div>`;
+  body.innerHTML=head+list.map(({it,used,short})=>`
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(224,80,80,.12);border-right:5px solid #e05050;border-radius:10px;padding:12px;margin-bottom:10px">
+      <span style="font-size:24px">${esc(it.icon||'')}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:15px">${esc(it.name)}</div>
+        <div style="font-size:12px;color:var(--mid)">${esc(t('shortHave'))}: ${fmtQty(it.qty)} · ${esc(t('shortNeeded'))}: ${fmtQty(used)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--mid)">${esc(t('shortLbl'))}</div>
+        <div style="font-size:22px;font-weight:800;color:#e05050">${fmtQty(short)}</div>
+      </div>
+    </div>`).join('');
+}
+// ══════════════════════════════════════════════════════
 // SHOPPING LIST (needed − stock; priced at MY cost — internal screen, not client-facing)
 // ══════════════════════════════════════════════════════
 function shoppingItems(){
@@ -3547,7 +3601,7 @@ function renderArrange(){
   }).join('');
   const tb=tables.find(x=>x.id===selectedArrangeTable);
   if(!tb){
-    area.innerHTML='<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">בחר שולחן מהרשימה כדי לקבוע כמויות</div>';
+    area.innerHTML=arrangeBanner()+'<div style="padding:20px;color:var(--mid);text-align:center;font-size:13px">בחר שולחן מהרשימה כדי לקבוע כמויות</div>';
     return;
   }
   const rows=inventory.map(it=>{
@@ -3556,21 +3610,21 @@ function renderArrange(){
     const rem=it.qty-total;
     return {it,per,total,rem};
   });
-  let html=`<div style="padding:16px"><h3 style="margin:0 0 12px;font-size:16px">${esc(tb.name)} · ${tb.count} שולחנות</h3>`;
+  let html=`<div style="padding:16px">${arrangeBanner()}<h3 style="margin:0 0 12px;font-size:16px">${esc(tb.name)} · ${tb.count} שולחנות</h3>`;
   if(!inventory.length){
     html+='<div style="color:var(--mid);font-size:13px">אין פריטי מלאי. הוסף פריטים בטאב מלאי.</div>';
   }
   rows.forEach(({it,per,total,rem})=>{
     const short=rem<0;
-    html+=`<div style="background:var(--bg2);padding:12px;border-radius:8px;margin-bottom:10px;border-right:3px solid ${short?'#e05050':'var(--primary)'}">
+    html+=`<div style="background:${short?'rgba(224,80,80,.12)':'var(--bg2)'};padding:12px;border-radius:8px;margin-bottom:10px;border-right:5px solid ${short?'#e05050':'var(--primary)'}">
       <div style="font-weight:500;margin-bottom:6px">${esc(it.icon||"")} ${esc(it.name)}</div>
       <div style="display:flex;gap:8px;align-items:center;font-size:12px">
         <label>לשולחן זה:</label>
         <input type="number" min="0" value="${per}" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:4px" onchange="updateArrangeQuantity(${it.id},${tb.id},this.value)">
         <span style="color:var(--mid)">× ${tb.count} שולחנות = ${per*tb.count}</span>
       </div>
-      <div style="font-size:12px;margin-top:6px;color:${short?'#e05050':'var(--mid)'}">
-        במלאי: ${it.qty} · נדרש בכל האירוע: ${total} · ${short?'⚠ חסר '+fmtQty(Math.abs(rem)):'נשאר '+fmtQty(rem)}
+      <div style="font-size:12px;margin-top:6px;color:var(--mid)">
+        במלאי: ${it.qty} · נדרש בכל האירוע: ${total} · ${short?`<span style="display:inline-block;background:#e05050;color:#fff;border-radius:12px;padding:2px 9px;font-weight:700">⚠ חסר ${fmtQty(Math.abs(rem))}</span>`:'נשאר '+fmtQty(rem)}
       </div>
     </div>`;
   });
@@ -3621,6 +3675,7 @@ document.addEventListener('keydown',e=>{
   el=document.getElementById('photo-lightbox'); if(el&&el.classList.contains('open')){closePhotoLightbox();return;}
   el=document.getElementById('photos-screen'); if(el&&el.style.display==='block'){closePhotosScreen();return;}
   el=document.getElementById('shopping-screen'); if(el&&el.style.display==='block'){closeShoppingScreen();return;}
+  el=document.getElementById('shortage-screen'); if(el&&el.style.display==='block'){closeShortageScreen();return;}
   const openModal=document.querySelector('.modal-overlay.open');
   if(openModal){
     const closers={
