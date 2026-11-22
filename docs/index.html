@@ -90,6 +90,9 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
 .mode-tabs{display:flex;margin-top:12px}
 .mode-tab{flex:1;padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;font-family:'Heebo',sans-serif}
 .mode-tab.active{color:#fff;border-bottom-color:var(--pink)}
+.sub-tabs .mode-tab{color:var(--mid)}
+.sub-tabs .mode-tab.active{color:var(--pink-dark);border-bottom-color:var(--pink-dark)}
+html[data-theme="dark"] .sub-tabs .mode-tab.active{color:var(--pink)}
 /* ══ LAYOUT ══ */
 .app-body{display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden}
 .sidebar{background:#fef6fb;border-left:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:18px;overflow-y:auto;height:calc(100dvh - 108px)}
@@ -574,7 +577,7 @@ body{background:var(--cream);font-family:'Heebo',sans-serif;color:var(--charcoal
   <!-- PLANNER -->
   <div class="app-body" id="planner-body">
     <!-- MAIN TABS: Tables | Inventory | Arrangement | Menu -->
-    <div class="mode-tabs" style="border-bottom:2px solid var(--border);margin-bottom:0;padding:0 16px;gap:0">
+    <div class="mode-tabs sub-tabs" style="border-bottom:2px solid var(--border);margin-bottom:0;padding:0 16px;gap:0">
       <div class="mode-tab active" id="tab-tables-main" onclick="switchMainTab('tables')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🪑 שולחנות</div>
       <div class="mode-tab" id="tab-inventory-main" onclick="switchMainTab('inventory')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">📦 מלאי</div>
       <div class="mode-tab" id="tab-arrange-main" onclick="switchMainTab('arrange')" style="flex:1;padding:12px 8px;border-bottom:3px solid transparent">🎯 סידור</div>
