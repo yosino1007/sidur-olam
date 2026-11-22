@@ -12,7 +12,7 @@ PWA (אפליקציית ווב מתקדמת) לניהול סידור אירוע�
 ## מבנה הקבצים
 ```
 pwa-v3b/
-├── index.html        ← כל האפליקציה (HTML+CSS+JS, קובץ יחיד)
+├── docs/             ← כל האתר המפורסם (GitHub Pages): index.html, sw.js, manifest.json, אייקונים (מקור יחיד)
 ├── manifest.json      ← הגדרות PWA (שם, צבעים, אייקונים)
 ├── sw.js              ← Service Worker לעבודה אופליין
 ├── icon-192.png        ← אייקון PWA (מיוצר מקומית — שולחן, ורדים, נר, סגנון 3D/glossy)
